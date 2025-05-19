@@ -49,8 +49,10 @@ export const Index = () => {
     Email: "",
     Dirección: "",
   });
+  const [edit, setEdit] = useState(false);
   const onEdit = (customerEdit) => {
     setShowModal(true);
+    setEdit(true);
     setCustomer(customerEdit);
   };
 
@@ -142,7 +144,7 @@ export const Index = () => {
       <CustomerModal
         show={showModal}
         closeModal={closeModal}
-        isEdit={false}
+        isEdit={edit}
         customer={customer}
       />
       <DeleteModal

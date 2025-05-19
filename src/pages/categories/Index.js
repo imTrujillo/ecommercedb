@@ -39,8 +39,10 @@ export const Index = () => {
     NombreCategoria: "",
     Descripción: "",
   });
+  const [edit, setEdit] = useState(false);
   const onEdit = (categoryEdit) => {
     setShowModal(true);
+    setEdit(true);
     setCategory(categoryEdit);
   };
 
@@ -126,7 +128,7 @@ export const Index = () => {
       <CategoryModal
         show={showModal}
         closeModal={closeModal}
-        isEdit={false}
+        isEdit={edit}
         category={category}
       />
       <DeleteModal

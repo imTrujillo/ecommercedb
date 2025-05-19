@@ -44,8 +44,10 @@ export const Index = () => {
     Teléfono: "",
     Email: "",
   });
+  const [edit, setEdit] = useState(false);
   const onEdit = (supplierEdit) => {
     setShowModal(true);
+    setEdit(true);
     setSupplier(supplierEdit);
   };
 
@@ -135,7 +137,7 @@ export const Index = () => {
       <SuppliersModal
         show={showModal}
         closeModal={closeModal}
-        isEdit={false}
+        isEdit={edit}
         supplier={supplier}
       />
       <DeleteModal

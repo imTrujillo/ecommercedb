@@ -69,8 +69,10 @@ export const Index = () => {
     IDProveedor: "",
     Proveedor: "",
   });
+  const [edit, setEdit] = useState(false);
   const onEdit = (productEdit) => {
     setShowModal(true);
+    setEdit(true);
     setProduct(productEdit);
   };
 
@@ -168,7 +170,7 @@ export const Index = () => {
       <ProductsModal
         show={showModal}
         closeModal={closeModal}
-        isEdit={false}
+        isEdit={edit}
         product={product}
       />
       <DeleteModal
