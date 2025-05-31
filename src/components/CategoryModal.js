@@ -46,7 +46,7 @@ export const CategoryModal = ({
       nombre: "",
       descripcion: "",
     });
-    toast.success("¡Categoría agregada!");
+    toast.success(isEdit ? "¡Categoría actualizado!" : "¡Categoría agregada!");
     fetchData();
   };
 

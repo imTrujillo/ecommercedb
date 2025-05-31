@@ -29,7 +29,7 @@ export const apiServicePost = async (endpoint, object) => {
   try {
     const response = await axios.post(baseUrl + endpoint, object);
     if (response.status == 200) {
-      return response.data;
+      return response;
     }
   } catch (error) {
     console.error("Ocurrió un error", error.message);
