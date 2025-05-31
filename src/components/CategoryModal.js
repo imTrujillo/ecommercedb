@@ -13,9 +13,9 @@ export const CategoryModal = ({
   fetchData,
 }) => {
   const [formData, setFormData] = useState({
-    IDCategoria: 0,
-    NombreCategoria: "",
-    Descripción: "",
+    id: 0,
+    nombre: "",
+    descripcion: "",
   });
 
   useEffect(() => {
@@ -29,10 +29,11 @@ export const CategoryModal = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (isEdit) {
       await apiServiceUpdate(
-        `categorias/categoria/update/${category.IDCategoria}`,
+        `categorias/categoria/update/${category.id}`,
         formData
       );
     } else {
@@ -40,9 +41,9 @@ export const CategoryModal = ({
     }
     closeModal();
     setFormData({
-      IDCategoria: 0,
-      NombreCategoria: "",
-      Descripción: "",
+      id: 0,
+      nombre: "",
+      descripcion: "",
     });
     fetchData();
   };
@@ -56,13 +57,9 @@ export const CategoryModal = ({
       role="dialog"
     >
       <div className="modal-dialog modal-lg">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => handleSubmit(e)}>
           {isEdit ? (
-            <input
-              type="hidden"
-              name="IDCategory"
-              value={category.IDCategoria}
-            ></input>
+            <input type="hidden" name="id" value={category.id}></input>
           ) : (
             ""
           )}
@@ -84,10 +81,10 @@ export const CategoryModal = ({
                 <label className="form-label required">Nombre</label>
                 <input
                   type="text"
-                  name="NombreCategoria"
+                  name="nombre"
                   onChange={handleChange}
                   className="form-control"
-                  value={formData.NombreCategoria}
+                  value={formData.nombre}
                   placeholder="Categoria 01"
                   pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                   required
@@ -97,11 +94,11 @@ export const CategoryModal = ({
                 <label className="form-label required">Descripción</label>
                 <textarea
                   type="text"
-                  name="Descripción"
+                  name="descripcion"
                   className="form-control"
                   placeholder="Descripción de Categoria 01"
                   pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                  value={formData.Descripción}
+                  value={formData.descripcion}
                   onChange={handleChange}
                   required
                 ></textarea>

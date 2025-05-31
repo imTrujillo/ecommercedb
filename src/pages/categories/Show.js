@@ -6,14 +6,14 @@ const Show = ({ category, onEdit, onDelete }) => {
     <tr>
       <td data-label="IDCategory">
         <div className="d-flex py-1 align-items-center">
-          <span>{category.IDCategoria}</span>
+          <span>{category.id}</span>
         </div>
       </td>
       <td data-label="NombreCategoria">
-        <div className="font-weight-medium">{category.NombreCategoria}</div>
+        <div className="font-weight-medium">{category.nombre}</div>
       </td>
       <td className="text-secondary" data-label="Role">
-        {category.Descripción}
+        {category.descripcion}
       </td>
       <td>
         <div className="btn-list flex-nowrap">
@@ -34,7 +34,7 @@ const Show = ({ category, onEdit, onDelete }) => {
               </button>
               <button
                 className="dropdown-item text-danger"
-                onClick={() => onDelete(category.IDCategoria)}
+                onClick={() => onDelete(category.id)}
               >
                 <IconTrash />
                 Eliminar
