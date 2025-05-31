@@ -12,38 +12,38 @@ const Show = ({ order, onEdit, onDelete, products }) => {
       break;
   }
   const orderProducts = products.filter(
-    (product) => product.IDProducto === order.ProductoID
+    (product) => product.id === order.productoId
   );
   return (
     <tr>
       <td data-label="IDPedido">
         <div className="d-flex py-1 align-items-center">
-          <span>{order.IDPedido}</span>
+          <span>{order.id}</span>
         </div>
       </td>
       <td data-label="Fecha">
-        <div className="font-weight-medium">{order.Fecha}</div>
+        <div className="font-weight-medium">{order.fecha}</div>
       </td>
       <td className="text-secondary" data-label="Role">
-        <span className={`badge ${bullet_color} w-max`}>{order.Estado}</span>
+        <span className={`badge ${bullet_color} w-max`}>{order.estado}</span>
       </td>
       <td className="text-secondary" data-label="Role">
-        {order.MetodoPago}
+        {order.metodoPago}
       </td>
       <td className="text-secondary" data-label="Role">
-        {order.DireccionEnvio}
+        {order.direccionEnvio}
       </td>
       <td className="text-secondary" data-label="Role">
-        {order.Cliente}
+        {order.cliente}
       </td>
       <td className="text-secondary" data-label="Role">
-        $ {order.PrecioTotal}
+        $ {order.precioTotal}
       </td>
       <td className="text-secondary markdown" data-label="Role">
         {orderProducts.map((product) => (
-          <li key={product.IDProducto}>
-            {product.NombreProducto}, {product.Cantidad} unidades, $
-            {product.PrecioUnitario}
+          <li key={product.id}>
+            {product.nombre}, {product.cantidad} unidades, $
+            {product.precioUnitario}
           </li>
         ))}
       </td>
@@ -66,7 +66,7 @@ const Show = ({ order, onEdit, onDelete, products }) => {
               </button>
               <button
                 className="dropdown-item text-danger"
-                onClick={() => onDelete(order)}
+                onClick={() => onDelete(order.IDPedido)}
               >
                 <IconTrash />
                 Eliminar

@@ -8,14 +8,11 @@ import { apiServiceGet } from "../../apiService/apiService";
 export const Index = () => {
   //LLAMAR LAS APIS
   const [orders, setOrders] = useState([]);
-  const [ordersDetails, setOrdersDetails] = useState([]);
   const [products, setProducts] = useState([]);
   const fetchData = async () => {
-    const ords = apiServiceGet("orders");
-    const ordsD = apiServiceGet("orders_details");
-    const prods = apiServiceGet("products");
+    const ords = await apiServiceGet("pedidos", "");
+    const prods = await apiServiceGet("productos", "");
     setOrders(ords);
-    setOrdersDetails(ordsD);
     setProducts(prods);
   };
   useEffect(() => {
@@ -128,6 +125,7 @@ export const Index = () => {
 
   //ELIMINAR UN PEDIDO
   const [showModalDelete, setShowModalDelete] = useState(false);
+  const [orderDelete, setOrderDelete] = useState(0);
   const closeModalDelete = () => {
     setOrder({
       IDPedido: 0,
@@ -137,10 +135,11 @@ export const Index = () => {
       DireccionEnvio: "",
       ClienteID: 0,
     });
+    setOrderDelete(0);
     setShowModalDelete(false);
   };
-  const onDelete = (orderDelete) => {
-    setOrder(orderDelete);
+  const onDelete = (orderId) => {
+    setOrderDelete(orderId);
     setShowModalDelete(true);
   };
 
@@ -203,7 +202,6 @@ export const Index = () => {
                         <Show
                           key={order.IDPedido}
                           order={order}
-                          orderDetails={ordersDetails}
                           onEdit={onEdit}
                           onDelete={onDelete}
                           products={products}
@@ -222,14 +220,13 @@ export const Index = () => {
         closeModal={closeModal}
         isEdit={edit}
         order={order}
-        orderDetails={ordersDetails}
         fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
-        id={order.IDPedido}
-        endpoint="orders/"
+        id={orderDelete}
+        endpoint="pedidos/delete/"
         fetchData={fetchData}
       />
     </div>

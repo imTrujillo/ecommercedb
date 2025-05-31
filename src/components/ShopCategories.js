@@ -10,17 +10,18 @@ import { Pagination } from "swiper/modules";
 export const ShopCategories = ({
   category,
   setProductsCart,
+  productsCart,
   products,
   suppliers,
 }) => {
   const categoryProducts = products.filter(
-    (product) => product.IDCategoria === category.IDCategoria
+    (product) => product.categoriaId == category.id
   );
 
   return (
     <div className="page-header mb-3">
       <h2 className="fs-1">
-        {category.NombreCategoría} | <em>{category.Descripción}</em>
+        {category.nombre} | <em>{category.descripcion}</em>
       </h2>
 
       <Swiper
@@ -37,11 +38,12 @@ export const ShopCategories = ({
         className="mySwiper w-100"
       >
         {categoryProducts.map((product) => (
-          <SwiperSlide key={product.IDProducto}>
+          <SwiperSlide key={product.id}>
             <ShopProducts
               product={product}
               suppliers={suppliers}
               setProductsCart={setProductsCart}
+              productsCart={productsCart}
             />
           </SwiperSlide>
         ))}

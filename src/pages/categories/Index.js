@@ -61,7 +61,7 @@ export const Index = () => {
   const [categoryDelete, setCategoryDelete] = useState(0);
   const closeModalDelete = () => {
     setShowModalDelete(false);
-    setCategoryDelete({ id: 0 });
+    setCategoryDelete(0);
   };
   const onDelete = (categoryId) => {
     setShowModalDelete(true);

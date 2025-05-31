@@ -1,33 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { apiServicePost } from "../apiService/apiService";
+import { toast } from "react-toastify";
 
-export const BuyModal = ({ show, closeModal, productCart, fetchData }) => {
+export const BuyModal = ({ show, closeModal, productsCart, fetchData }) => {
   const [customerData, setCustomerData] = useState({
-    NombreCliente: "",
-    Teléfono: "",
-    Email: "",
-    Dirección: "",
-  });
-
-  const [orderData, setOrderData] = useState({
-    Fecha: new Date().toISOString(),
-    Estado: "Pendiente",
-    MetodoPago: "",
-    DireccionEnvio: "",
-    IDCliente: customerData.IDCliente,
+    nombre: "",
+    telefono: "",
+    email: "",
+    direccion: "",
   });
 
   const [orderDetailsData, setOrderDetailsData] = useState([]);
-  useEffect(() => {
-    if (Array.isArray(productCart)) {
-      const detalles = productCart.map((product) => ({
-        Cantidad: 1,
-        PrecioUnitario: product.Precio,
-        ProductoID: product.IDProducto,
-      }));
-      setOrderDetailsData(detalles);
-    }
-  }, [productCart]);
+
+  const [orderData, setOrderData] = useState({
+    fecha: new Date().toISOString(),
+    estado: "Pendiente",
+    metodoPago: "",
+    direccionEnvio: "",
+    clienteId: null,
+    detalles: [],
+  });
 
   const handleChangeCustomer = (e) => {
     const { name, value } = e.target;
@@ -40,38 +32,63 @@ export const BuyModal = ({ show, closeModal, productCart, fetchData }) => {
   };
 
   const handleSubmit = async (e) => {
-    const clienteResponse = await apiServicePost("customers", customerData);
-    const clienteID = clienteResponse.IDCliente;
+    e.preventDefault();
 
-    const ordenResponse = await apiServicePost("orders", {
-      ...orderData,
-      IDCliente: clienteID,
-    });
-    const pedidoID = ordenResponse.IDPedido;
+    try {
+      const detalles = Array.isArray(productsCart)
+        ? productsCart.map((product) => ({
+            cantidad: 1,
+            precioUnitario: product.precio,
+            productoId: product.id,
+          }))
+        : [];
 
-    for (const detalle of orderDetailsData) {
-      await apiServicePost("order_details", {
-        ...detalle,
-        PedidoID: pedidoID,
-      });
+      if (detalles.length <= 0) {
+        toast.error("No hay productos en el carrito.");
+        return;
+      }
+
+      const clienteResponse = await apiServicePost("clientes", customerData);
+      const clienteID = clienteResponse.id;
+
+      const pedidoPayload = {
+        ...orderData,
+        clienteId: clienteID,
+        detalles: detalles,
+      };
+
+      const ordenResponse = await apiServicePost(
+        "pedidos/crear-con-detalles",
+        pedidoPayload
+      );
+
+      if (ordenResponse) {
+        toast.success("¡Pedido registrado con éxito!");
+        closeModal();
+        fetchData();
+        // Reset
+        setCustomerData({
+          nombre: "",
+          telefono: "",
+          email: "",
+          direccion: "",
+        });
+        setOrderData({
+          fecha: new Date().toISOString(),
+          estado: "Pendiente",
+          metodoPago: "",
+          direccionEnvio: "",
+          clienteId: null,
+          detalles: [],
+        });
+        setOrderDetailsData([]);
+      } else {
+        toast.error("Error al crear el pedido. Intenta nuevamente.");
+      }
+    } catch (error) {
+      console.error("Error en el envío del pedido:", error);
+      toast.error("Ocurrió un error al registrar el pedido.");
     }
-
-    closeModal();
-    setCustomerData({
-      NombreCliente: "",
-      Telefono: "",
-      Email: "",
-      Direccion: "",
-    });
-    setOrderData({
-      Fecha: new Date().toISOString(),
-      Estado: "Pendiente",
-      MetodoPago: "",
-      DireccionEnvio: "",
-      IDCliente: null,
-    });
-    setOrderDetailsData([]);
-    fetchData();
   };
 
   if (!show) return null;
@@ -83,13 +100,7 @@ export const BuyModal = ({ show, closeModal, productCart, fetchData }) => {
       role="dialog"
     >
       <div className="modal-dialog modal-lg">
-        <form onSubmit={(e) => handleSubmit(e)}>
-          <input
-            type="hidden"
-            name="ClienteID"
-            value={orderData.PedidoID}
-          ></input>
-
+        <form onSubmit={handleSubmit}>
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Agregar Pedido</h5>
@@ -106,10 +117,10 @@ export const BuyModal = ({ show, closeModal, productCart, fetchData }) => {
                   <label className="form-label required">Nombre</label>
                   <input
                     type="text"
-                    name="NombreCliente"
+                    name="nombre"
                     onChange={handleChangeCustomer}
                     className="form-control"
-                    value={customerData.NombreCliente}
+                    value={customerData.nombre}
                     placeholder="Juan Pérez"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                     required
@@ -119,10 +130,10 @@ export const BuyModal = ({ show, closeModal, productCart, fetchData }) => {
                   <label className="form-label required">Teléfono</label>
                   <input
                     type="text"
-                    name="Teléfono"
+                    name="telefono"
                     className="form-control"
                     placeholder="+503 0000 0000"
-                    value={customerData.Teléfono}
+                    value={customerData.telefono}
                     onChange={handleChangeCustomer}
                     required
                   />
@@ -134,9 +145,9 @@ export const BuyModal = ({ show, closeModal, productCart, fetchData }) => {
                   <label className="form-label required">Email</label>
                   <input
                     type="email"
-                    name="Email"
+                    name="email"
                     className="form-control"
-                    value={customerData.Email}
+                    value={customerData.email}
                     onChange={handleChangeCustomer}
                     placeholder="example@example.com"
                     required
@@ -146,24 +157,24 @@ export const BuyModal = ({ show, closeModal, productCart, fetchData }) => {
                   <label className="form-label required">Método de pago</label>
                   <input
                     type="text"
-                    name="MetodoPago"
+                    name="metodoPago"
                     className="form-control"
                     placeholder="Efectivo"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                    value={orderData.MetodoPago}
+                    value={orderData.metodoPago}
                     onChange={handleChangeOrder}
                     required
                   />
                 </div>
               </div>
+
               <div className="row mb-3">
                 <div className="col-6">
                   <label className="form-label required">Dirección</label>
                   <textarea
-                    type="text"
-                    name="Dirección"
+                    name="direccion"
                     className="form-control"
-                    value={customerData.Dirección}
+                    value={customerData.direccion}
                     onChange={handleChangeCustomer}
                     placeholder="Ubicación de la residencia del cliente"
                     required
@@ -174,17 +185,17 @@ export const BuyModal = ({ show, closeModal, productCart, fetchData }) => {
                     Dirección de envío
                   </label>
                   <textarea
-                    type="text"
-                    name="DireccionEnvio"
+                    name="direccionEnvio"
                     className="form-control"
                     placeholder="Ubicación de la recepción de pedido"
-                    value={orderData.DireccionEnvio}
+                    value={orderData.direccionEnvio}
                     onChange={handleChangeOrder}
                     required
                   ></textarea>
                 </div>
               </div>
             </div>
+
             <div className="modal-footer">
               <button type="button" className="btn" onClick={closeModal}>
                 Cancelar

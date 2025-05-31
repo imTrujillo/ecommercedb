@@ -22,10 +22,10 @@ export const Index = () => {
   const [customers, setCustomers] = useState([]);
 
   const fetchData = async () => {
-    const cats = await apiServiceGet("categories", "");
-    const prods = await apiServiceGet("products", "");
-    const sups = await apiServiceGet("suppliers", "");
-    const custs = await apiServiceGet("customers", "");
+    const cats = await apiServiceGet("categorias", "");
+    const prods = await apiServiceGet("productos", "");
+    const sups = await apiServiceGet("proveedores", "");
+    const custs = await apiServiceGet("clientes", "");
 
     setCategories(cats);
     setProducts(prods);
@@ -138,11 +138,12 @@ export const Index = () => {
             ) : (
               categories.map((category) => (
                 <ShopCategories
+                  key={category.id}
+                  category={category}
                   products={products}
                   suppliers={suppliers}
-                  category={category}
                   setProductsCart={setProductsCart}
-                  key={category.IDCategoria}
+                  productsCart={productsCart}
                 />
               ))
             )}
@@ -178,6 +179,7 @@ export const Index = () => {
                     productBuy={productBuy}
                     key={id}
                     setProductsCart={setProductsCart}
+                    productsCart={productsCart}
                   />
                 ))}
                 <div className="mt-3">
