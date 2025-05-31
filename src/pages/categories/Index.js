@@ -9,15 +9,13 @@ export const Index = () => {
   //LLAMAR LA API
   const [categories, setCategories] = useState([]);
   const fetchData = async () => {
-    const cat = apiServiceGet("categories", "");
+    const cat = await apiServiceGet("categorias", "");
     setCategories(cat);
   };
   useEffect(() => {
     fetchData();
   }, []);
 
-  // [
-  //   {
   //     IDCategoria: "1",
   //     NombreCategoria: "Prueba1",
   //     Descripción: "Descripción de prueba",
@@ -38,16 +36,16 @@ export const Index = () => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setCategory({
-      IDCategoria: 0,
-      NombreCategoria: "",
-      Descripción: "",
+      id: 0,
+      nombre: "",
+      descripcion: "",
     });
     setShowModal(false);
   };
   const [category, setCategory] = useState({
-    IDCategoria: 0,
-    NombreCategoria: "",
-    Descripción: "",
+    id: 0,
+    nombre: "",
+    descripcion: "",
   });
   const [edit, setEdit] = useState(false);
   const onEdit = (categoryEdit) => {
@@ -55,13 +53,16 @@ export const Index = () => {
     setEdit(true);
     setCategory(categoryEdit);
   };
-
+  const handleModal = () => {
+    setShowModal(true);
+    setEdit(false);
+  };
   //ELIMINAR UNA CATEGORIA
   const [showModalDelete, setShowModalDelete] = useState(false);
   const [categoryDelete, setCategoryDelete] = useState(0);
   const closeModalDelete = () => {
     setShowModalDelete(false);
-    setCategoryDelete({ id: 0 });
+    setCategoryDelete(0);
   };
   const onDelete = (categoryId) => {
     setShowModalDelete(true);
@@ -85,7 +86,7 @@ export const Index = () => {
                   <div className="btn-list">
                     <button
                       className="btn btn-primary d-none d-sm-inline-block"
-                      onClick={() => setShowModal(true)}
+                      onClick={handleModal}
                     >
                       <IconPlus className="me-3" />
                       Agregar categoría
@@ -113,12 +114,12 @@ export const Index = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {categories.length === 0 ? (
+                    {categories.length <= 0 ? (
                       <div>No hay categorías disponibles</div>
                     ) : (
                       categories.map((category) => (
                         <Show
-                          key={category.IDCategoria}
+                          key={category.id}
                           category={category}
                           onEdit={onEdit}
                           onDelete={onDelete}

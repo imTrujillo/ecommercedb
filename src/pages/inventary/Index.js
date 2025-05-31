@@ -8,76 +8,43 @@ import { apiServiceGet } from "../../apiService/apiService";
 export const Index = () => {
   //LLAMAR LA API
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const fetchData = async () => {
-    const prods = await apiServiceGet("Productos");
+
+    const prods = await apiServiceGet("productos", "");
+    const cat = await apiServiceGet("categorias", "");
+    const sup = await apiServiceGet("proveedores", "");
     setProducts(prods);
+    setSuppliers(sup);
+    setCategories(cat);
   };
   useEffect(() => {
     fetchData();
   }, []);
-  // DATOS ESTATICOS
-  // const products = [
-  //   {
-  //     IDProducto: "1",
-  //     NombreProducto: "Prueba",
-  //     Descripción: "Descripción de prueba",
-  //     Precio: 24.23,
-  //     Stock: 23,
-  //     CategoriaID: 1,
-  //     ProveedorID: 1,
-  //     Categoria: "Prueba",
-  //     Proveedor: "Universidad",
-  //   },
-  //   {
-  //     IDProducto: "2",
-  //     NombreProducto: "Prueba2",
-  //     Descripción: "Descripción de prueba2",
-  //     Precio: 123.12,
-  //     Stock: 10,
-  //     CategoriaID: 2,
-  //     ProveedorID: 2,
-  //     Categoria: "Prueba2",
-  //     Proveedor: "Universidad2",
-  //   },
-  //   {
-  //     IDProducto: "3",
-  //     NombreProducto: "Prueba3",
-  //     Descripción: "Descripción de prueba3",
-  //     Precio: 99.99,
-  //     Stock: 0,
-  //     CategoriaID: 3,
-  //     ProveedorID: 3,
-  //     Categoria: "Prueba3",
-  //     Proveedor: "Universidad3",
-  //   },
-  // ];
 
   //CREAR/EDITAR UN PRODUCTO
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setProduct({
-      IDProducto: 0,
-      NombreProducto: "",
-      Descripción: "",
-      Precio: 0,
-      Stock: 0,
-      CategoriaID: "",
-      Categoria: "",
-      IDProveedor: "",
-      Proveedor: "",
+      id: 0,
+      nombre: "",
+      descripcion: "",
+      precio: 0,
+      stock: 0,
+      categoriaId: "",
+      proveedorId: "",
     });
     setShowModal(false);
   };
   const [product, setProduct] = useState({
-    IDProducto: 0,
-    NombreProducto: "",
-    Descripción: "",
-    Precio: 0,
-    Stock: 0,
-    CategoriaID: "",
-    Categoria: "",
-    IDProveedor: "",
-    Proveedor: "",
+    id: 0,
+    nombre: "",
+    descripcion: "",
+    precio: 0,
+    stock: 0,
+    categoriaId: "",
+    proveedorId: "",
   });
   const [edit, setEdit] = useState(false);
   const onEdit = (productEdit) => {
@@ -85,25 +52,28 @@ export const Index = () => {
     setEdit(true);
     setProduct(productEdit);
   };
+  const handleModal = () => {
+    setShowModal(true);
+    setEdit(false);
+  };
 
   //ELIMINAR UN PRODUCTO
   const [showModalDelete, setShowModalDelete] = useState(false);
+  const [productDelete, setProductDelete] = useState(0);
   const closeModalDelete = () => {
     setProduct({
-      IDProducto: 0,
-      NombreProducto: "",
-      Descripción: "",
-      Precio: 0,
-      Stock: 0,
-      CategoriaID: "",
-      Categoria: "",
-      IDProveedor: "",
-      Proveedor: "",
+      id: 0,
+      nombre: "",
+      descripcion: "",
+      precio: 0,
+      stock: 0,
+      categoriaId: "",
+      proveedorId: "",
     });
     setShowModalDelete(false);
   };
-  const onDelete = (productDelete) => {
-    setProduct(productDelete);
+  const onDelete = (productId) => {
+    setProductDelete(productId);
     setShowModalDelete(true);
   };
 
@@ -126,7 +96,7 @@ export const Index = () => {
                   <div className="btn-list">
                     <button
                       className="btn btn-primary d-none d-sm-inline-block"
-                      onClick={() => setShowModal(true)}
+                      onClick={handleModal}
                     >
                       <IconPlus className="me-3" />
                       Agregar producto
@@ -158,13 +128,15 @@ export const Index = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {products.length === 0 ? (
+                    {products.length <= 0 ? (
                       <div>No hay productos disponibles</div>
                     ) : (
                       products.map((product) => (
                         <Show
-                          key={product.IDProducto}
+                          key={product.id}
                           product={product}
+                          categories={setCategories}
+                          suppliers={setSuppliers}
                           onEdit={onEdit}
                           onDelete={onDelete}
                         />
@@ -182,13 +154,15 @@ export const Index = () => {
         closeModal={closeModal}
         isEdit={edit}
         product={product}
+        suppliers={suppliers}
+        categories={categories}
         fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
-        id={product.IDProducto}
-        endpoint="products/"
+        id={productDelete}
+        endpoint="productos/delete/"
         fetchData={fetchData}
       />
     </div>

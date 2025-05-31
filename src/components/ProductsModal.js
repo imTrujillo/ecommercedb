@@ -4,6 +4,7 @@ import {
   apiServicePost,
   apiServiceUpdate,
 } from "../apiService/apiService";
+import { toast } from "react-toastify";
 
 export const ProductsModal = ({
   show,
@@ -11,83 +12,82 @@ export const ProductsModal = ({
   isEdit,
   product,
   fetchData,
+  suppliers,
+  categories,
 }) => {
   const [formData, setFormData] = useState({
+
     id: 0,
     nombre: "",
     descripcion: "",
     precio: 0.0,
     stock: 0,
-    categoriaId: 0,
-    proveedorId: 0,
+    categoriaId: "",
+    proveedorId: "",
   });
-
-  const [categories, setCategories] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-
-  // Cargar categorías y proveedores al montar el modal
-  useEffect(() => {
-    const fetchDependencies = async () => {
-        const cats = await apiServiceGet("Categorias", "");
-        const sups = await apiServiceGet("Proveedores", "");
-        setCategories(cats || []);
-        setSuppliers(sups || []);
-    };
-    fetchDependencies();
-}, []);
 
   useEffect(() => {
     if (product) {
       setFormData({
-        id: product.id,
-        nombre: product.nombre,
-        descripcion: product.descripcion,
-        precio: product.precio,
-        stock: product.stock,
-        categoriaId: product.categoriaId,
-        proveedorId: product.proveedorId
+        ...product,
+        categoriaId: product.categoriaId.toString(),
+        proveedorId: product.proveedorId.toString(),
       });
-    } else {
-      // Resetear formulario si no hay producto (para crear nuevo)
-            setFormData({
-                id: 0,
-                nombre: "",
-                descripcion: "",
-                precio: 0.0,
-                stock: 0,
-                categoriaId: 0,
-                proveedorId: 0,
-            });
     }
   }, [product]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-     // Convierte a número solo si el campo es numérico para evitar problemas de tipo
-    setFormData((prev) => ({ 
-      ...prev, 
-      [name]: ['precio', 'stock', 'categoriaId', 'proveedorId'].includes(name) ? Number(value) : value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // para asegurar de que los IDs sean números antes de enviar
-        const dataToSend = {
-            ...formData,
-            precio: Number(formData.precio),
-            stock: Number(formData.stock),
-            categoriaId: Number(formData.categoriaId),
-            proveedorId: Number(formData.proveedorId),
-        };
-
-    if (isEdit) {
-      await apiServiceUpdate(`Productos/update/${dataToSend.id}`, dataToSend);
-    } else {
-      await apiServicePost("Productos", dataToSend);
+    // Validación
+    if (!formData.categoriaId || !formData.proveedorId) {
+      toast.error("Debes seleccionar categoría y proveedor");
+      return;
     }
-    closeModal();
-    fetchData();
+
+    // Solo enviar campos necesarios
+    const payload = {
+      nombre: formData.nombre,
+      descripcion: formData.descripcion,
+      precio: parseFloat(formData.precio),
+      stock: parseInt(formData.stock),
+      categoriaId: parseInt(formData.categoriaId),
+      proveedorId: parseInt(formData.proveedorId),
+    };
+
+    try {
+      if (isEdit) {
+        await apiServiceUpdate(`productos/update/${product.id}`, payload);
+      } else {
+        await apiServicePost("productos", payload);
+      }
+
+      toast.success(isEdit ? "¡Producto actualizado!" : "¡Producto agregado!");
+      fetchData();
+      closeModal();
+
+      // Limpiar formulario
+      setFormData({
+        nombre: "",
+        descripcion: "",
+        precio: 0.0,
+        stock: 0,
+        categoriaId: "",
+        proveedorId: "",
+      });
+    } catch (error) {
+      console.error("Error al guardar producto:", error);
+      toast.error("Error al guardar el producto.");
+    }
   };
 
   if (!show) return null;
@@ -100,15 +100,8 @@ export const ProductsModal = ({
     >
       <div className="modal-dialog modal-lg">
         <form onSubmit={handleSubmit}>
-          {isEdit ? (
-            <input
-              type="hidden"
-              name="id"
-              value={formData.id}
-            ></input>
-          ) : (
-            ""
-          )}
+
+          {isEdit && <input type="hidden" name="id" value={product.id} />}
 
           <div className="modal-content">
             <div className="modal-header">
@@ -188,6 +181,7 @@ export const ProductsModal = ({
                   <label className="form-label required">Categoría</label>
                   <select
                     type="text"
+
                     name="categoriaId"
                     className="form-select"
                     value={formData.categoriaId}
@@ -198,10 +192,8 @@ export const ProductsModal = ({
                       Selecciona aquí
                     </option>
                     {categories.map((category) => (
-                      <option
-                        key={category.id}
-                        value={category.id}
-                      >
+                      <option key={category.id} value={category.id}>
+
                         {category.nombre}
                       </option>
                     ))}
@@ -211,6 +203,7 @@ export const ProductsModal = ({
                   <label className="form-label required">Proveedor</label>
                   <select
                     type="text"
+
                     name="proveedorId"
                     className="form-select"
                     value={formData.proveedorId}
@@ -225,6 +218,7 @@ export const ProductsModal = ({
                         key={supplier.id}
                         value={supplier.id}
                       >
+
                         {supplier.nombre}
                       </option>
                     ))}
@@ -232,6 +226,7 @@ export const ProductsModal = ({
                 </div>
               </div>
             </div>
+
             <div className="modal-footer">
               <button type="button" className="btn" onClick={closeModal}>
                 Cancelar

@@ -6,118 +6,56 @@ import { DeleteModal } from "../../components/DeleteModal";
 import { apiServiceGet } from "../../apiService/apiService";
 
 export const Index = () => {
-  //LLAMAR LAS APIS
   const [orders, setOrders] = useState([]);
-  const [ordersDetails, setOrdersDetails] = useState([]);
+  const [ordersWithDetails, setOrdersWithDetails] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
+
   const fetchData = async () => {
-    const ords = apiServiceGet("orders");
-    const ordsD = apiServiceGet("orders_details");
-    const prods = apiServiceGet("products");
+    const ords = await apiServiceGet("pedidos", "");
+    const cats = await apiServiceGet("clientes", "");
+    const prods = await apiServiceGet("productos", "");
+
     setOrders(ords);
-    setOrdersDetails(ordsD);
+    setCustomers(cats);
     setProducts(prods);
+
+    const ordersWithDetailsFetched = await Promise.all(
+      ords.map(async (order) => {
+        const orderDetails = await apiServiceGet(
+          `pedidos/${order.id}/detalles`,
+          ""
+        );
+        return { ...order, orderDetails };
+      })
+    );
+    setOrdersWithDetails(ordersWithDetailsFetched);
   };
+
   useEffect(() => {
     fetchData();
   }, []);
 
-  // DATOS ESTATICOS
-  // const orders = [
-  //   {
-  //     IDPedido: 1,
-  //     Fecha: "23/05/2024",
-  //     Estado: "Pendiente",
-  //     MetodoPago: "Efectivo",
-  //     DireccionEnvio: "Av. Bernal",
-  //     PrecioTotal: 24.43,
-  //     Cliente: "Pedro",
-  //     Productos: [
-  //       {
-  //         NombreProducto: "Caja",
-  //         ProductoID: 4,
-  //         Cantidad: 21,
-  //         PrecioUnitario: 23.23,
-  //       },
-  //       {
-  //         NombreProducto: "Caja2",
-  //         ProductoID: 5,
-  //         Cantidad: 10,
-  //         PrecioUnitario: 15.5,
-  //       },
-  //     ],
-  //     ClienteID: 1,
-  //   },
-  //   {
-  //     IDPedido: 2,
-  //     Fecha: "23/05/2024",
-  //     Estado: "Realizado",
-  //     MetodoPago: "Bitcoin",
-  //     DireccionEnvio: "Av. Bernal",
-  //     PrecioTotal: 24.43,
-  //     Cliente: "Mati",
-  //     Productos: [
-  //       {
-  //         NombreProducto: "Caja",
-  //         ProductoID: 1,
-  //         Cantidad: 1,
-  //         PrecioUnitario: 23.23,
-  //       },
-  //       {
-  //         NombreProducto: "Caja2",
-  //         ProductoID: 9,
-  //         Cantidad: 1,
-  //         PrecioUnitario: 15.5,
-  //       },
-  //     ],
-  //     ClienteID: 2,
-  //   },
-  //   {
-  //     IDPedido: 3,
-  //     Fecha: "23/05/2024",
-  //     Estado: "Pendiente",
-  //     MetodoPago: "Bitcoin",
-  //     DireccionEnvio: "Zona Rosa",
-  //     PrecioTotal: 24.43,
-  //     Cliente: "Duran",
-  //     Productos: [
-  //       {
-  //         NombreProducto: "Pack",
-  //         ProductoID: 3,
-  //         Cantidad: 2,
-  //         PrecioUnitario: 23.23,
-  //       },
-  //       {
-  //         NombreProducto: "Pack2",
-  //         ProductoID: 1,
-  //         Cantidad: 10,
-  //         PrecioUnitario: 15.5,
-  //       },
-  //     ],
-  //     ClienteID: 3,
-  //   },
-  // ];
-
-  //CREAR/EDITAR UN PEDIDO
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setOrder({
-      IDPedido: 0,
-      Fecha: "",
-      Estado: "",
-      MetodoPago: "",
-      DireccionEnvio: "",
-      ClienteID: 0,
+      id: 0,
+      fecha: "",
+      estado: "",
+      metodoPago: "",
+      direccionEnvio: "",
+      clienteId: 0,
     });
     setShowModal(false);
   };
+
   const [order, setOrder] = useState({
-    IDPedido: 0,
-    Fecha: "",
-    Estado: "",
-    MetodoPago: "",
-    DireccionEnvio: "",
-    ClienteID: 0,
+    id: 0,
+    fecha: "",
+    estado: "",
+    metodoPago: "",
+    direccionEnvio: "",
+    clienteId: 0,
   });
   const [edit, setEdit] = useState(false);
   const onEdit = (orderEdit) => {
@@ -126,21 +64,22 @@ export const Index = () => {
     setOrder(orderEdit);
   };
 
-  //ELIMINAR UN PEDIDO
   const [showModalDelete, setShowModalDelete] = useState(false);
+  const [orderDelete, setOrderDelete] = useState(0);
   const closeModalDelete = () => {
     setOrder({
-      IDPedido: 0,
-      Fecha: "",
-      Estado: "",
-      MetodoPago: "",
-      DireccionEnvio: "",
-      ClienteID: 0,
+      id: 0,
+      fecha: "",
+      estado: "",
+      metodoPago: "",
+      direccionEnvio: "",
+      clienteId: 0,
     });
+    setOrderDelete(0);
     setShowModalDelete(false);
   };
-  const onDelete = (orderDelete) => {
-    setOrder(orderDelete);
+  const onDelete = (orderId) => {
+    setOrderDelete(orderId);
     setShowModalDelete(true);
   };
 
@@ -190,23 +129,25 @@ export const Index = () => {
                       <th>Método de Pago</th>
                       <th>Dirección de Envío</th>
                       <th>Cliente</th>
-                      <th>Precio Total</th>
                       <th>Productos</th>
                       <th className="w-1"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.length === 0 ? (
-                      <tr>No hay pedidos disponibles</tr>
+                    {ordersWithDetails.length === 0 ? (
+                      <tr>
+                        <td colSpan="8">No hay pedidos disponibles</td>
+                      </tr>
                     ) : (
-                      orders.map((order) => (
+                      ordersWithDetails.map((order) => (
                         <Show
-                          key={order.IDPedido}
+                          key={order.id}
                           order={order}
-                          orderDetails={ordersDetails}
+                          orderDetails={order.orderDetails}
+                          customers={customers}
+                          products={products}
                           onEdit={onEdit}
                           onDelete={onDelete}
-                          products={products}
                         />
                       ))
                     )}
@@ -222,14 +163,13 @@ export const Index = () => {
         closeModal={closeModal}
         isEdit={edit}
         order={order}
-        orderDetails={ordersDetails}
         fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
-        id={order.IDPedido}
-        endpoint="orders/"
+        id={orderDelete}
+        endpoint="pedidos/delete/"
         fetchData={fetchData}
       />
     </div>
