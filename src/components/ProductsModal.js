@@ -4,6 +4,7 @@ import {
   apiServicePost,
   apiServiceUpdate,
 } from "../apiService/apiService";
+import { toast } from "react-toastify";
 
 export const ProductsModal = ({
   show,
@@ -11,49 +12,79 @@ export const ProductsModal = ({
   isEdit,
   product,
   fetchData,
+  suppliers,
+  categories,
 }) => {
   const [formData, setFormData] = useState({
-    IDProducto: 0,
-    NombreProducto: "",
-    Descripción: "",
-    Precio: 0.0,
-    Stock: 0,
-    CategoriaID: 0,
-    ProveedorID: 0,
+    nombre: "",
+    descripcion: "",
+    precio: 0.0,
+    stock: 0,
+    categoriaId: "",
+    proveedorId: "",
   });
-
-  //LLAMAR APIS PARA OBTENER INFORMACION ADICIONAL PARA EL FORMULARIO
-  const categoriesData = apiServiceGet("categories", "");
-  const suppliersData = apiServiceGet("suppliers", "");
 
   useEffect(() => {
     if (product) {
-      setFormData(product);
+      setFormData({
+        ...product,
+        categoriaId: product.categoriaId.toString(),
+        proveedorId: product.proveedorId.toString(),
+      });
     }
   }, [product]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = async () => {
-    if (isEdit) {
-      await apiServiceUpdate(`products/${product.IDProducto}`, formData);
-    } else {
-      await apiServicePost("products", formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validación
+    if (!formData.categoriaId || !formData.proveedorId) {
+      toast.error("Debes seleccionar categoría y proveedor");
+      return;
     }
-    closeModal();
-    setFormData({
-      IDProducto: 0,
-      NombreProducto: "",
-      Descripción: "",
-      Precio: 0.0,
-      Stock: 0,
-      CategoriaID: 0,
-      ProveedorID: 0,
-    });
-    fetchData();
+
+    // Solo enviar campos necesarios
+    const payload = {
+      nombre: formData.nombre,
+      descripcion: formData.descripcion,
+      precio: parseFloat(formData.precio),
+      stock: parseInt(formData.stock),
+      categoriaId: parseInt(formData.categoriaId),
+      proveedorId: parseInt(formData.proveedorId),
+    };
+
+    try {
+      if (isEdit) {
+        await apiServiceUpdate(`productos/update/${product.id}`, payload);
+      } else {
+        await apiServicePost("productos", payload);
+      }
+
+      toast.success(isEdit ? "¡Producto actualizado!" : "¡Producto agregado!");
+      fetchData();
+      closeModal();
+
+      // Limpiar formulario
+      setFormData({
+        nombre: "",
+        descripcion: "",
+        precio: 0.0,
+        stock: 0,
+        categoriaId: "",
+        proveedorId: "",
+      });
+    } catch (error) {
+      console.error("Error al guardar producto:", error);
+      toast.error("Error al guardar el producto.");
+    }
   };
 
   if (!show) return null;
@@ -66,15 +97,7 @@ export const ProductsModal = ({
     >
       <div className="modal-dialog modal-lg">
         <form onSubmit={handleSubmit}>
-          {isEdit ? (
-            <input
-              type="hidden"
-              name="IDProducto"
-              value={product.IDProducto}
-            ></input>
-          ) : (
-            ""
-          )}
+          {isEdit && <input type="hidden" name="id" value={product.id} />}
 
           <div className="modal-content">
             <div className="modal-header">
@@ -94,10 +117,10 @@ export const ProductsModal = ({
                   <label className="form-label required">Nombre</label>
                   <input
                     type="text"
-                    name="NombreProducto"
+                    name="nombre"
                     onChange={handleChange}
                     className="form-control"
-                    value={formData.NombreProducto}
+                    value={formData.nombre}
                     placeholder="Producto 01"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                     required
@@ -106,12 +129,11 @@ export const ProductsModal = ({
                 <div className="col-7">
                   <label className="form-label required">Descripción</label>
                   <textarea
-                    type="text"
-                    name="Descripción"
+                    name="descripcion"
                     className="form-control"
                     placeholder="Descripción del Producto 01"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                    value={formData.Descripción}
+                    value={formData.descripcion}
                     onChange={handleChange}
                     required
                   ></textarea>
@@ -123,9 +145,9 @@ export const ProductsModal = ({
                   <label className="form-label required">Precio</label>
                   <input
                     type="number"
-                    name="Precio"
+                    name="precio"
                     className="form-control"
-                    value={formData.Precio}
+                    value={formData.precio}
                     onChange={handleChange}
                     placeholder="99.99"
                     min={0}
@@ -137,9 +159,9 @@ export const ProductsModal = ({
                   <label className="form-label required">Stock</label>
                   <input
                     type="number"
-                    name="Stock"
+                    name="stock"
                     className="form-control"
-                    value={formData.Stock}
+                    value={formData.stock}
                     onChange={handleChange}
                     placeholder="99"
                     min={0}
@@ -153,22 +175,18 @@ export const ProductsModal = ({
                 <div className="col-5">
                   <label className="form-label required">Categoría</label>
                   <select
-                    type="text"
-                    name="CategoriaID"
+                    name="categoriaId"
                     className="form-select"
-                    value={formData.CategoriaID}
+                    value={formData.categoriaId}
                     onChange={handleChange}
                     required
                   >
                     <option value="" disabled>
                       Selecciona aquí
                     </option>
-                    {categoriesData.map((category) => (
-                      <option
-                        key={category.IDCategoria}
-                        value={category.IDCategoria}
-                      >
-                        {category.NombreCategoria}
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.nombre}
                       </option>
                     ))}
                   </select>
@@ -176,28 +194,25 @@ export const ProductsModal = ({
                 <div className="col-7">
                   <label className="form-label required">Proveedor</label>
                   <select
-                    type="text"
-                    name="ProveedorID"
+                    name="proveedorId"
                     className="form-select"
-                    value={formData.ProveedorID}
+                    value={formData.proveedorId}
                     onChange={handleChange}
                     required
                   >
                     <option value="" disabled>
                       Selecciona aquí
                     </option>
-                    {suppliersData.map((supplier) => (
-                      <option
-                        key={supplier.IDProveedor}
-                        value={supplier.IDProveedor}
-                      >
-                        {supplier.NombreProveedor}
+                    {suppliers.map((supplier) => (
+                      <option key={supplier.id} value={supplier.id}>
+                        {supplier.nombre}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
             </div>
+
             <div className="modal-footer">
               <button type="button" className="btn" onClick={closeModal}>
                 Cancelar

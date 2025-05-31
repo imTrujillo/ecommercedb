@@ -4,6 +4,7 @@ import {
   apiServicePost,
   apiServiceUpdate,
 } from "../apiService/apiService";
+import { toast } from "react-toastify";
 
 export const CategoryModal = ({
   show,
@@ -45,6 +46,7 @@ export const CategoryModal = ({
       nombre: "",
       descripcion: "",
     });
+    toast.success("¡Categoría agregada!");
     fetchData();
   };
 
