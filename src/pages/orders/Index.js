@@ -8,12 +8,15 @@ import { apiServiceGet } from "../../apiService/apiService";
 export const Index = () => {
   //LLAMAR LAS APIS
   const [orders, setOrders] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const fetchData = async () => {
     const ords = await apiServiceGet("pedidos", "");
+    const cats = await apiServiceGet("clientes", "");
     const prods = await apiServiceGet("productos", "");
     setOrders(ords);
     setProducts(prods);
+    setCustomers(cats);
   };
   useEffect(() => {
     fetchData();
@@ -99,22 +102,22 @@ export const Index = () => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setOrder({
-      IDPedido: 0,
-      Fecha: "",
-      Estado: "",
-      MetodoPago: "",
-      DireccionEnvio: "",
-      ClienteID: 0,
+      id: 0,
+      fecha: "",
+      estado: "",
+      metodoPago: "",
+      direccionEnvio: "",
+      clienteID: 0,
     });
     setShowModal(false);
   };
   const [order, setOrder] = useState({
-    IDPedido: 0,
-    Fecha: "",
-    Estado: "",
-    MetodoPago: "",
-    DireccionEnvio: "",
-    ClienteID: 0,
+    id: 0,
+    fecha: "",
+    estado: "",
+    metodoPago: "",
+    direccionEnvio: "",
+    clienteID: 0,
   });
   const [edit, setEdit] = useState(false);
   const onEdit = (orderEdit) => {
@@ -128,12 +131,12 @@ export const Index = () => {
   const [orderDelete, setOrderDelete] = useState(0);
   const closeModalDelete = () => {
     setOrder({
-      IDPedido: 0,
-      Fecha: "",
-      Estado: "",
-      MetodoPago: "",
-      DireccionEnvio: "",
-      ClienteID: 0,
+      id: 0,
+      fecha: "",
+      estado: "",
+      metodoPago: "",
+      direccionEnvio: "",
+      clienteID: 0,
     });
     setOrderDelete(0);
     setShowModalDelete(false);
@@ -189,7 +192,6 @@ export const Index = () => {
                       <th>Método de Pago</th>
                       <th>Dirección de Envío</th>
                       <th>Cliente</th>
-                      <th>Precio Total</th>
                       <th>Productos</th>
                       <th className="w-1"></th>
                     </tr>
@@ -198,15 +200,23 @@ export const Index = () => {
                     {orders.length === 0 ? (
                       <tr>No hay pedidos disponibles</tr>
                     ) : (
-                      orders.map((order) => (
-                        <Show
-                          key={order.IDPedido}
-                          order={order}
-                          onEdit={onEdit}
-                          onDelete={onDelete}
-                          products={products}
-                        />
-                      ))
+                      orders.map((order) => {
+                        const orderDetails = products.filter(
+                          (product) => product.pedidoId === order.id
+                        );
+
+                        return (
+                          <Show
+                            key={order.id}
+                            order={order}
+                            orderDetails={orderDetails}
+                            customers={customers}
+                            products={products}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                          />
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
