@@ -33,12 +33,10 @@ export const CategoryModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isEdit) {
-      await apiServiceUpdate(
-
-        `categorias/categoria/update/${category.Id}`,
-
-        formData
-      );
+      await apiServiceUpdate(`categorias/categoria/update/${category.id}`, {
+        ...formData,
+        id: category.id,
+      });
     } else {
       await apiServicePost("categorias", formData);
     }
@@ -63,8 +61,12 @@ export const CategoryModal = ({
       <div className="modal-dialog modal-lg">
         <form onSubmit={(e) => handleSubmit(e)}>
           {isEdit ? (
-
-            <input type="hidden" name="id" value={category.id}></input>
+            <input
+              type="hidden"
+              name="id"
+              onChange={handleChange}
+              value={category.id}
+            ></input>
           ) : (
             ""
           )}
@@ -86,12 +88,10 @@ export const CategoryModal = ({
                 <label className="form-label required">Nombre</label>
                 <input
                   type="text"
-
                   name="nombre"
                   onChange={handleChange}
                   className="form-control"
                   value={formData.nombre}
-
                   placeholder="Categoria 01"
                   pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                   required
@@ -101,7 +101,6 @@ export const CategoryModal = ({
                 <label className="form-label required">Descripcion</label>
                 <textarea
                   type="text"
-
                   name="descripcion"
                   className="form-control"
                   placeholder="Descripcion de Categoria 01"

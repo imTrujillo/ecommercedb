@@ -11,7 +11,6 @@ export const Index = () => {
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const fetchData = async () => {
-
     const prods = await apiServiceGet("productos", "");
     const cat = await apiServiceGet("categorias", "");
     const sup = await apiServiceGet("proveedores", "");
@@ -135,8 +134,8 @@ export const Index = () => {
                         <Show
                           key={product.id}
                           product={product}
-                          categories={setCategories}
-                          suppliers={setSuppliers}
+                          categories={categories}
+                          suppliers={suppliers}
                           onEdit={onEdit}
                           onDelete={onDelete}
                         />

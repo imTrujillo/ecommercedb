@@ -17,8 +17,8 @@ export const Index = () => {
 
   //LLAMAR APIS PARA TIENDA
   const [categorias, setCategories] = useState([]);
-  const [productos, setProducts] = useState([]);
-  const [proveedores, setSuppliers] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [clientes, setCustomers] = useState([]);
 
   const fetchData = async () => {
@@ -36,8 +36,6 @@ export const Index = () => {
     fetchData();
   }, []);
 
-  
-
   return (
     <>
       {/* MOSTRAR LAS CATEGORIAS DISPONIBLES */}
@@ -51,7 +49,6 @@ export const Index = () => {
             ) : (
               categorias.map((category) => (
                 <ShopCategories
-
                   key={category.id}
                   category={category}
                   products={products}
