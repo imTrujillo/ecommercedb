@@ -13,46 +13,80 @@ export const ProductsModal = ({
   fetchData,
 }) => {
   const [formData, setFormData] = useState({
-    IDProducto: 0,
-    NombreProducto: "",
-    Descripción: "",
-    Precio: 0.0,
-    Stock: 0,
-    CategoriaID: 0,
-    ProveedorID: 0,
+    id: 0,
+    nombre: "",
+    descripcion: "",
+    precio: 0.0,
+    stock: 0,
+    categoriaId: 0,
+    proveedorId: 0,
   });
 
-  //LLAMAR APIS PARA OBTENER INFORMACION ADICIONAL PARA EL FORMULARIO
-  const categoriesData = apiServiceGet("categories", "");
-  const suppliersData = apiServiceGet("suppliers", "");
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+
+  // Cargar categorías y proveedores al montar el modal
+  useEffect(() => {
+    const fetchDependencies = async () => {
+        const cats = await apiServiceGet("Categorias", "");
+        const sups = await apiServiceGet("Proveedores", "");
+        setCategories(cats || []);
+        setSuppliers(sups || []);
+    };
+    fetchDependencies();
+}, []);
 
   useEffect(() => {
     if (product) {
-      setFormData(product);
+      setFormData({
+        id: product.id,
+        nombre: product.nombre,
+        descripcion: product.descripcion,
+        precio: product.precio,
+        stock: product.stock,
+        categoriaId: product.categoriaId,
+        proveedorId: product.proveedorId
+      });
+    } else {
+      // Resetear formulario si no hay producto (para crear nuevo)
+            setFormData({
+                id: 0,
+                nombre: "",
+                descripcion: "",
+                precio: 0.0,
+                stock: 0,
+                categoriaId: 0,
+                proveedorId: 0,
+            });
     }
   }, [product]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+     // Convierte a número solo si el campo es numérico para evitar problemas de tipo
+    setFormData((prev) => ({ 
+      ...prev, 
+      [name]: ['precio', 'stock', 'categoriaId', 'proveedorId'].includes(name) ? Number(value) : value }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // para asegurar de que los IDs sean números antes de enviar
+        const dataToSend = {
+            ...formData,
+            precio: Number(formData.precio),
+            stock: Number(formData.stock),
+            categoriaId: Number(formData.categoriaId),
+            proveedorId: Number(formData.proveedorId),
+        };
+
     if (isEdit) {
-      await apiServiceUpdate(`products/${product.IDProducto}`, formData);
+      await apiServiceUpdate(`Productos/update/${dataToSend.id}`, dataToSend);
     } else {
-      await apiServicePost("products", formData);
+      await apiServicePost("Productos", dataToSend);
     }
     closeModal();
-    setFormData({
-      IDProducto: 0,
-      NombreProducto: "",
-      Descripción: "",
-      Precio: 0.0,
-      Stock: 0,
-      CategoriaID: 0,
-      ProveedorID: 0,
-    });
     fetchData();
   };
 
@@ -69,8 +103,8 @@ export const ProductsModal = ({
           {isEdit ? (
             <input
               type="hidden"
-              name="IDProducto"
-              value={product.IDProducto}
+              name="id"
+              value={formData.id}
             ></input>
           ) : (
             ""
@@ -91,27 +125,27 @@ export const ProductsModal = ({
             <div className="modal-body">
               <div className="row mb-3">
                 <div className="col-5">
-                  <label className="form-label required">Nombre</label>
+                  <label className="form-label required">nombre</label>
                   <input
                     type="text"
-                    name="NombreProducto"
+                    name="nombre"
                     onChange={handleChange}
                     className="form-control"
-                    value={formData.NombreProducto}
+                    value={formData.nombre}
                     placeholder="Producto 01"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                     required
                   />
                 </div>
                 <div className="col-7">
-                  <label className="form-label required">Descripción</label>
+                  <label className="form-label required">descripcion</label>
                   <textarea
                     type="text"
-                    name="Descripción"
+                    name="descripcion"
                     className="form-control"
-                    placeholder="Descripción del Producto 01"
+                    placeholder="descripcion del Producto 01"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                    value={formData.Descripción}
+                    value={formData.descripcion}
                     onChange={handleChange}
                     required
                   ></textarea>
@@ -120,12 +154,12 @@ export const ProductsModal = ({
 
               <div className="row mb-3">
                 <div className="col-6">
-                  <label className="form-label required">Precio</label>
+                  <label className="form-label required">precio</label>
                   <input
                     type="number"
-                    name="Precio"
+                    name="precio"
                     className="form-control"
-                    value={formData.Precio}
+                    value={formData.precio}
                     onChange={handleChange}
                     placeholder="99.99"
                     min={0}
@@ -134,12 +168,12 @@ export const ProductsModal = ({
                   />
                 </div>
                 <div className="col-6">
-                  <label className="form-label required">Stock</label>
+                  <label className="form-label required">stock</label>
                   <input
                     type="number"
-                    name="Stock"
+                    name="stock"
                     className="form-control"
-                    value={formData.Stock}
+                    value={formData.stock}
                     onChange={handleChange}
                     placeholder="99"
                     min={0}
@@ -154,21 +188,21 @@ export const ProductsModal = ({
                   <label className="form-label required">Categoría</label>
                   <select
                     type="text"
-                    name="CategoriaID"
+                    name="categoriaId"
                     className="form-select"
-                    value={formData.CategoriaID}
+                    value={formData.categoriaId}
                     onChange={handleChange}
                     required
                   >
                     <option value="" disabled>
                       Selecciona aquí
                     </option>
-                    {categoriesData.map((category) => (
+                    {categories.map((category) => (
                       <option
-                        key={category.IDCategoria}
-                        value={category.IDCategoria}
+                        key={category.id}
+                        value={category.id}
                       >
-                        {category.NombreCategoria}
+                        {category.nombre}
                       </option>
                     ))}
                   </select>
@@ -177,21 +211,21 @@ export const ProductsModal = ({
                   <label className="form-label required">Proveedor</label>
                   <select
                     type="text"
-                    name="ProveedorID"
+                    name="proveedorId"
                     className="form-select"
-                    value={formData.ProveedorID}
+                    value={formData.proveedorId}
                     onChange={handleChange}
                     required
                   >
                     <option value="" disabled>
                       Selecciona aquí
                     </option>
-                    {suppliersData.map((supplier) => (
+                    {suppliers.map((supplier) => (
                       <option
-                        key={supplier.IDProveedor}
-                        value={supplier.IDProveedor}
+                        key={supplier.id}
+                        value={supplier.id}
                       >
-                        {supplier.NombreProveedor}
+                        {supplier.nombre}
                       </option>
                     ))}
                   </select>

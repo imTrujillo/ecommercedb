@@ -4,19 +4,19 @@ import { IconPencil, IconTrash } from "@tabler/icons-react";
 const Show = ({ supplier, onEdit, onDelete }) => {
   return (
     <tr>
-      <td data-label="IDProveedor">
+      <td data-label="id">
         <div className="d-flex py-1 align-items-center">
-          <span>{supplier.IDProveedor}</span>
+          <span>{supplier.id}</span>
         </div>
       </td>
-      <td data-label="NombreProveedor">
-        <div className="font-weight-medium">{supplier.NombreProveedor}</div>
+      <td data-label="nombre">
+        <div className="font-weight-medium">{supplier.nombre}</div>
       </td>
-      <td className="text-secondary" data-label="Role">
-        {supplier.Teléfono}
+      <td className="text-secondary" data-label="telefono">
+        {supplier.telefono}
       </td>
-      <td className="text-secondary" data-label="Role">
-        {supplier.Email}
+      <td className="text-secondary" data-label="email">
+        {supplier.email}
       </td>
       <td>
         <div className="btn-list flex-nowrap">

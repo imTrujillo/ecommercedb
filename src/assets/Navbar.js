@@ -80,7 +80,7 @@ export default function Navbar() {
             >
               <IconShoppingCart />
             </a>
-            <form action="./" method="get" autocomplete="off" novalidate>
+            <form action="./" method="get" autoComplete="off" noValidate>
               <div className="input-icon">
                 <span className="input-icon-addon">
                   <IconSearch size={24} stroke={2} />

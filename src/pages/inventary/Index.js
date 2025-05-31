@@ -9,7 +9,7 @@ export const Index = () => {
   //LLAMAR LA API
   const [products, setProducts] = useState([]);
   const fetchData = async () => {
-    const prods = apiServiceGet("products");
+    const prods = await apiServiceGet("Productos");
     setProducts(prods);
   };
   useEffect(() => {

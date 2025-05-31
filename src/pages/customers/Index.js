@@ -9,8 +9,8 @@ export const Index = () => {
   //LLAMAR LA API
   const [customers, setCustomers] = useState([]);
   const fetchData = async () => {
-    const cust = apiServiceGet("customers");
-    setCustomers(cust);
+    const cust = await apiServiceGet("Clientes");
+    setCustomers(cust); 
   };
   useEffect(() => {
     fetchData();
@@ -18,25 +18,25 @@ export const Index = () => {
   // DATOS ESTATICOS
   // const customers = [
   //   {
-  //     IDCliente: "1",
-  //     NombreCliente: "Mati",
-  //     Teléfono: "+503 7364 6423",
-  //     Email: "example@example1.com",
-  //     Dirección: "Av. Bernal",
+  //     id: "1",
+  //     nombre: "Mati",
+  //     telefono: "+503 7364 6423",
+  //     email: "example@example1.com",
+  //     direccion: "Av. Bernal",
   //   },
   //   {
-  //     IDCliente: "2",
-  //     NombreCliente: "Santi",
-  //     Teléfono: "+503 6450 5134",
-  //     Email: "example@example2.com",
-  //     Dirección: "Av. Bernal",
+  //     id: "2",
+  //     nombre: "Santi",
+  //     telefono: "+503 6450 5134",
+  //     email: "example@example2.com",
+  //     direccion: "Av. Bernal",
   //   },
   //   {
-  //     IDCliente: "3",
-  //     NombreCliente: "Milli",
-  //     Teléfono: "+503 9784 2534",
-  //     Email: "example@example3.com",
-  //     Dirección: "Av. Bernal",
+  //     id: "3",
+  //     nombre: "Milli",
+  //     telefono: "+503 9784 2534",
+  //     email: "example@example3.com",
+  //     direccion: "Av. Bernal",
   //   },
   // ];
 
@@ -44,20 +44,20 @@ export const Index = () => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setCustomer({
-      IDCliente: "",
-      NombreCliente: "",
-      Teléfono: "",
-      Email: "",
-      Dirección: "",
+      id: "",
+      nombre: "",
+      telefono: "",
+      email: "",
+      direccion: "",
     });
     setShowModal(false);
   };
   const [customer, setCustomer] = useState({
-    IDCliente: "",
-    NombreCliente: "",
-    Teléfono: "",
-    Email: "",
-    Dirección: "",
+    id: "",
+    nombre: "",
+    telefono: "",
+    email: "",
+    direccion: "",
   });
   const [edit, setEdit] = useState(false);
   const onEdit = (customerEdit) => {
@@ -70,11 +70,11 @@ export const Index = () => {
   const [showModalDelete, setShowModalDelete] = useState(false);
   const closeModalDelete = () => {
     setCustomer({
-      IDCliente: "",
-      NombreCliente: "",
-      Teléfono: "",
-      Email: "",
-      Dirección: "",
+      id: "",
+      nombre: "",
+      telefono: "",
+      email: "",
+      direccion: "",
     });
     setShowModalDelete(false);
   };
@@ -124,20 +124,22 @@ export const Index = () => {
                   <thead>
                     <tr>
                       <th>No.</th>
-                      <th>Nombre</th>
-                      <th>Teléfono</th>
-                      <th>Email</th>
-                      <th>Dirección</th>
+                      <th>nombre</th>
+                      <th>telefono</th>
+                      <th>email</th>
+                      <th>direccion</th>
                       <th className="w-1"></th>
                     </tr>
                   </thead>
                   <tbody>
                     {customers.length === 0 ? (
-                      <tr>No hay clientes disponibles</tr>
+                      <tr><td colSpan="4" className="text-center">
+                          No hay clientes disponibles
+                        </td></tr>
                     ) : (
                       customers.map((customer) => (
                         <Show
-                          key={customer.IDCliente}
+                          key={customer.id}
                           customer={customer}
                           onEdit={onEdit}
                           onDelete={onDelete}
@@ -161,8 +163,8 @@ export const Index = () => {
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
-        id={customer.IDCliente}
-        endpoint="customers/"
+        id={customer.id}
+        endpoint="Clientes/cliente/delete/"
         fetchData={fetchData}
       />
     </div>

@@ -2,11 +2,16 @@ import React from "react";
 import { apiServiceDelete } from "../apiService/apiService";
 
 export const DeleteModal = ({ show, closeModal, id, endpoint, fetchData }) => {
-  const handleDelete = async () => {
-    await apiServiceDelete(endpoint + id);
-
-    closeModal();
-    fetchData();
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    try {
+      await apiServiceDelete(endpoint + id);
+      closeModal();
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting record:", error);
+      closeModal(); // Cerrar el modal incluso si hay un error
+    }
   };
 
   if (!show) return null;
