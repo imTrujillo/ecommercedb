@@ -6,20 +6,20 @@ const Show = ({ customer, onEdit, onDelete }) => {
     <tr>
       <td data-label="IDProducto">
         <div className="d-flex py-1 align-items-center">
-          <span>{customer.IDCliente}</span>
+          <span>{customer.id}</span>
         </div>
       </td>
-      <td data-label="NombreProducto">
-        <div className="font-weight-medium">{customer.NombreCliente}</div>
+      <td data-label="nombreProducto">
+        <div className="font-weight-medium">{customer.nombre}</div>
       </td>
       <td className="text-secondary" data-label="Role">
-        {customer.Teléfono}
+        {customer.telefono}
       </td>
       <td className="text-secondary" data-label="Role">
-        {customer.Email}
+        {customer.email}
       </td>
       <td className="text-secondary" data-label="Role">
-        {customer.Dirección}
+        {customer.direccion}
       </td>
 
       <td>

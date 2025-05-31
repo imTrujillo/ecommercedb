@@ -9,16 +9,28 @@ export const SuppliersModal = ({
   fetchData,
 }) => {
   const [formData, setFormData] = useState({
-    IDProveedor: 0,
-    NombreProveedor: "",
-    Teléfono: "",
-    Email: "",
+    id: 0,
+    nombre: "",
+    telefono: "",
+    email: "",
   });
 
   useEffect(() => {
     if (supplier) {
-      setFormData(supplier);
-    }
+      setFormData({
+      id: supplier.id,
+      nombre: supplier.nombre,
+      telefono: supplier.telefono,
+      email: supplier.email,
+    });
+  } else {
+    setFormData({
+      id: 0,
+      nombre: "",
+      telefono: "",
+      email: "",
+    });
+  }
   }, [supplier]);
 
   const handleChange = (e) => {
@@ -26,18 +38,14 @@ export const SuppliersModal = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault()
     if (isEdit) {
-      await apiServiceUpdate(`suppliers/${supplier.IDProveedor}`, formData);
+      await apiServiceUpdate(`Proveedores/proveedor/update/${formData.id}`, formData);
     } else {
-      await apiServicePost("suppliers", formData);
+      await apiServicePost("Proveedores", formData);
     }
     closeModal();
-    setFormData({
-      IDCategoria: 0,
-      NombreCategoria: "",
-      Descripción: "",
-    });
     fetchData();
   };
 
@@ -54,8 +62,8 @@ export const SuppliersModal = ({
           {isEdit ? (
             <input
               type="hidden"
-              name="IDProveedor"
-              value={supplier.IDProveedor}
+              name="id"
+              value={supplier.id}
             ></input>
           ) : (
             ""
@@ -75,38 +83,38 @@ export const SuppliersModal = ({
 
             <div className="modal-body">
               <div className="row mb-3">
-                <label className="form-label required">Nombre</label>
+                <label className="form-label required">nombre</label>
                 <input
                   type="text"
-                  name="NombreProveedor"
+                  name="nombre"
                   onChange={handleChange}
                   className="form-control"
-                  value={formData.NombreProveedor}
+                  value={formData.nombre}
                   placeholder="Proveedor 01"
                   pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                   required
                 />
               </div>
               <div className="row mb-3">
-                <label className="form-label required">Teléfono</label>
+                <label className="form-label required">telefono</label>
                 <input
                   type="text"
-                  name="Teléfono"
+                  name="telefono"
                   onChange={handleChange}
                   className="form-control"
-                  value={formData.Teléfono}
+                  value={formData.telefono}
                   placeholder="+503 0000 0000"
                   required
                 />
               </div>
               <div className="row mb-3">
-                <label className="form-label required">Email</label>
+                <label className="form-label required">email</label>
                 <input
                   type="email"
-                  name="Email"
+                  name="email"
                   onChange={handleChange}
                   className="form-control"
-                  value={formData.Email}
+                  value={formData.email}
                   placeholder="example@example.com"
                   required
                 />

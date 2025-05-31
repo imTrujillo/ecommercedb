@@ -16,6 +16,8 @@ export const ProductsModal = ({
   categories,
 }) => {
   const [formData, setFormData] = useState({
+
+    id: 0,
     nombre: "",
     descripcion: "",
     precio: 0.0,
@@ -36,6 +38,7 @@ export const ProductsModal = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -97,6 +100,7 @@ export const ProductsModal = ({
     >
       <div className="modal-dialog modal-lg">
         <form onSubmit={handleSubmit}>
+
           {isEdit && <input type="hidden" name="id" value={product.id} />}
 
           <div className="modal-content">
@@ -114,7 +118,7 @@ export const ProductsModal = ({
             <div className="modal-body">
               <div className="row mb-3">
                 <div className="col-5">
-                  <label className="form-label required">Nombre</label>
+                  <label className="form-label required">nombre</label>
                   <input
                     type="text"
                     name="nombre"
@@ -127,11 +131,12 @@ export const ProductsModal = ({
                   />
                 </div>
                 <div className="col-7">
-                  <label className="form-label required">Descripción</label>
+                  <label className="form-label required">descripcion</label>
                   <textarea
+                    type="text"
                     name="descripcion"
                     className="form-control"
-                    placeholder="Descripción del Producto 01"
+                    placeholder="descripcion del Producto 01"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                     value={formData.descripcion}
                     onChange={handleChange}
@@ -142,7 +147,7 @@ export const ProductsModal = ({
 
               <div className="row mb-3">
                 <div className="col-6">
-                  <label className="form-label required">Precio</label>
+                  <label className="form-label required">precio</label>
                   <input
                     type="number"
                     name="precio"
@@ -156,7 +161,7 @@ export const ProductsModal = ({
                   />
                 </div>
                 <div className="col-6">
-                  <label className="form-label required">Stock</label>
+                  <label className="form-label required">stock</label>
                   <input
                     type="number"
                     name="stock"
@@ -175,6 +180,8 @@ export const ProductsModal = ({
                 <div className="col-5">
                   <label className="form-label required">Categoría</label>
                   <select
+                    type="text"
+
                     name="categoriaId"
                     className="form-select"
                     value={formData.categoriaId}
@@ -186,6 +193,7 @@ export const ProductsModal = ({
                     </option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
+
                         {category.nombre}
                       </option>
                     ))}
@@ -194,6 +202,8 @@ export const ProductsModal = ({
                 <div className="col-7">
                   <label className="form-label required">Proveedor</label>
                   <select
+                    type="text"
+
                     name="proveedorId"
                     className="form-select"
                     value={formData.proveedorId}
@@ -204,7 +214,11 @@ export const ProductsModal = ({
                       Selecciona aquí
                     </option>
                     {suppliers.map((supplier) => (
-                      <option key={supplier.id} value={supplier.id}>
+                      <option
+                        key={supplier.id}
+                        value={supplier.id}
+                      >
+
                         {supplier.nombre}
                       </option>
                     ))}

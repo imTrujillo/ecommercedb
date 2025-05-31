@@ -7,34 +7,39 @@ import { apiServiceGet } from "../../apiService/apiService";
 
 export const Index = () => {
   //LLAMAR LA API
-  const [suppliers, setSuppliers] = useState([]);
+  const [Proveedores, setProveedores] = useState([]);
+
   const fetchData = async () => {
-    const sups = apiServiceGet("suppliers");
-    setSuppliers(sups);
+  try {
+    const sups = await apiServiceGet("Proveedores");
+    setProveedores(sups);
+  } catch (error) {
+    console.error("Error al obtener proveedores:", error);
+  }
   };
   useEffect(() => {
     fetchData();
   }, []);
 
   // DATOS ESTATICOS
-  // const suppliers = [
+  // const Proveedores = [
   //   {
-  //     IDProveedor: "1",
-  //     NombreProveedor: "Universidad1",
-  //     Teléfono: "+503 1234 5678",
-  //     Email: "example@example.com",
+  //     id: "1",
+  //     nombre: "Universidad1",
+  //     telefono: "+503 1234 5678",
+  //     email: "example@example.com",
   //   },
   //   {
-  //     IDProveedor: "2",
-  //     NombreProveedor: "Universidad2",
-  //     Teléfono: "+503 1234 5678",
-  //     Email: "example@example.com",
+  //     id: "2",
+  //     nombre: "Universidad2",
+  //     telefono: "+503 1234 5678",
+  //     email: "example@example.com",
   //   },
   //   {
-  //     IDProveedor: "3",
-  //     NombreProveedor: "Universidad3",
-  //     Teléfono: "+503 1234 5678",
-  //     Email: "example@example.com",
+  //     id: "3",
+  //     nombre: "Universidad3",
+  //     telefono: "+503 1234 5678",
+  //     email: "example@example.com",
   //   },
   // ];
 
@@ -42,18 +47,18 @@ export const Index = () => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setSupplier({
-      IDProveedor: 0,
-      NombreProveedor: "",
-      Teléfono: "",
-      Email: "",
+      id: 0,
+      nombre: "",
+      telefono: "",
+      email: "",
     });
     setShowModal(false);
   };
   const [supplier, setSupplier] = useState({
-    IDProveedor: 0,
-    NombreProveedor: "",
-    Teléfono: "",
-    Email: "",
+    id: 0,
+    nombre: "",
+    telefono: "",
+    email: "",
   });
   const [edit, setEdit] = useState(false);
   const onEdit = (supplierEdit) => {
@@ -66,10 +71,10 @@ export const Index = () => {
   const [showModalDelete, setShowModalDelete] = useState(false);
   const closeModalDelete = () => {
     setSupplier({
-      IDProveedor: 0,
-      NombreProveedor: "",
-      Teléfono: "",
-      Email: "",
+      id: 0,
+      nombre: "",
+      telefono: "",
+      email: "",
     });
     setShowModalDelete(false);
   };
@@ -97,7 +102,10 @@ export const Index = () => {
                   <div className="btn-list">
                     <button
                       className="btn btn-primary d-none d-sm-inline-block"
-                      onClick={() => setShowModal(true)}
+                      onClick={() => {
+                        setEdit(false); 
+                        closeModal();
+                        setShowModal(true)}}
                     >
                       <IconPlus className="me-3" />
                       Agregar proveedor
@@ -114,24 +122,28 @@ export const Index = () => {
               <div className="table-responsive">
                 <table
                   className="table table-vcenter card-table table-striped"
-                  id="table-suppliers"
+                  id="table-Proveedores"
                 >
                   <thead>
                     <tr>
                       <th>No.</th>
-                      <th>Nombre</th>
-                      <th>Teléfono</th>
-                      <th>Email</th>
+                      <th>nombre</th>
+                      <th>telefono</th>
+                      <th>email</th>
                       <th className="w-1"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {suppliers.length === 0 ? (
-                      <div>No hay proveedores disponibles</div>
+                    {Proveedores.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="text-center"> {/* Ajusta colSpan según tus columnas */}
+                          No hay clientes disponibles
+                        </td>
+                      </tr>
                     ) : (
-                      suppliers.map((supplier) => (
+                      Proveedores.map((supplier) => (
                         <Show
-                          key={supplier.IDProveedor}
+                          key={supplier.id}
                           supplier={supplier}
                           onEdit={onEdit}
                           onDelete={onDelete}
@@ -155,8 +167,8 @@ export const Index = () => {
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
-        id={supplier.IDProveedor}
-        endpoint="suppliers/"
+        id={supplier.id}
+        endpoint="Proveedores/proveedor/delete/"
         fetchData={fetchData}
       />
     </div>

@@ -34,7 +34,9 @@ export const CategoryModal = ({
     e.preventDefault();
     if (isEdit) {
       await apiServiceUpdate(
-        `categorias/categoria/update/${category.id}`,
+
+        `categorias/categoria/update/${category.Id}`,
+
         formData
       );
     } else {
@@ -61,6 +63,7 @@ export const CategoryModal = ({
       <div className="modal-dialog modal-lg">
         <form onSubmit={(e) => handleSubmit(e)}>
           {isEdit ? (
+
             <input type="hidden" name="id" value={category.id}></input>
           ) : (
             ""
@@ -83,22 +86,25 @@ export const CategoryModal = ({
                 <label className="form-label required">Nombre</label>
                 <input
                   type="text"
+
                   name="nombre"
                   onChange={handleChange}
                   className="form-control"
                   value={formData.nombre}
+
                   placeholder="Categoria 01"
                   pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                   required
                 />
               </div>
               <div className="row mb-3">
-                <label className="form-label required">Descripción</label>
+                <label className="form-label required">Descripcion</label>
                 <textarea
                   type="text"
+
                   name="descripcion"
                   className="form-control"
-                  placeholder="Descripción de Categoria 01"
+                  placeholder="Descripcion de Categoria 01"
                   pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                   value={formData.descripcion}
                   onChange={handleChange}

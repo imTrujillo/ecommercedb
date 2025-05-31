@@ -9,16 +9,31 @@ export const CustomerModal = ({
   fetchData,
 }) => {
   const [formData, setFormData] = useState({
-    IDCliente: "",
-    NombreCliente: "",
-    Teléfono: "",
-    Email: "",
-    Dirección: "",
+    id: "",
+    nombre: "",
+    telefono: "",
+    email: "",
+    direccion: "",
   });
 
   useEffect(() => {
     if (customer) {
-      setFormData(customer);
+      setFormData({
+        id: customer.id, // Asumiendo que el ID en C# es 'id'
+        nombre: customer.nombre,
+        telefono: customer.telefono, // Asumiendo 'telefono' sin tilde
+        email: customer.email,
+        direccion: customer.direccion, // Asumiendo 'direccion' sin tilde
+      });
+    } else {
+      // Si es un nuevo cliente, resetear el formulario
+      setFormData({
+        id: 0,
+        nombre: "",
+        telefono: "",
+        email: "",
+        direccion: "",
+      });
     }
   }, [customer]);
 
@@ -27,20 +42,19 @@ export const CustomerModal = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // para asegurar de que el ID sea un número antes de enviar
+    const dataToSend = {
+      ...formData,
+      id: Number(formData.id),
+    };
     if (isEdit) {
-      await apiServiceUpdate(`customers/${customer.IDProveedor}`, formData);
+      await apiServiceUpdate(`Clientes/cliente/update/${dataToSend.id}`, dataToSend);
     } else {
-      await apiServicePost("customers", formData);
+      await apiServicePost("Clientes", dataToSend);
     }
     closeModal();
-    setFormData({
-      IDCliente: "",
-      NombreCliente: "",
-      Teléfono: "",
-      Email: "",
-      Dirección: "",
-    });
     fetchData();
   };
 
@@ -57,8 +71,8 @@ export const CustomerModal = ({
           {isEdit ? (
             <input
               type="hidden"
-              name="IDCliente"
-              value={customer.IDCliente}
+              name="id"
+              value={customer.id}
             ></input>
           ) : (
             ""
@@ -79,26 +93,26 @@ export const CustomerModal = ({
             <div className="modal-body">
               <div className="row mb-3">
                 <div className="col-6">
-                  <label className="form-label required">Nombre</label>
+                  <label className="form-label required">nombre</label>
                   <input
                     type="text"
-                    name="NombreCliente"
+                    name="nombre"
                     onChange={handleChange}
                     className="form-control"
-                    value={formData.NombreCliente}
+                    value={formData.nombre}
                     placeholder="Juan Pérez"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                     required
                   />
                 </div>
                 <div className="col-6">
-                  <label className="form-label required">Teléfono</label>
+                  <label className="form-label required">telefono</label>
                   <input
                     type="text"
-                    name="Teléfono"
+                    name="telefono"
                     className="form-control"
                     placeholder="+503 0000 0000"
-                    value={formData.Teléfono}
+                    value={formData.telefono}
                     onChange={handleChange}
                     required
                   />
@@ -107,24 +121,24 @@ export const CustomerModal = ({
 
               <div className="row mb-3">
                 <div className="col-5">
-                  <label className="form-label required">Email</label>
+                  <label className="form-label required">email</label>
                   <input
                     type="email"
-                    name="Email"
+                    name="email"
                     className="form-control"
-                    value={formData.Email}
+                    value={formData.email}
                     onChange={handleChange}
                     placeholder="example@example.com"
                     required
                   />
                 </div>
                 <div className="col-7">
-                  <label className="form-label required">Dirección</label>
+                  <label className="form-label required">direccion</label>
                   <textarea
                     type="text"
-                    name="Dirección"
+                    name="direccion"
                     className="form-control"
-                    value={formData.Dirección}
+                    value={formData.direccion}
                     onChange={handleChange}
                     placeholder="Av. Bernal"
                     required
