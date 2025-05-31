@@ -1,31 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Show from "./Show";
 import { SuppliersModal } from "../../components/SuppliersModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/DeleteModal";
+import { apiServiceGet } from "../../apiService/apiService";
 
 export const Index = () => {
+  //LLAMAR LA API
+  const [suppliers, setSuppliers] = useState([]);
+  const fetchData = async () => {
+    const sups = apiServiceGet("suppliers");
+    setSuppliers(sups);
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   // DATOS ESTATICOS
-  const suppliers = [
-    {
-      IDProveedor: "1",
-      NombreProveedor: "Universidad1",
-      Teléfono: "+503 1234 5678",
-      Email: "example@example.com",
-    },
-    {
-      IDProveedor: "2",
-      NombreProveedor: "Universidad2",
-      Teléfono: "+503 1234 5678",
-      Email: "example@example.com",
-    },
-    {
-      IDProveedor: "3",
-      NombreProveedor: "Universidad3",
-      Teléfono: "+503 1234 5678",
-      Email: "example@example.com",
-    },
-  ];
+  // const suppliers = [
+  //   {
+  //     IDProveedor: "1",
+  //     NombreProveedor: "Universidad1",
+  //     Teléfono: "+503 1234 5678",
+  //     Email: "example@example.com",
+  //   },
+  //   {
+  //     IDProveedor: "2",
+  //     NombreProveedor: "Universidad2",
+  //     Teléfono: "+503 1234 5678",
+  //     Email: "example@example.com",
+  //   },
+  //   {
+  //     IDProveedor: "3",
+  //     NombreProveedor: "Universidad3",
+  //     Teléfono: "+503 1234 5678",
+  //     Email: "example@example.com",
+  //   },
+  // ];
 
   //CREAR/EDITAR UN PROVEEDOR
   const [showModal, setShowModal] = useState(false);
@@ -139,11 +150,14 @@ export const Index = () => {
         closeModal={closeModal}
         isEdit={edit}
         supplier={supplier}
+        fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
         id={supplier.IDProveedor}
+        endpoint="suppliers/"
+        fetchData={fetchData}
       />
     </div>
   );

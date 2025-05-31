@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from "react";
+import {
+  apiServiceGet,
+  apiServicePost,
+  apiServiceUpdate,
+} from "../apiService/apiService";
 
-export const ProductsModal = ({ show, closeModal, isEdit, product }) => {
+export const ProductsModal = ({
+  show,
+  closeModal,
+  isEdit,
+  product,
+  fetchData,
+}) => {
   const [formData, setFormData] = useState({
-    IDProducto: "",
+    IDProducto: 0,
     NombreProducto: "",
     Descripción: "",
     Precio: 0.0,
@@ -10,6 +21,10 @@ export const ProductsModal = ({ show, closeModal, isEdit, product }) => {
     CategoriaID: 0,
     ProveedorID: 0,
   });
+
+  //LLAMAR APIS PARA OBTENER INFORMACION ADICIONAL PARA EL FORMULARIO
+  const categoriesData = apiServiceGet("categories", "");
+  const suppliersData = apiServiceGet("suppliers", "");
 
   useEffect(() => {
     if (product) {
@@ -22,9 +37,23 @@ export const ProductsModal = ({ show, closeModal, isEdit, product }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    if (isEdit) {
+      await apiServiceUpdate(`products/${product.IDProducto}`, formData);
+    } else {
+      await apiServicePost("products", formData);
+    }
     closeModal();
+    setFormData({
+      IDProducto: 0,
+      NombreProducto: "",
+      Descripción: "",
+      Precio: 0.0,
+      Stock: 0,
+      CategoriaID: 0,
+      ProveedorID: 0,
+    });
+    fetchData();
   };
 
   if (!show) return null;
@@ -134,9 +163,14 @@ export const ProductsModal = ({ show, closeModal, isEdit, product }) => {
                     <option value="" disabled>
                       Selecciona aquí
                     </option>
-                    <option value="1">Categoria1</option>
-                    <option value="2">Categoria2</option>
-                    <option value="3">Categoria3</option>
+                    {categoriesData.map((category) => (
+                      <option
+                        key={category.IDCategoria}
+                        value={category.IDCategoria}
+                      >
+                        {category.NombreCategoria}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="col-7">
@@ -152,9 +186,14 @@ export const ProductsModal = ({ show, closeModal, isEdit, product }) => {
                     <option value="" disabled>
                       Selecciona aquí
                     </option>
-                    <option value="1">Proveedor1</option>
-                    <option value="2">Proveedor2</option>
-                    <option value="3">Proveedor3</option>
+                    {suppliersData.map((supplier) => (
+                      <option
+                        key={supplier.IDProveedor}
+                        value={supplier.IDProveedor}
+                      >
+                        {supplier.NombreProveedor}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

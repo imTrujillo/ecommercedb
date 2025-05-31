@@ -1,51 +1,77 @@
 import React, { useEffect, useState } from "react";
+import { apiServicePost } from "../apiService/apiService";
 
-export const BuyModal = ({
-  show,
-  closeModal,
-  customer,
-  orderDetail,
-  order,
-}) => {
-  const [formData, setFormData] = useState({
-    //DATOS DEL CLIENTE
-    IDCliente: 0,
+export const BuyModal = ({ show, closeModal, productCart, fetchData }) => {
+  const [customerData, setCustomerData] = useState({
     NombreCliente: "",
     Teléfono: "",
     Email: "",
     Dirección: "",
-
-    //DATOS DEL PEDIDO
-    Fecha: "",
-    Estado: "",
-    MetodoPago: "",
-    DireccionEnvio: "",
-
-    //DETALLES DEL PEDIDO
-    Cantidad: 0,
-    PrecioTotalProductos: 0,
   });
 
-  useEffect(() => {
-    if (customer) {
-      setFormData((prev) => ({ ...prev, ...customer }));
-    }
-    if (order) {
-      setFormData((prev) => ({ ...prev, ...order }));
-    }
-    if (orderDetail) {
-      setFormData((prev) => ({ ...prev, ...orderDetail }));
-    }
-  }, [customer, order, orderDetail]);
+  const [orderData, setOrderData] = useState({
+    Fecha: new Date().toISOString(),
+    Estado: "Pendiente",
+    MetodoPago: "",
+    DireccionEnvio: "",
+    IDCliente: customerData.IDCliente,
+  });
 
-  const handleChange = (e) => {
+  const [orderDetailsData, setOrderDetailsData] = useState([]);
+  useEffect(() => {
+    if (Array.isArray(productCart)) {
+      const detalles = productCart.map((product) => ({
+        Cantidad: 1,
+        PrecioUnitario: product.Precio,
+        ProductoID: product.IDProducto,
+      }));
+      setOrderDetailsData(detalles);
+    }
+  }, [productCart]);
+
+  const handleChangeCustomer = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setCustomerData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleChangeOrder = (e) => {
+    const { name, value } = e.target;
+    setOrderData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    const clienteResponse = await apiServicePost("customers", customerData);
+    const clienteID = clienteResponse.IDCliente;
+
+    const ordenResponse = await apiServicePost("orders", {
+      ...orderData,
+      IDCliente: clienteID,
+    });
+    const pedidoID = ordenResponse.IDPedido;
+
+    for (const detalle of orderDetailsData) {
+      await apiServicePost("order_details", {
+        ...detalle,
+        PedidoID: pedidoID,
+      });
+    }
+
     closeModal();
+    setCustomerData({
+      NombreCliente: "",
+      Telefono: "",
+      Email: "",
+      Direccion: "",
+    });
+    setOrderData({
+      Fecha: new Date().toISOString(),
+      Estado: "Pendiente",
+      MetodoPago: "",
+      DireccionEnvio: "",
+      IDCliente: null,
+    });
+    setOrderDetailsData([]);
+    fetchData();
   };
 
   if (!show) return null;
@@ -57,8 +83,12 @@ export const BuyModal = ({
       role="dialog"
     >
       <div className="modal-dialog modal-lg">
-        <form onSubmit={handleSubmit}>
-          <input type="hidden" name="ClienteID" value={order.PedidoID}></input>
+        <form onSubmit={(e) => handleSubmit(e)}>
+          <input
+            type="hidden"
+            name="ClienteID"
+            value={orderData.PedidoID}
+          ></input>
 
           <div className="modal-content">
             <div className="modal-header">
@@ -77,9 +107,9 @@ export const BuyModal = ({
                   <input
                     type="text"
                     name="NombreCliente"
-                    onChange={handleChange}
+                    onChange={handleChangeCustomer}
                     className="form-control"
-                    value={formData.NombreCliente}
+                    value={customerData.NombreCliente}
                     placeholder="Juan Pérez"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                     required
@@ -92,8 +122,8 @@ export const BuyModal = ({
                     name="Teléfono"
                     className="form-control"
                     placeholder="+503 0000 0000"
-                    value={formData.Teléfono}
-                    onChange={handleChange}
+                    value={customerData.Teléfono}
+                    onChange={handleChangeCustomer}
                     required
                   />
                 </div>
@@ -106,8 +136,8 @@ export const BuyModal = ({
                     type="email"
                     name="Email"
                     className="form-control"
-                    value={formData.Email}
-                    onChange={handleChange}
+                    value={customerData.Email}
+                    onChange={handleChangeCustomer}
                     placeholder="example@example.com"
                     required
                   />
@@ -120,8 +150,8 @@ export const BuyModal = ({
                     className="form-control"
                     placeholder="Efectivo"
                     pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                    value={formData.MetodoPago}
-                    onChange={handleChange}
+                    value={orderData.MetodoPago}
+                    onChange={handleChangeOrder}
                     required
                   />
                 </div>
@@ -133,8 +163,8 @@ export const BuyModal = ({
                     type="text"
                     name="Dirección"
                     className="form-control"
-                    value={formData.Dirección}
-                    onChange={handleChange}
+                    value={customerData.Dirección}
+                    onChange={handleChangeCustomer}
                     placeholder="Ubicación de la residencia del cliente"
                     required
                   ></textarea>
@@ -148,8 +178,8 @@ export const BuyModal = ({
                     name="DireccionEnvio"
                     className="form-control"
                     placeholder="Ubicación de la recepción de pedido"
-                    value={formData.DireccionEnvio}
-                    onChange={handleChange}
+                    value={orderData.DireccionEnvio}
+                    onChange={handleChangeOrder}
                     required
                   ></textarea>
                 </div>

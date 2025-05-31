@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from "react";
+import {
+  apiServiceGet,
+  apiServicePost,
+  apiServiceUpdate,
+} from "../apiService/apiService";
 
-export const CategoryModal = ({ show, closeModal, isEdit, category }) => {
+export const CategoryModal = ({
+  show,
+  closeModal,
+  isEdit,
+  category,
+  fetchData,
+}) => {
   const [formData, setFormData] = useState({
     IDCategoria: 0,
     NombreCategoria: "",
@@ -18,9 +29,22 @@ export const CategoryModal = ({ show, closeModal, isEdit, category }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    if (isEdit) {
+      await apiServiceUpdate(
+        `categorias/categoria/update/${category.IDCategoria}`,
+        formData
+      );
+    } else {
+      await apiServicePost("categorias", formData);
+    }
     closeModal();
+    setFormData({
+      IDCategoria: 0,
+      NombreCategoria: "",
+      Descripción: "",
+    });
+    fetchData();
   };
 
   if (!show) return null;

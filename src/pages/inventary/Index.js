@@ -1,46 +1,56 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Show from "./Show";
 import { ProductsModal } from "../../components/ProductsModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/DeleteModal";
+import { apiServiceGet } from "../../apiService/apiService";
 
 export const Index = () => {
+  //LLAMAR LA API
+  const [products, setProducts] = useState([]);
+  const fetchData = async () => {
+    const prods = apiServiceGet("products");
+    setProducts(prods);
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
   // DATOS ESTATICOS
-  const products = [
-    {
-      IDProducto: "1",
-      NombreProducto: "Prueba",
-      Descripción: "Descripción de prueba",
-      Precio: 24.23,
-      Stock: 23,
-      CategoriaID: 1,
-      ProveedorID: 1,
-      Categoria: "Prueba",
-      Proveedor: "Universidad",
-    },
-    {
-      IDProducto: "2",
-      NombreProducto: "Prueba2",
-      Descripción: "Descripción de prueba2",
-      Precio: 123.12,
-      Stock: 10,
-      CategoriaID: 2,
-      ProveedorID: 2,
-      Categoria: "Prueba2",
-      Proveedor: "Universidad2",
-    },
-    {
-      IDProducto: "3",
-      NombreProducto: "Prueba3",
-      Descripción: "Descripción de prueba3",
-      Precio: 99.99,
-      Stock: 0,
-      CategoriaID: 3,
-      ProveedorID: 3,
-      Categoria: "Prueba3",
-      Proveedor: "Universidad3",
-    },
-  ];
+  // const products = [
+  //   {
+  //     IDProducto: "1",
+  //     NombreProducto: "Prueba",
+  //     Descripción: "Descripción de prueba",
+  //     Precio: 24.23,
+  //     Stock: 23,
+  //     CategoriaID: 1,
+  //     ProveedorID: 1,
+  //     Categoria: "Prueba",
+  //     Proveedor: "Universidad",
+  //   },
+  //   {
+  //     IDProducto: "2",
+  //     NombreProducto: "Prueba2",
+  //     Descripción: "Descripción de prueba2",
+  //     Precio: 123.12,
+  //     Stock: 10,
+  //     CategoriaID: 2,
+  //     ProveedorID: 2,
+  //     Categoria: "Prueba2",
+  //     Proveedor: "Universidad2",
+  //   },
+  //   {
+  //     IDProducto: "3",
+  //     NombreProducto: "Prueba3",
+  //     Descripción: "Descripción de prueba3",
+  //     Precio: 99.99,
+  //     Stock: 0,
+  //     CategoriaID: 3,
+  //     ProveedorID: 3,
+  //     Categoria: "Prueba3",
+  //     Proveedor: "Universidad3",
+  //   },
+  // ];
 
   //CREAR/EDITAR UN PRODUCTO
   const [showModal, setShowModal] = useState(false);
@@ -172,11 +182,14 @@ export const Index = () => {
         closeModal={closeModal}
         isEdit={edit}
         product={product}
+        fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
         id={product.IDProducto}
+        endpoint="products/"
+        fetchData={fetchData}
       />
     </div>
   );

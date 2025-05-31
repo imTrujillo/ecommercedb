@@ -1,6 +1,14 @@
 import React from "react";
+import { apiServiceDelete } from "../apiService/apiService";
 
-export const DeleteModal = ({ show, closeModal, id }) => {
+export const DeleteModal = ({ show, closeModal, id, endpoint, fetchData }) => {
+  const handleDelete = async () => {
+    await apiServiceDelete(endpoint + id);
+
+    closeModal();
+    fetchData();
+  };
+
   if (!show) return null;
   return (
     <div
@@ -33,12 +41,11 @@ export const DeleteModal = ({ show, closeModal, id }) => {
                   </button>
                 </div>
                 <div className="col">
-                  <form className="delete-form">
+                  <form className="delete-form" onSubmit={handleDelete}>
                     <input className="hidden" hidden value={id} />
                     <button
                       type="submit"
                       className="btn btn-danger w-100 flex items-center gap-2"
-                      onClick={closeModal}
                     >
                       Sí, eliminar
                     </button>

@@ -1,7 +1,7 @@
 import React from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
 
-const Show = ({ order, onEdit, onDelete }) => {
+const Show = ({ order, onEdit, onDelete, products }) => {
   var bullet_color = "";
   switch (order.Estado) {
     case "Realizado":
@@ -11,6 +11,9 @@ const Show = ({ order, onEdit, onDelete }) => {
       bullet_color = "bg-orange text-orange-fg";
       break;
   }
+  const orderProducts = products.filter(
+    (product) => product.IDProducto === order.ProductoID
+  );
   return (
     <tr>
       <td data-label="IDPedido">
@@ -37,7 +40,7 @@ const Show = ({ order, onEdit, onDelete }) => {
         $ {order.PrecioTotal}
       </td>
       <td className="text-secondary markdown" data-label="Role">
-        {order.Productos.map((product) => (
+        {orderProducts.map((product) => (
           <li key={product.IDProducto}>
             {product.NombreProducto}, {product.Cantidad} unidades, $
             {product.PrecioUnitario}

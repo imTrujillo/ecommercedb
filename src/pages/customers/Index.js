@@ -1,34 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Show from "./Show";
 import { CustomerModal } from "../../components/CustomerModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/DeleteModal";
+import { apiServiceGet } from "../../apiService/apiService";
 
 export const Index = () => {
+  //LLAMAR LA API
+  const [customers, setCustomers] = useState([]);
+  const fetchData = async () => {
+    const cust = apiServiceGet("customers");
+    setCustomers(cust);
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
   // DATOS ESTATICOS
-  const customers = [
-    {
-      IDCliente: "1",
-      NombreCliente: "Mati",
-      Teléfono: "+503 7364 6423",
-      Email: "example@example1.com",
-      Dirección: "Av. Bernal",
-    },
-    {
-      IDCliente: "2",
-      NombreCliente: "Santi",
-      Teléfono: "+503 6450 5134",
-      Email: "example@example2.com",
-      Dirección: "Av. Bernal",
-    },
-    {
-      IDCliente: "3",
-      NombreCliente: "Milli",
-      Teléfono: "+503 9784 2534",
-      Email: "example@example3.com",
-      Dirección: "Av. Bernal",
-    },
-  ];
+  // const customers = [
+  //   {
+  //     IDCliente: "1",
+  //     NombreCliente: "Mati",
+  //     Teléfono: "+503 7364 6423",
+  //     Email: "example@example1.com",
+  //     Dirección: "Av. Bernal",
+  //   },
+  //   {
+  //     IDCliente: "2",
+  //     NombreCliente: "Santi",
+  //     Teléfono: "+503 6450 5134",
+  //     Email: "example@example2.com",
+  //     Dirección: "Av. Bernal",
+  //   },
+  //   {
+  //     IDCliente: "3",
+  //     NombreCliente: "Milli",
+  //     Teléfono: "+503 9784 2534",
+  //     Email: "example@example3.com",
+  //     Dirección: "Av. Bernal",
+  //   },
+  // ];
 
   //CREAR/EDITAR UN CLIENTE
   const [showModal, setShowModal] = useState(false);
@@ -146,11 +156,14 @@ export const Index = () => {
         closeModal={closeModal}
         isEdit={edit}
         customer={customer}
+        fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
         id={customer.IDCliente}
+        endpoint="customers/"
+        fetchData={fetchData}
       />
     </div>
   );

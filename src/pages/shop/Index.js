@@ -1,131 +1,131 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ShopCategories } from "../../components/ShopCategories";
 import { BuyModal } from "../../components/BuyModal";
 
 import { ShopCart } from "../../components/ShopCart";
+import { apiServiceGet } from "../../apiService/apiService";
 
 export const Index = () => {
   // LOS PRODUCTOS DEL CARRITO DE COMPRAS
-  const [products, setProducts] = useState([]);
+  const [productsCart, setProductsCart] = useState([]);
 
-  //DATOS DEL CLIENTE, PEDIDO y DETALLES DE PEDIDO
-  const [customer, setCustomer] = useState({
-    IDCliente: 0,
-    NombreCliente: "",
-    Teléfono: "",
-    Email: "",
-    Dirección: "",
-  });
-  const [order, setOrder] = useState({
-    ClienteID: 0,
-    IDPedido: 0,
-    Fecha: "",
-    Estado: "",
-    MetodoPago: "",
-    DireccionEnvio: "",
-  });
-  const [orderDetail, setOrderDetail] = useState({
-    PedidoID: 0,
-    Cantidad: 0,
-    PrecioTotalProductos: 0,
-  });
-
-  //REALIZAR EL PROCESO DE COMPRA
+  //MODAL PARA EL PROCESO DE COMPRA
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setShowModal(false);
   };
 
+  //LLAMAR APIS PARA TIENDA
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [customers, setCustomers] = useState([]);
+
+  const fetchData = async () => {
+    const cats = await apiServiceGet("categories", "");
+    const prods = await apiServiceGet("products", "");
+    const sups = await apiServiceGet("suppliers", "");
+    const custs = await apiServiceGet("customers", "");
+
+    setCategories(cats);
+    setProducts(prods);
+    setSuppliers(sups);
+    setCustomers(custs);
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   //DATOS EsTATICOS
-  const categories = [
-    {
-      IDCategoria: 1,
-      NombreCategoría: "Motocicletas",
-      Descripción: "Una aventura sobre ruedas",
-      Productos: [
-        {
-          IDProducto: "1",
-          NombreProducto: "Moto 1",
-          Descripción: "Descripción de prueba",
-          Precio: 999.99,
-          Stock: 23,
-          Cantidad: 1,
-          CategoriaID: 1,
-          ProveedorID: 1,
-          Proveedor: "YAMAHA",
-        },
-        {
-          IDProducto: "2",
-          NombreProducto: "Moto 2",
-          Descripción: "Descripción de prueba",
-          Precio: 1000.99,
-          Stock: 2,
-          Cantidad: 1,
-          CategoriaID: 1,
-          ProveedorID: 2,
-          Proveedor: "KOMODO",
-        },
-      ],
-    },
-    {
-      IDCategoria: 2,
-      NombreCategoría: "Cocina",
-      Descripción: "Para los amantes a la cocina",
-      Productos: [
-        {
-          IDProducto: "3",
-          NombreProducto: "Cacerola",
-          Descripción: "Descripción de prueba",
-          Precio: 9.99,
-          Stock: 99,
-          Cantidad: 1,
-          CategoriaID: 2,
-          ProveedorID: 3,
-          Proveedor: "Nestle",
-        },
-        {
-          IDProducto: "4",
-          NombreProducto: "Pan",
-          Descripción: "Descripción de prueba",
-          Precio: 1.99,
-          Stock: 23,
-          CategoriaID: 2,
-          ProveedorID: 3,
-          Proveedor: "Nestle",
-        },
-        {
-          IDProducto: "5",
-          NombreProducto: "Sabritas",
-          Descripción: "Descripción de prueba",
-          Precio: 0.5,
-          Stock: 60,
-          CategoriaID: 2,
-          ProveedorID: 4,
-          Proveedor: "Diana",
-        },
-        {
-          IDProducto: "6",
-          NombreProducto: "Pan Tostado",
-          Descripción: "Descripción de prueba",
-          Precio: 10.99,
-          Stock: 2,
-          CategoriaID: 2,
-          ProveedorID: 4,
-          Proveedor: "Ulala",
-        },
-        {
-          IDProducto: "7",
-          NombreProducto: "Remolacha",
-          Descripción: "Descripción de prueba",
-          Precio: 0.2,
-          Stock: 100,
-          CategoriaID: 2,
-          ProveedorID: 5,
-          Proveedor: "Doña Flora",
-        },
-      ],
-    },
-  ];
+  // const categories = [
+  //   {
+  //     IDCategoria: 1,
+  //     NombreCategoría: "Motocicletas",
+  //     Descripción: "Una aventura sobre ruedas",
+  //     Productos: [
+  //       {
+  //         IDProducto: "1",
+  //         NombreProducto: "Moto 1",
+  //         Descripción: "Descripción de prueba",
+  //         Precio: 999.99,
+  //         Stock: 23,
+  //         Cantidad: 1,
+  //         CategoriaID: 1,
+  //         ProveedorID: 1,
+  //         Proveedor: "YAMAHA",
+  //       },
+  //       {
+  //         IDProducto: "2",
+  //         NombreProducto: "Moto 2",
+  //         Descripción: "Descripción de prueba",
+  //         Precio: 1000.99,
+  //         Stock: 2,
+  //         Cantidad: 1,
+  //         CategoriaID: 1,
+  //         ProveedorID: 2,
+  //         Proveedor: "KOMODO",
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     IDCategoria: 2,
+  //     NombreCategoría: "Cocina",
+  //     Descripción: "Para los amantes a la cocina",
+  //     Productos: [
+  //       {
+  //         IDProducto: "3",
+  //         NombreProducto: "Cacerola",
+  //         Descripción: "Descripción de prueba",
+  //         Precio: 9.99,
+  //         Stock: 99,
+  //         Cantidad: 1,
+  //         CategoriaID: 2,
+  //         ProveedorID: 3,
+  //         Proveedor: "Nestle",
+  //       },
+  //       {
+  //         IDProducto: "4",
+  //         NombreProducto: "Pan",
+  //         Descripción: "Descripción de prueba",
+  //         Precio: 1.99,
+  //         Stock: 23,
+  //         CategoriaID: 2,
+  //         ProveedorID: 3,
+  //         Proveedor: "Nestle",
+  //       },
+  //       {
+  //         IDProducto: "5",
+  //         NombreProducto: "Sabritas",
+  //         Descripción: "Descripción de prueba",
+  //         Precio: 0.5,
+  //         Stock: 60,
+  //         CategoriaID: 2,
+  //         ProveedorID: 4,
+  //         Proveedor: "Diana",
+  //       },
+  //       {
+  //         IDProducto: "6",
+  //         NombreProducto: "Pan Tostado",
+  //         Descripción: "Descripción de prueba",
+  //         Precio: 10.99,
+  //         Stock: 2,
+  //         CategoriaID: 2,
+  //         ProveedorID: 4,
+  //         Proveedor: "Ulala",
+  //       },
+  //       {
+  //         IDProducto: "7",
+  //         NombreProducto: "Remolacha",
+  //         Descripción: "Descripción de prueba",
+  //         Precio: 0.2,
+  //         Stock: 100,
+  //         CategoriaID: 2,
+  //         ProveedorID: 5,
+  //         Proveedor: "Doña Flora",
+  //       },
+  //     ],
+  //   },
+  // ];
 
   return (
     <>
@@ -138,8 +138,10 @@ export const Index = () => {
             ) : (
               categories.map((category) => (
                 <ShopCategories
+                  products={products}
+                  suppliers={suppliers}
                   category={category}
-                  setProducts={setProducts}
+                  setProductsCart={setProductsCart}
                   key={category.IDCategoria}
                 />
               ))
@@ -167,15 +169,15 @@ export const Index = () => {
           </div>
           <div className="offcanvas-body">
             {/* PRODUCTOS DEL CARRITO DE COMPRAS */}
-            {products.length <= 0 ? (
+            {productsCart.length <= 0 ? (
               <div>¡Tu carrito está vacío!</div>
             ) : (
               <>
-                {products.map((productBuy, id) => (
+                {productsCart.map((productBuy, id) => (
                   <ShopCart
                     productBuy={productBuy}
                     key={id}
-                    setProducts={setProducts}
+                    setProductsCart={setProductsCart}
                   />
                 ))}
                 <div className="mt-3">
@@ -196,9 +198,8 @@ export const Index = () => {
       <BuyModal
         show={showModal}
         closeModal={closeModal}
-        customer={customer}
-        order={order}
-        orderDetail={orderDetail}
+        productsCart={productsCart}
+        fetchData={fetchData}
       />
     </>
   );

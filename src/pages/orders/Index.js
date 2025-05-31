@@ -1,85 +1,102 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Show from "./Show";
 import { OrderModal } from "../../components/OrderModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/DeleteModal";
+import { apiServiceGet } from "../../apiService/apiService";
 
 export const Index = () => {
+  //LLAMAR LAS APIS
+  const [orders, setOrders] = useState([]);
+  const [ordersDetails, setOrdersDetails] = useState([]);
+  const [products, setProducts] = useState([]);
+  const fetchData = async () => {
+    const ords = apiServiceGet("orders");
+    const ordsD = apiServiceGet("orders_details");
+    const prods = apiServiceGet("products");
+    setOrders(ords);
+    setOrdersDetails(ordsD);
+    setProducts(prods);
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   // DATOS ESTATICOS
-  const orders = [
-    {
-      IDPedido: 1,
-      Fecha: "23/05/2024",
-      Estado: "Pendiente",
-      MetodoPago: "Efectivo",
-      DireccionEnvio: "Av. Bernal",
-      PrecioTotal: 24.43,
-      Cliente: "Pedro",
-      Productos: [
-        {
-          NombreProducto: "Caja",
-          ProductoID: 4,
-          Cantidad: 21,
-          PrecioUnitario: 23.23,
-        },
-        {
-          NombreProducto: "Caja2",
-          ProductoID: 5,
-          Cantidad: 10,
-          PrecioUnitario: 15.5,
-        },
-      ],
-      ClienteID: 1,
-    },
-    {
-      IDPedido: 2,
-      Fecha: "23/05/2024",
-      Estado: "Realizado",
-      MetodoPago: "Bitcoin",
-      DireccionEnvio: "Av. Bernal",
-      PrecioTotal: 24.43,
-      Cliente: "Mati",
-      Productos: [
-        {
-          NombreProducto: "Caja",
-          ProductoID: 1,
-          Cantidad: 1,
-          PrecioUnitario: 23.23,
-        },
-        {
-          NombreProducto: "Caja2",
-          ProductoID: 9,
-          Cantidad: 1,
-          PrecioUnitario: 15.5,
-        },
-      ],
-      ClienteID: 2,
-    },
-    {
-      IDPedido: 3,
-      Fecha: "23/05/2024",
-      Estado: "Pendiente",
-      MetodoPago: "Bitcoin",
-      DireccionEnvio: "Zona Rosa",
-      PrecioTotal: 24.43,
-      Cliente: "Duran",
-      Productos: [
-        {
-          NombreProducto: "Pack",
-          ProductoID: 3,
-          Cantidad: 2,
-          PrecioUnitario: 23.23,
-        },
-        {
-          NombreProducto: "Pack2",
-          ProductoID: 1,
-          Cantidad: 10,
-          PrecioUnitario: 15.5,
-        },
-      ],
-      ClienteID: 3,
-    },
-  ];
+  // const orders = [
+  //   {
+  //     IDPedido: 1,
+  //     Fecha: "23/05/2024",
+  //     Estado: "Pendiente",
+  //     MetodoPago: "Efectivo",
+  //     DireccionEnvio: "Av. Bernal",
+  //     PrecioTotal: 24.43,
+  //     Cliente: "Pedro",
+  //     Productos: [
+  //       {
+  //         NombreProducto: "Caja",
+  //         ProductoID: 4,
+  //         Cantidad: 21,
+  //         PrecioUnitario: 23.23,
+  //       },
+  //       {
+  //         NombreProducto: "Caja2",
+  //         ProductoID: 5,
+  //         Cantidad: 10,
+  //         PrecioUnitario: 15.5,
+  //       },
+  //     ],
+  //     ClienteID: 1,
+  //   },
+  //   {
+  //     IDPedido: 2,
+  //     Fecha: "23/05/2024",
+  //     Estado: "Realizado",
+  //     MetodoPago: "Bitcoin",
+  //     DireccionEnvio: "Av. Bernal",
+  //     PrecioTotal: 24.43,
+  //     Cliente: "Mati",
+  //     Productos: [
+  //       {
+  //         NombreProducto: "Caja",
+  //         ProductoID: 1,
+  //         Cantidad: 1,
+  //         PrecioUnitario: 23.23,
+  //       },
+  //       {
+  //         NombreProducto: "Caja2",
+  //         ProductoID: 9,
+  //         Cantidad: 1,
+  //         PrecioUnitario: 15.5,
+  //       },
+  //     ],
+  //     ClienteID: 2,
+  //   },
+  //   {
+  //     IDPedido: 3,
+  //     Fecha: "23/05/2024",
+  //     Estado: "Pendiente",
+  //     MetodoPago: "Bitcoin",
+  //     DireccionEnvio: "Zona Rosa",
+  //     PrecioTotal: 24.43,
+  //     Cliente: "Duran",
+  //     Productos: [
+  //       {
+  //         NombreProducto: "Pack",
+  //         ProductoID: 3,
+  //         Cantidad: 2,
+  //         PrecioUnitario: 23.23,
+  //       },
+  //       {
+  //         NombreProducto: "Pack2",
+  //         ProductoID: 1,
+  //         Cantidad: 10,
+  //         PrecioUnitario: 15.5,
+  //       },
+  //     ],
+  //     ClienteID: 3,
+  //   },
+  // ];
 
   //CREAR/EDITAR UN PEDIDO
   const [showModal, setShowModal] = useState(false);
@@ -90,9 +107,6 @@ export const Index = () => {
       Estado: "",
       MetodoPago: "",
       DireccionEnvio: "",
-      Cliente: "",
-      PrecioTotal: 0.0,
-      Productos: [],
       ClienteID: 0,
     });
     setShowModal(false);
@@ -103,9 +117,6 @@ export const Index = () => {
     Estado: "",
     MetodoPago: "",
     DireccionEnvio: "",
-    Cliente: "",
-    PrecioTotal: 0.0,
-    Productos: [],
     ClienteID: 0,
   });
   const [edit, setEdit] = useState(false);
@@ -124,9 +135,6 @@ export const Index = () => {
       Estado: "",
       MetodoPago: "",
       DireccionEnvio: "",
-      Cliente: "",
-      PrecioTotal: 0.0,
-      Productos: [],
       ClienteID: 0,
     });
     setShowModalDelete(false);
@@ -195,8 +203,10 @@ export const Index = () => {
                         <Show
                           key={order.IDPedido}
                           order={order}
+                          orderDetails={ordersDetails}
                           onEdit={onEdit}
                           onDelete={onDelete}
+                          products={products}
                         />
                       ))
                     )}
@@ -212,11 +222,15 @@ export const Index = () => {
         closeModal={closeModal}
         isEdit={edit}
         order={order}
+        orderDetails={ordersDetails}
+        fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
         id={order.IDPedido}
+        endpoint="orders/"
+        fetchData={fetchData}
       />
     </div>
   );

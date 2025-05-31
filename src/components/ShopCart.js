@@ -43,7 +43,7 @@ export const ShopCart = ({ productBuy, setProducts }) => {
           <input
             type="number"
             placeholder="1"
-            min="0"
+            min="1"
             step="0"
             value={productBuy.Cantidad}
             onChange={(e) =>

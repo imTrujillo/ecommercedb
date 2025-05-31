@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { apiServicePost, apiServiceUpdate } from "../apiService/apiService";
 
-export const SuppliersModal = ({ show, closeModal, isEdit, supplier }) => {
+export const SuppliersModal = ({
+  show,
+  closeModal,
+  isEdit,
+  supplier,
+  fetchData,
+}) => {
   const [formData, setFormData] = useState({
     IDProveedor: 0,
     NombreProveedor: "",
@@ -19,9 +26,19 @@ export const SuppliersModal = ({ show, closeModal, isEdit, supplier }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    if (isEdit) {
+      await apiServiceUpdate(`suppliers/${supplier.IDProveedor}`, formData);
+    } else {
+      await apiServicePost("suppliers", formData);
+    }
     closeModal();
+    setFormData({
+      IDCategoria: 0,
+      NombreCategoria: "",
+      Descripción: "",
+    });
+    fetchData();
   };
 
   if (!show) return null;

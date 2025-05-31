@@ -1,28 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Show from "./Show";
 import { CategoryModal } from "../../components/CategoryModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/DeleteModal";
+import { apiServiceGet } from "../../apiService/apiService";
 
 export const Index = () => {
-  // DATOS ESTATICOS
-  const categories = [
-    {
-      IDCategoria: "1",
-      NombreCategoria: "Prueba1",
-      Descripción: "Descripción de prueba",
-    },
-    {
-      IDCategoria: "2",
-      NombreCategoria: "Prueba2",
-      Descripción: "Descripción de prueba",
-    },
-    {
-      IDCategoria: "3",
-      NombreCategoria: "Prueba3",
-      Descripción: "Descripción de prueba",
-    },
-  ];
+  //LLAMAR LA API
+  const [categories, setCategories] = useState([]);
+  const fetchData = async () => {
+    const cat = apiServiceGet("categories", "");
+    setCategories(cat);
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // [
+  //   {
+  //     IDCategoria: "1",
+  //     NombreCategoria: "Prueba1",
+  //     Descripción: "Descripción de prueba",
+  //   },
+  //   {
+  //     IDCategoria: "2",
+  //     NombreCategoria: "Prueba2",
+  //     Descripción: "Descripción de prueba",
+  //   },
+  //   {
+  //     IDCategoria: "3",
+  //     NombreCategoria: "Prueba3",
+  //     Descripción: "Descripción de prueba",
+  //   },
+  // ];
 
   //CREAR/EDITAR UNA CATEGORIA
   const [showModal, setShowModal] = useState(false);
@@ -48,17 +58,14 @@ export const Index = () => {
 
   //ELIMINAR UNA CATEGORIA
   const [showModalDelete, setShowModalDelete] = useState(false);
+  const [categoryDelete, setCategoryDelete] = useState(0);
   const closeModalDelete = () => {
-    setCategory({
-      IDCategoria: "1",
-      NombreCategoria: "Prueba1",
-      Descripción: "Descripción de prueba",
-    });
     setShowModalDelete(false);
+    setCategoryDelete({ id: 0 });
   };
-  const onDelete = (categoryDelete) => {
-    setCategory(categoryDelete);
+  const onDelete = (categoryId) => {
     setShowModalDelete(true);
+    setCategoryDelete(categoryId);
   };
 
   return (
@@ -130,11 +137,14 @@ export const Index = () => {
         closeModal={closeModal}
         isEdit={edit}
         category={category}
+        fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
-        id={category.IDCategoria}
+        id={categoryDelete}
+        endpoint="categorias/categoria/delete/"
+        fetchData={fetchData}
       />
     </div>
   );

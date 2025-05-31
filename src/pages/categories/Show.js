@@ -34,7 +34,7 @@ const Show = ({ category, onEdit, onDelete }) => {
               </button>
               <button
                 className="dropdown-item text-danger"
-                onClick={() => onDelete(category)}
+                onClick={() => onDelete(category.IDCategoria)}
               >
                 <IconTrash />
                 Eliminar
