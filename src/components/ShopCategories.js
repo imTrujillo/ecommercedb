@@ -18,7 +18,9 @@ export const ShopCategories = ({
     (product) => product.categoriaId == category.id
   );
 
-  return (
+  return categoryProducts.length == 0 ? (
+    ""
+  ) : (
     <div className="page-header mb-3">
       <h2 className="fs-1">
         {category.nombre} | <em>{category.descripcion}</em>

@@ -4,8 +4,13 @@ import { ProductsModal } from "../../components/ProductsModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/DeleteModal";
 import { apiServiceGet } from "../../apiService/apiService";
+import { Header } from "../../assets/Header";
+import PaginationControl from "../../assets/PaginationControl";
 
 export const Index = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
   //LLAMAR LA API
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -21,6 +26,13 @@ export const Index = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const totalPages = Math.ceil(products.length / rowsPerPage);
+
+  const visibleData = products.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
   //CREAR/EDITAR UN PRODUCTO
   const [showModal, setShowModal] = useState(false);
@@ -81,30 +93,15 @@ export const Index = () => {
       <div className="container-xl">
         <div className="row row-cards">
           {/* ENCABEZADO DE INVENTARIO */}
-          <div className="page-header d-print-none">
-            <div className="container-xl">
-              <div className="row g-2 align-items-center">
-                <div className="col">
-                  <h2 className="page-title">Inventario</h2>
-                  <div className="page-pretitle">
-                    Registra y elimina productos
-                  </div>
-                </div>
-
-                <div className="col-auto ms-auto d-print-none">
-                  <div className="btn-list">
-                    <button
-                      className="btn btn-primary d-none d-sm-inline-block"
-                      onClick={handleModal}
-                    >
-                      <IconPlus className="me-3" />
-                      Agregar producto
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Header title="Inventario" subtitle="Registra y elimina productos">
+            <button
+              className="btn btn-primary d-inline-block"
+              onClick={handleModal}
+            >
+              <IconPlus className="me-3" />
+              Agregar producto
+            </button>
+          </Header>
 
           {/* TABLA DE PRODUCTOS */}
           <div className="col-12">
@@ -127,10 +124,10 @@ export const Index = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {products.length <= 0 ? (
+                    {visibleData.length <= 0 ? (
                       <div>No hay productos disponibles</div>
                     ) : (
-                      products.map((product) => (
+                      visibleData.map((product) => (
                         <Show
                           key={product.id}
                           product={product}
@@ -145,6 +142,12 @@ export const Index = () => {
                 </table>
               </div>
             </div>
+
+            <PaginationControl
+              count={totalPages}
+              page={currentPage}
+              onChange={(event, value) => setCurrentPage(value)}
+            />
           </div>
         </div>
       </div>

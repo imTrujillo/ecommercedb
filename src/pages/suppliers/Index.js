@@ -4,44 +4,34 @@ import { SuppliersModal } from "../../components/SuppliersModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/DeleteModal";
 import { apiServiceGet } from "../../apiService/apiService";
+import { Header } from "../../assets/Header";
+import PaginationControl from "../../assets/PaginationControl";
 
 export const Index = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
   //LLAMAR LA API
   const [Proveedores, setProveedores] = useState([]);
 
   const fetchData = async () => {
-  try {
-    const sups = await apiServiceGet("Proveedores");
-    setProveedores(sups);
-  } catch (error) {
-    console.error("Error al obtener proveedores:", error);
-  }
+    try {
+      const sups = await apiServiceGet("Proveedores");
+      setProveedores(sups);
+    } catch (error) {
+      console.error("Error al obtener proveedores:", error);
+    }
   };
   useEffect(() => {
     fetchData();
   }, []);
 
-  // DATOS ESTATICOS
-  // const Proveedores = [
-  //   {
-  //     id: "1",
-  //     nombre: "Universidad1",
-  //     telefono: "+503 1234 5678",
-  //     email: "example@example.com",
-  //   },
-  //   {
-  //     id: "2",
-  //     nombre: "Universidad2",
-  //     telefono: "+503 1234 5678",
-  //     email: "example@example.com",
-  //   },
-  //   {
-  //     id: "3",
-  //     nombre: "Universidad3",
-  //     telefono: "+503 1234 5678",
-  //     email: "example@example.com",
-  //   },
-  // ];
+  const totalPages = Math.ceil(Proveedores.length / rowsPerPage);
+
+  const visibleData = Proveedores.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
   //CREAR/EDITAR UN PROVEEDOR
   const [showModal, setShowModal] = useState(false);
@@ -88,33 +78,22 @@ export const Index = () => {
       <div className="container-xl">
         <div className="row row-cards">
           {/* ENCABEZADO DE PROVEEDOR */}
-          <div className="page-header d-print-none">
-            <div className="container-xl">
-              <div className="row g-2 align-items-center">
-                <div className="col">
-                  <h2 className="page-title">Proveedores</h2>
-                  <div className="page-pretitle">
-                    Anota detalles sobre proveedores
-                  </div>
-                </div>
-
-                <div className="col-auto ms-auto d-print-none">
-                  <div className="btn-list">
-                    <button
-                      className="btn btn-primary d-none d-sm-inline-block"
-                      onClick={() => {
-                        setEdit(false); 
-                        closeModal();
-                        setShowModal(true)}}
-                    >
-                      <IconPlus className="me-3" />
-                      Agregar proveedor
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Header
+            title="Proveedores"
+            subtitle="Anota detalles sobre proveedores"
+          >
+            <button
+              className="btn btn-primary d-inline-block"
+              onClick={() => {
+                setEdit(false);
+                closeModal();
+                setShowModal(true);
+              }}
+            >
+              <IconPlus className="me-3" />
+              Agregar proveedor
+            </button>
+          </Header>
 
           {/* TABLA DE PROVEEDORES */}
           <div className="col-12">
@@ -136,7 +115,9 @@ export const Index = () => {
                   <tbody>
                     {Proveedores.length === 0 ? (
                       <tr>
-                        <td colSpan="4" className="text-center"> {/* Ajusta colSpan según tus columnas */}
+                        <td colSpan="4" className="text-center">
+                          {" "}
+                          {/* Ajusta colSpan según tus columnas */}
                           No hay clientes disponibles
                         </td>
                       </tr>
@@ -154,6 +135,11 @@ export const Index = () => {
                 </table>
               </div>
             </div>
+            <PaginationControl
+              count={totalPages}
+              page={currentPage}
+              onChange={(event, value) => setCurrentPage(value)}
+            />
           </div>
         </div>
       </div>

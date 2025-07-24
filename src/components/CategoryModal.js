@@ -92,18 +92,18 @@ export const CategoryModal = ({
                   onChange={handleChange}
                   className="form-control"
                   value={formData.nombre}
-                  placeholder="Categoria 01"
+                  placeholder="Categoría 01"
                   pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                   required
                 />
               </div>
               <div className="row mb-3">
-                <label className="form-label required">Descripcion</label>
+                <label className="form-label required">Descripción</label>
                 <textarea
                   type="text"
                   name="descripcion"
                   className="form-control"
-                  placeholder="Descripcion de Categoria 01"
+                  placeholder="Descripcion de Categoría 01"
                   pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                   value={formData.descripcion}
                   onChange={handleChange}

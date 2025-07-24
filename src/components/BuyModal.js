@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { apiServicePost } from "../apiService/apiService";
+import { apiServiceGet, apiServicePost } from "../apiService/apiService";
 import { toast } from "react-toastify";
 
-export const BuyModal = ({ show, closeModal, productsCart, fetchData }) => {
+export const BuyModal = ({
+  show,
+  closeModal,
+  productsCart,
+  fetchData,
+  customers,
+}) => {
   const [customerData, setCustomerData] = useState({
     nombre: "",
     telefono: "",
@@ -13,7 +19,7 @@ export const BuyModal = ({ show, closeModal, productsCart, fetchData }) => {
   const [orderDetailsData, setOrderDetailsData] = useState([]);
 
   const [orderData, setOrderData] = useState({
-    fecha: new Date().toISOString(),
+    fecha: new Date(),
     estado: "Pendiente",
     metodoPago: "",
     direccionEnvio: "",
@@ -37,7 +43,7 @@ export const BuyModal = ({ show, closeModal, productsCart, fetchData }) => {
     try {
       const detalles = Array.isArray(productsCart)
         ? productsCart.map((product) => ({
-            cantidad: 1,
+            cantidad: product.quantity ? product.quantity : 1,
             precioUnitario: product.precio,
             productoId: product.id,
           }))
@@ -48,7 +54,18 @@ export const BuyModal = ({ show, closeModal, productsCart, fetchData }) => {
         return;
       }
 
-      const clienteResponse = await apiServicePost("clientes", customerData);
+      const clienteExistente = customers.find(
+        (c) => c.email === customerData.email
+      );
+
+      let clienteResponse;
+
+      if (!clienteExistente) {
+        clienteResponse = await apiServicePost("clientes", customerData);
+      } else {
+        clienteResponse = clienteExistente;
+      }
+
       const clienteID = clienteResponse.id;
 
       const pedidoPayload = {
@@ -56,6 +73,7 @@ export const BuyModal = ({ show, closeModal, productsCart, fetchData }) => {
         clienteId: clienteID,
         detalles: detalles,
       };
+      console.log("payload a enviar:", pedidoPayload);
 
       const ordenResponse = await apiServicePost(
         "pedidos/crear-con-detalles",
@@ -74,7 +92,7 @@ export const BuyModal = ({ show, closeModal, productsCart, fetchData }) => {
           direccion: "",
         });
         setOrderData({
-          fecha: new Date().toISOString(),
+          fecha: new Date(),
           estado: "Pendiente",
           metodoPago: "",
           direccionEnvio: "",

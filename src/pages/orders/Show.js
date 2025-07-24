@@ -1,14 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
-const Show = ({
-  order,
-  onEdit,
-  onDelete,
-  orderDetails,
-  customers,
-  products,
-}) => {
+const Show = ({ openProductsModal, order, onEdit, onDelete, customers }) => {
+  dayjs.extend(relativeTime);
   let bullet_color = "";
   switch (order.estado) {
     case "Realizado":
@@ -32,7 +28,9 @@ const Show = ({
         </div>
       </td>
       <td data-label="Fecha">
-        <div className="font-weight-medium">{order.fecha}</div>
+        <div className="font-weight-medium">
+          {dayjs(order.fecha).format(" MMMM D, YYYY. h:mm a")}
+        </div>
       </td>
       <td className="text-secondary" data-label="Estado">
         <span className={`badge ${bullet_color} w-max`}>{order.estado}</span>
@@ -47,17 +45,12 @@ const Show = ({
         {customer ? customer.nombre : "Cliente no encontrado"}
       </td>
       <td className="text-secondary markdown" data-label="Productos">
-        <ul>
-          {orderDetails.map((detail) => {
-            const product = products.find((p) => p.id === detail.productoId);
-            return (
-              <li key={detail.id}>
-                {product ? product.nombre : "Producto no encontrado"},{" "}
-                {detail.cantidad} unidades, ${detail.precioUnitario}
-              </li>
-            );
-          })}
-        </ul>
+        <button
+          onClick={() => openProductsModal(order.orderDetails)}
+          className="btn btn-action"
+        >
+          Mostrar ↓
+        </button>
       </td>
       <td>
         <div className="btn-list flex-nowrap">

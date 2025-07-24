@@ -18,19 +18,19 @@ export const SuppliersModal = ({
   useEffect(() => {
     if (supplier) {
       setFormData({
-      id: supplier.id,
-      nombre: supplier.nombre,
-      telefono: supplier.telefono,
-      email: supplier.email,
-    });
-  } else {
-    setFormData({
-      id: 0,
-      nombre: "",
-      telefono: "",
-      email: "",
-    });
-  }
+        id: supplier.id,
+        nombre: supplier.nombre,
+        telefono: supplier.telefono,
+        email: supplier.email,
+      });
+    } else {
+      setFormData({
+        id: 0,
+        nombre: "",
+        telefono: "",
+        email: "",
+      });
+    }
   }, [supplier]);
 
   const handleChange = (e) => {
@@ -39,9 +39,12 @@ export const SuppliersModal = ({
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (isEdit) {
-      await apiServiceUpdate(`Proveedores/proveedor/update/${formData.id}`, formData);
+      await apiServiceUpdate(
+        `Proveedores/proveedor/update/${formData.id}`,
+        formData
+      );
     } else {
       await apiServicePost("Proveedores", formData);
     }
@@ -60,11 +63,7 @@ export const SuppliersModal = ({
       <div className="modal-dialog modal-lg">
         <form onSubmit={handleSubmit}>
           {isEdit ? (
-            <input
-              type="hidden"
-              name="id"
-              value={supplier.id}
-            ></input>
+            <input type="hidden" name="id" value={supplier.id}></input>
           ) : (
             ""
           )}
@@ -83,7 +82,7 @@ export const SuppliersModal = ({
 
             <div className="modal-body">
               <div className="row mb-3">
-                <label className="form-label required">nombre</label>
+                <label className="form-label required">Nombre</label>
                 <input
                   type="text"
                   name="nombre"
@@ -96,7 +95,7 @@ export const SuppliersModal = ({
                 />
               </div>
               <div className="row mb-3">
-                <label className="form-label required">telefono</label>
+                <label className="form-label required">Teléfono</label>
                 <input
                   type="text"
                   name="telefono"
@@ -108,7 +107,7 @@ export const SuppliersModal = ({
                 />
               </div>
               <div className="row mb-3">
-                <label className="form-label required">email</label>
+                <label className="form-label required">Correo</label>
                 <input
                   type="email"
                   name="email"

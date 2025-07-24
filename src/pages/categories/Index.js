@@ -4,50 +4,42 @@ import { CategoryModal } from "../../components/CategoryModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/DeleteModal";
 import { apiServiceGet } from "../../apiService/apiService";
+import { Header } from "../../assets/Header";
+import PaginationControl from "../../assets/PaginationControl";
 
 export const Index = () => {
-  //LLAMAR LA API
   const [categories, setCategories] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
   const fetchData = async () => {
     const cat = await apiServiceGet("categorias", "");
     setCategories(cat);
   };
+
   useEffect(() => {
     fetchData();
   }, []);
 
-  //     IDCategoria: "1",
-  //     NombreCategoria: "Prueba1",
-  //     Descripción: "Descripción de prueba",
-  //   },
-  //   {
-  //     IDCategoria: "2",
-  //     NombreCategoria: "Prueba2",
-  //     Descripción: "Descripción de prueba",
-  //   },
-  //   {
-  //     IDCategoria: "3",
-  //     NombreCategoria: "Prueba3",
-  //     Descripción: "Descripción de prueba",
-  //   },
-  // ];
+  const totalPages = Math.ceil(categories.length / rowsPerPage);
 
-  //CREAR/EDITAR UNA CATEGORIA
+  const visibleData = categories.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  // Modal y lógica
   const [showModal, setShowModal] = useState(false);
-  const closeModal = () => {
-    setCategory({
-      id: 0,
-      nombre: "",
-      descripcion: "",
-    });
-    setShowModal(false);
-  };
   const [category, setCategory] = useState({
     id: 0,
     nombre: "",
     descripcion: "",
   });
   const [edit, setEdit] = useState(false);
+  const closeModal = () => {
+    setCategory({ id: 0, nombre: "", descripcion: "" });
+    setShowModal(false);
+  };
   const onEdit = (categoryEdit) => {
     setShowModal(true);
     setEdit(true);
@@ -57,7 +49,7 @@ export const Index = () => {
     setShowModal(true);
     setEdit(false);
   };
-  //ELIMINAR UNA CATEGORIA
+
   const [showModalDelete, setShowModalDelete] = useState(false);
   const [categoryDelete, setCategoryDelete] = useState(0);
   const closeModalDelete = () => {
@@ -73,31 +65,16 @@ export const Index = () => {
     <div className="page-wrapper">
       <div className="container-xl">
         <div className="row row-cards">
-          {/* ENCABEZADO DE CATEOGRIAS */}
-          <div className="page-header d-print-none">
-            <div className="container-xl">
-              <div className="row g-2 align-items-center">
-                <div className="col">
-                  <h2 className="page-title">Categorías</h2>
-                  <div className="page-pretitle">Clasifica tus productos</div>
-                </div>
+          <Header title="Categorías" subtitle="Clasifica tus productos">
+            <button
+              className="btn btn-primary d-inline-block"
+              onClick={handleModal}
+            >
+              <IconPlus className="me-3" />
+              Agregar categoría
+            </button>
+          </Header>
 
-                <div className="col-auto ms-auto d-print-none">
-                  <div className="btn-list">
-                    <button
-                      className="btn btn-primary d-none d-sm-inline-block"
-                      onClick={handleModal}
-                    >
-                      <IconPlus className="me-3" />
-                      Agregar categoría
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* TABLA DE CATEGORIAS */}
           <div className="col-12">
             <div className="card">
               <div className="table-responsive">
@@ -114,10 +91,14 @@ export const Index = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {categories.length <= 0 ? (
-                      <div>No hay categorías disponibles</div>
+                    {visibleData.length <= 0 ? (
+                      <tr>
+                        <td colSpan={4} className="text-center">
+                          No hay categorías disponibles
+                        </td>
+                      </tr>
                     ) : (
-                      categories.map((category) => (
+                      visibleData.map((category, index) => (
                         <Show
                           key={category.id}
                           category={category}
@@ -130,6 +111,12 @@ export const Index = () => {
                 </table>
               </div>
             </div>
+
+            <PaginationControl
+              count={totalPages}
+              page={currentPage}
+              onChange={(event, value) => setCurrentPage(value)}
+            />
           </div>
         </div>
       </div>

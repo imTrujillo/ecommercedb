@@ -130,7 +130,6 @@ export const ProductsModal = ({
                     value={formData.nombre}
                     onChange={handleChange}
                     placeholder="Producto 01"
-                    pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                     required
                   />
                 </div>

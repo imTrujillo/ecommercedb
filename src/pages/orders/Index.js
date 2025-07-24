@@ -4,8 +4,14 @@ import { OrderModal } from "../../components/OrderModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/DeleteModal";
 import { apiServiceGet } from "../../apiService/apiService";
+import { ProductsOrderModal } from "../../components/ProductsOrderModal";
+import { Header } from "../../assets/Header";
+import PaginationControl from "../../assets/PaginationControl";
 
 export const Index = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
   const [orders, setOrders] = useState([]);
   const [ordersWithDetails, setOrdersWithDetails] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -32,20 +38,41 @@ export const Index = () => {
     setOrdersWithDetails(ordersWithDetailsFetched);
   };
 
+  const totalPages = Math.ceil(orders.length / rowsPerPage);
+
+  const visibleData = orders.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const [showModal, setShowModal] = useState(false);
+  const [orderProducts, setOrderProducts] = useState([]);
+  const [productsModal, setProductsModal] = useState(false);
+
+  const openProductsModal = (products) => {
+    setOrderProducts(products);
+    setProductsModal(true);
+  };
+  const closeProductsModal = () => {
+    setOrderProducts([]);
+    setProductsModal(false);
+  };
+
   const closeModal = () => {
     setOrder({
       id: 0,
-      fecha: "",
-      estado: "",
+      fecha: new Date(),
+      estado: "Pendiente",
       metodoPago: "",
       direccionEnvio: "",
       clienteId: 0,
+      detalles: [],
     });
+    setEdit(false);
     setShowModal(false);
   };
 
@@ -74,6 +101,7 @@ export const Index = () => {
       metodoPago: "",
       direccionEnvio: "",
       clienteId: 0,
+      detalles: [],
     });
     setOrderDelete(0);
     setShowModalDelete(false);
@@ -88,30 +116,15 @@ export const Index = () => {
       <div className="container-xl">
         <div className="row row-cards">
           {/* ENCABEZADO DE PEDIDO */}
-          <div className="page-header d-print-none">
-            <div className="container-xl">
-              <div className="row g-2 align-items-center">
-                <div className="col">
-                  <h2 className="page-title">Pedidos</h2>
-                  <div className="page-pretitle">
-                    Edita estados y completa compras
-                  </div>
-                </div>
-
-                <div className="col-auto ms-auto d-print-none">
-                  <div className="btn-list">
-                    <button
-                      className="btn btn-primary d-none d-sm-inline-block"
-                      onClick={() => setShowModal(true)}
-                    >
-                      <IconPlus className="me-3" />
-                      Agregar pedido
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Header title="Pedidos" subtitle="Edita estados y completa compras">
+            <button
+              className="btn btn-primary d-inline-block"
+              onClick={() => setShowModal(true)}
+            >
+              <IconPlus className="me-3" />
+              Agregar pedido
+            </button>
+          </Header>
 
           {/* TABLA DE PEDIDOS */}
           <div className="col-12">
@@ -142,10 +155,9 @@ export const Index = () => {
                       ordersWithDetails.map((order) => (
                         <Show
                           key={order.id}
+                          openProductsModal={openProductsModal}
                           order={order}
-                          orderDetails={order.orderDetails}
                           customers={customers}
-                          products={products}
                           onEdit={onEdit}
                           onDelete={onDelete}
                         />
@@ -155,6 +167,11 @@ export const Index = () => {
                 </table>
               </div>
             </div>
+            <PaginationControl
+              count={totalPages}
+              page={currentPage}
+              onChange={(event, value) => setCurrentPage(value)}
+            />
           </div>
         </div>
       </div>
@@ -163,6 +180,9 @@ export const Index = () => {
         closeModal={closeModal}
         isEdit={edit}
         order={order}
+        orderDetails={ordersWithDetails}
+        products={products}
+        customers={customers}
         fetchData={fetchData}
       />
       <DeleteModal
@@ -171,6 +191,12 @@ export const Index = () => {
         id={orderDelete}
         endpoint="pedidos/delete/"
         fetchData={fetchData}
+      />
+      <ProductsOrderModal
+        show={productsModal}
+        closeProductsModal={closeProductsModal}
+        orderDetails={orderProducts}
+        products={products}
       />
     </div>
   );

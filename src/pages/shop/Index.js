@@ -1,25 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { ShopCategories } from "../../components/ShopCategories";
 import { BuyModal } from "../../components/BuyModal";
-
 import { ShopCart } from "../../components/ShopCart";
 import { apiServiceGet } from "../../apiService/apiService";
 
 export const Index = () => {
-  // LOS PRODUCTOS DEL CARRITO DE COMPRAS
-  const [productsCart, setProductsCart] = useState([]);
+  // CARGAR CARRITO DESDE LOCALSTORAGE
+  const [productsCart, setProductsCart] = useState(() => {
+    const storedCart = localStorage.getItem("productsCart");
+    return storedCart ? JSON.parse(storedCart) : [];
+  });
+
+  // GUARDAR CARRITO EN LOCALSTORAGE CADA VEZ QUE CAMBIA
+  useEffect(() => {
+    localStorage.setItem("productsCart", JSON.stringify(productsCart));
+  }, [productsCart]);
 
   //MODAL PARA EL PROCESO DE COMPRA
   const [showModal, setShowModal] = useState(false);
-  const closeModal = () => {
-    setShowModal(false);
-  };
+  const closeModal = () => setShowModal(false);
 
   //LLAMAR APIS PARA TIENDA
   const [categorias, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
-  const [clientes, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState([]);
 
   const fetchData = async () => {
     const cats = await apiServiceGet("categorias", "");
@@ -32,13 +37,13 @@ export const Index = () => {
     setSuppliers(sups);
     setCustomers(custs);
   };
+
   useEffect(() => {
     fetchData();
   }, []);
 
   return (
     <>
-      {/* MOSTRAR LAS CATEGORIAS DISPONIBLES */}
       <div className="page-wrapper">
         <div className="container-xl">
           <div className="row row-cards">
@@ -61,7 +66,7 @@ export const Index = () => {
           </div>
         </div>
 
-        {/* VENTANA DEL CARRITO DE COMPRAS */}
+        {/* CARRITO DE COMPRAS */}
         <div
           className="offcanvas offcanvas-end"
           tabIndex="-1"
@@ -80,11 +85,8 @@ export const Index = () => {
             ></button>
           </div>
           <div className="offcanvas-body">
-            {/* PRODUCTOS DEL CARRITO DE COMPRAS */}
             {productsCart.length <= 0 ? (
-              <div className="col-12 text-center mt-3">
-                No hay categorias disponibles
-              </div>
+              <div className="col-12 text-center mt-3">¡Carrito Vacío!</div>
             ) : (
               <>
                 {productsCart.map((productBuy, id) => (
@@ -95,6 +97,21 @@ export const Index = () => {
                     productsCart={productsCart}
                   />
                 ))}
+
+                {/* TOTAL DEL CARRITO */}
+                <div className="p-3 text-end">
+                  <h4>
+                    Total: ${" "}
+                    {productsCart
+                      .reduce((acc, item) => {
+                        const quantity = item.quantity ?? 1;
+                        return acc + item.precio * quantity;
+                      }, 0)
+                      .toFixed(2)}
+                  </h4>
+                </div>
+
+                {/* HACER PEDIDO */}
                 <div className="mt-3">
                   <button
                     className="btn btn-primary w-100"
@@ -110,11 +127,13 @@ export const Index = () => {
           </div>
         </div>
       </div>
+
       <BuyModal
         show={showModal}
         closeModal={closeModal}
         productsCart={productsCart}
         fetchData={fetchData}
+        customers={customers}
       />
     </>
   );

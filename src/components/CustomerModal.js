@@ -50,7 +50,10 @@ export const CustomerModal = ({
       id: Number(formData.id),
     };
     if (isEdit) {
-      await apiServiceUpdate(`Clientes/cliente/update/${dataToSend.id}`, dataToSend);
+      await apiServiceUpdate(
+        `Clientes/cliente/update/${dataToSend.id}`,
+        dataToSend
+      );
     } else {
       await apiServicePost("Clientes", dataToSend);
     }
@@ -69,11 +72,7 @@ export const CustomerModal = ({
       <div className="modal-dialog modal-lg">
         <form onSubmit={handleSubmit}>
           {isEdit ? (
-            <input
-              type="hidden"
-              name="id"
-              value={customer.id}
-            ></input>
+            <input type="hidden" name="id" value={customer.id}></input>
           ) : (
             ""
           )}
@@ -93,7 +92,7 @@ export const CustomerModal = ({
             <div className="modal-body">
               <div className="row mb-3">
                 <div className="col-6">
-                  <label className="form-label required">nombre</label>
+                  <label className="form-label required">Nombre</label>
                   <input
                     type="text"
                     name="nombre"
@@ -106,7 +105,7 @@ export const CustomerModal = ({
                   />
                 </div>
                 <div className="col-6">
-                  <label className="form-label required">telefono</label>
+                  <label className="form-label required">Teléfono</label>
                   <input
                     type="text"
                     name="telefono"
@@ -121,7 +120,7 @@ export const CustomerModal = ({
 
               <div className="row mb-3">
                 <div className="col-5">
-                  <label className="form-label required">email</label>
+                  <label className="form-label required">Correo</label>
                   <input
                     type="email"
                     name="email"
@@ -133,7 +132,7 @@ export const CustomerModal = ({
                   />
                 </div>
                 <div className="col-7">
-                  <label className="form-label required">direccion</label>
+                  <label className="form-label required">Dirección</label>
                   <textarea
                     type="text"
                     name="direccion"
