@@ -15,20 +15,8 @@ import {
   IconShoppingCart,
 } from "@tabler/icons-react";
 
-export default function Navbar() {
+export default function Navbar({ darkTheme, handleTheme }) {
   var location = useLocation();
-
-  const params = new URLSearchParams(window.location.search);
-  const theme = params.get("theme") || "light";
-  document.documentElement.classList.remove("theme-light", "theme-dark");
-  document.documentElement.classList.add(`theme-${theme}`);
-
-  document.querySelectorAll(".hide-theme-light").forEach((el) => {
-    el.style.display = theme === "light" ? "none" : "";
-  });
-  document.querySelectorAll(".hide-theme-dark").forEach((el) => {
-    el.style.display = theme === "dark" ? "none" : "";
-  });
 
   return (
     <nav>
@@ -48,26 +36,15 @@ export default function Navbar() {
 
           <div className=" d-flex flex-row gap-3">
             <button
-              className="nav-link px-0 hide-theme-dark"
-              title="Modo oscuro"
-              data-bs-toggle="tooltip"
-              data-bs-placement="bottom"
-              onClick={() => {
-                window.location.href = "?theme=dark";
-              }}
+              className="nav-link px-0"
+              title={darkTheme ? "Modo claro" : "Modo oscuro"}
+              onClick={handleTheme}
             >
-              <IconMoon size={24} stroke={2} />
-            </button>
-            <button
-              className="nav-link px-0 hide-theme-light"
-              title="Modo claro"
-              data-bs-toggle="tooltip"
-              data-bs-placement="bottom"
-              onClick={() => {
-                window.location.href = "?theme=light";
-              }}
-            >
-              <IconSun size={24} stroke={2} />
+              {darkTheme ? (
+                <IconMoon size={24} stroke={2} />
+              ) : (
+                <IconSun size={24} stroke={2} />
+              )}
             </button>
             <a
               className={`nav-item ${
@@ -199,24 +176,17 @@ export default function Navbar() {
               </ul>
               <div className="d-none d-md-flex flex-row gap-3">
                 {/* ACTIVAR MODO CLARO/OSCURO */}
-                <a
-                  href="?theme=light"
-                  className="nav-link px-0 hide-theme-light"
-                  title="Activar modo claro"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="bottom"
+                <button
+                  className="nav-link px-0"
+                  onClick={handleTheme}
+                  title={darkTheme ? "Modo claro" : "Modo oscuro"}
                 >
-                  <IconSun size={24} stroke={2} />
-                </a>
-                <a
-                  href="?theme=dark"
-                  className="nav-link px-0 hide-theme-dark"
-                  title="Activar modo oscuro"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="bottom"
-                >
-                  <IconMoon size={24} stroke={2} />
-                </a>
+                  {darkTheme ? (
+                    <IconSun size={24} stroke={2} />
+                  ) : (
+                    <IconMoon size={24} stroke={2} />
+                  )}
+                </button>
 
                 {/* CARRITO DE COMPRAS */}
                 <a

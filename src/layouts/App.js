@@ -1,15 +1,42 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "./../assets/Navbar";
 import { ToastContainer } from "react-toastify";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 export default function App({ children }) {
-  // ACTIVAR/DESACTIVAR MODO OSCURO PARA EL POP UP
-  const [searchParams] = useSearchParams();
-  const theme = searchParams.get("theme") === "dark" ? "dark" : "light";
+  const [darkTheme, setDarkTheme] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme
+      ? savedTheme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const themeParam = searchParams.get("theme");
+    if (themeParam === "light" || themeParam === "dark") {
+      const newTheme = themeParam === "dark";
+      if (newTheme !== darkTheme) {
+        setDarkTheme(newTheme);
+      }
+    }
+
+    localStorage.setItem("theme", darkTheme ? "dark" : "light");
+  }, [darkTheme, searchParams]);
+
+  const handleTheme = () => {
+    const newTheme = !darkTheme;
+    localStorage.setItem("theme", newTheme ? "dark" : "light");
+    window.location.href = newTheme ? "?theme=dark" : "?theme=light";
+  };
+
+  const toastTheme = darkTheme ? "dark" : "light";
+
   return (
     <>
-      <Navbar />
+      <Navbar darkTheme={darkTheme} handleTheme={handleTheme} />
       <main>{children}</main>
       <ToastContainer
         id="toast-popup"
@@ -22,7 +49,7 @@ export default function App({ children }) {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme={theme}
+        theme={toastTheme}
       />
     </>
   );
