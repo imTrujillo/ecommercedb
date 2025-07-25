@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import PaginationControl from "./../assets/PaginationControl";
 
 export const ProductsOrderModal = ({
   show,
@@ -6,6 +7,16 @@ export const ProductsOrderModal = ({
   orderDetails,
   products,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
+  const totalPages = Math.ceil(orderDetails.length / rowsPerPage);
+
+  const visibleData = orderDetails.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
   if (!show) return null;
 
   return (
@@ -36,7 +47,7 @@ export const ProductsOrderModal = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {orderDetails.map((detail) => {
+                  {visibleData.map((detail) => {
                     const product = products.find(
                       (p) => p.id === detail.productoId
                     );
@@ -55,6 +66,11 @@ export const ProductsOrderModal = ({
                   })}
                 </tbody>
               </table>
+              <PaginationControl
+                count={totalPages}
+                page={currentPage}
+                onChange={(event, value) => setCurrentPage(value)}
+              />
             </div>
           </div>
         </div>
