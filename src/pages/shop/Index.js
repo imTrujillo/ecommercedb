@@ -5,15 +5,15 @@ import { ShopCart } from "../../components/ShopCart";
 import { apiServiceGet } from "../../apiService/apiService";
 
 export const Index = () => {
-  // CARGAR CARRITO DESDE LOCALSTORAGE
+  // CARGAR CARRITO DESDE SESSIONSTORAGE
   const [productsCart, setProductsCart] = useState(() => {
-    const storedCart = localStorage.getItem("productsCart");
+    const storedCart = sessionStorage.getItem("productsCart");
     return storedCart ? JSON.parse(storedCart) : [];
   });
 
-  // GUARDAR CARRITO EN LOCALSTORAGE CADA VEZ QUE CAMBIA
+  // GUARDAR CARRITO EN SESSIONSTORAGE CADA VEZ QUE CAMBIA
   useEffect(() => {
-    localStorage.setItem("productsCart", JSON.stringify(productsCart));
+    sessionStorage.setItem("productsCart", JSON.stringify(productsCart));
   }, [productsCart]);
 
   //MODAL PARA EL PROCESO DE COMPRA
@@ -48,8 +48,21 @@ export const Index = () => {
         <div className="container-xl">
           <div className="row row-cards">
             {categorias.length <= 0 ? (
-              <div className="col-12 text-center mt-3">
-                No hay categorias disponibles
+              <div className="d-flex flex-column align-items-center justify-content-center m-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="48" // más grande
+                  height="48" // más grande
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="mb-2"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-2 10.66h-6l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h6l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-5.99 -5l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm6 0l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" />
+                </svg>
+                <span className="fw-semibold">
+                  No hay categorías disponibles
+                </span>
               </div>
             ) : (
               categorias.map((category) => (
@@ -132,6 +145,7 @@ export const Index = () => {
         show={showModal}
         closeModal={closeModal}
         productsCart={productsCart}
+        setProductsCart={setProductsCart}
         fetchData={fetchData}
         customers={customers}
       />

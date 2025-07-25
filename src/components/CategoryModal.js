@@ -5,6 +5,7 @@ import {
   apiServiceUpdate,
 } from "../apiService/apiService";
 import { toast } from "react-toastify";
+import * as Yup from "yup";
 
 export const CategoryModal = ({
   show,
@@ -17,6 +18,24 @@ export const CategoryModal = ({
     id: 0,
     nombre: "",
     descripcion: "",
+  });
+
+  // VALIDACIONES CON YUP
+  const categorySchema = Yup.object().shape({
+    nombre: Yup.string()
+      .min(3, "El nombre debe tener al menos 3 caracteres")
+      .required("El nombre es requerido")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    descripcion: Yup.string()
+      .min(10, "La descripción debe tener al menos 10 caracteres")
+      .required("La descripción es requerida")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "No se permiten caracteres especiales"
+      ),
   });
 
   useEffect(() => {
@@ -32,22 +51,45 @@ export const CategoryModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isEdit) {
-      await apiServiceUpdate(`categorias/categoria/update/${category.id}`, {
-        ...formData,
-        id: category.id,
+
+    try {
+      // Validar el formulario con Yup
+      await categorySchema.validate(formData, { abortEarly: false });
+
+      if (isEdit) {
+        await apiServiceUpdate(`categorias/categoria/update/${category.id}`, {
+          ...formData,
+          id: category.id,
+        });
+      } else {
+        await apiServicePost("categorias", formData);
+      }
+      closeModal();
+      setFormData({
+        id: 0,
+        nombre: "",
+        descripcion: "",
       });
-    } else {
-      await apiServicePost("categorias", formData);
+      toast.success(
+        isEdit ? "¡Categoría actualizado!" : "¡Categoría agregada!"
+      );
+      fetchData();
+    } catch (err) {
+      if (err.name === "ValidationError") {
+        if (err.inner.length > 3) {
+          toast.error("Formulario incompleto.");
+        } else {
+          err.inner.forEach((e) => {
+            if (e?.message) {
+              toast.error(e.message);
+            }
+          });
+        }
+      } else {
+        console.error("Error al guardar la categoría:", err);
+        toast.error("Error al guardar la categoría.");
+      }
     }
-    closeModal();
-    setFormData({
-      id: 0,
-      nombre: "",
-      descripcion: "",
-    });
-    toast.success(isEdit ? "¡Categoría actualizado!" : "¡Categoría agregada!");
-    fetchData();
   };
 
   if (!show) return null;
@@ -93,8 +135,6 @@ export const CategoryModal = ({
                   className="form-control"
                   value={formData.nombre}
                   placeholder="Categoría 01"
-                  pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                  required
                 />
               </div>
               <div className="row mb-3">
@@ -104,10 +144,8 @@ export const CategoryModal = ({
                   name="descripcion"
                   className="form-control"
                   placeholder="Descripcion de Categoría 01"
-                  pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                   value={formData.descripcion}
                   onChange={handleChange}
-                  required
                 ></textarea>
               </div>
             </div>

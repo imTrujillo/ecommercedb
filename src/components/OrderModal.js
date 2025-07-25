@@ -8,6 +8,8 @@ import {
 import { DateTimePicker } from "@progress/kendo-react-dateinputs";
 import "@progress/kendo-theme-bootstrap/dist/all.css";
 import { toast } from "react-toastify";
+import * as Yup from "yup";
+import addMonths from "date-fns/addMonths";
 
 export const OrderModal = ({
   show,
@@ -28,6 +30,33 @@ export const OrderModal = ({
   });
   const [orderProducts, setOrderProducts] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
+
+  // VALIDACIONES CON YUP
+  const orderSchema = Yup.object().shape({
+    fecha: Yup.date()
+      .min(new Date(1950, 0, 1), "La fecha no puede ser anterior a 1950")
+      .max(
+        addMonths(new Date(), 6),
+        "La fecha no puede ocurrir después de 6 meses"
+      )
+      .required("La fecha es requerida"),
+    metodoPago: Yup.string()
+      .min(3, "El método de pago debe tener al menos 3 caracteres")
+      .required("El método de pago es requerido")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    direccionEnvio: Yup.string()
+      .min(10, "La dirección de envío debe tener al menos 10 caracteres")
+      .required("La dirección de envío es requerida")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    estado: Yup.string().required("Selecciona un estado"),
+    clienteId: Yup.string().required("Selecciona un cliente"),
+  });
 
   useEffect(() => {
     if (show && isEdit && order) {
@@ -128,40 +157,60 @@ export const OrderModal = ({
       ...orderData,
       detalles,
     };
-
     console.log(fullOrder);
-    let orderResponse;
-    if (!isEdit) {
-      orderResponse = await apiServicePost(
-        "pedidos/crear-con-detalles",
-        fullOrder
-      );
-    } else {
-      orderResponse = await apiServiceUpdate(
-        `pedidos/update/${fullOrder.id}`,
-        fullOrder
-      );
-    }
 
-    if (orderResponse) {
-      if (isEdit) {
-        toast.success("¡Pedido actualizado con éxito!");
+    try {
+      // Validar el formulario con Yup
+      await orderSchema.validate(fullOrder, { abortEarly: false });
+
+      let orderResponse;
+      if (!isEdit) {
+        orderResponse = await apiServicePost(
+          "pedidos/crear-con-detalles",
+          fullOrder
+        );
       } else {
-        toast.success("¡Pedido registrado con éxito!");
+        orderResponse = await apiServiceUpdate(
+          `pedidos/update/${fullOrder.id}`,
+          fullOrder
+        );
       }
 
-      setOrderData({
-        fecha: new Date(),
-        estado: "Pendiente",
-        metodoPago: "",
-        direccionEnvio: "",
-        clienteId: null,
-        id: 0,
-        detalles: [],
-      });
-      setOrderProducts([]);
-      fetchData();
-      closeModal();
+      if (orderResponse) {
+        if (isEdit) {
+          toast.success("¡Pedido actualizado con éxito!");
+        } else {
+          toast.success("¡Pedido registrado con éxito!");
+        }
+
+        setOrderData({
+          fecha: new Date(),
+          estado: "Pendiente",
+          metodoPago: "",
+          direccionEnvio: "",
+          clienteId: null,
+          id: 0,
+          detalles: [],
+        });
+        setOrderProducts([]);
+        fetchData();
+        closeModal();
+      }
+    } catch (err) {
+      if (err.name === "ValidationError") {
+        if (err.inner.length > 3) {
+          toast.error("Formulario incompleto.");
+        } else {
+          err.inner.forEach((e) => {
+            if (e?.message) {
+              toast.error(e.message);
+            }
+          });
+        }
+      } else {
+        console.error("Error al guardar el pedido:", err);
+        toast.error("Error al guardar el pedido.");
+      }
     }
   };
 
@@ -212,7 +261,6 @@ export const OrderModal = ({
                     className="form-select"
                     value={orderData.clienteId}
                     onChange={handleChange}
-                    required
                   >
                     <option value="">Selecciona un cliente</option>
                     {customers.map((c) => (
@@ -231,7 +279,6 @@ export const OrderModal = ({
                       className="form-select"
                       value={orderData.estado}
                       onChange={handleChange}
-                      required
                     >
                       <option value="Pendiente">Pendiente</option>
                       <option value="Realizado">Realizado</option>
@@ -254,7 +301,6 @@ export const OrderModal = ({
                     className="form-control"
                     value={orderData.metodoPago}
                     onChange={handleChange}
-                    required
                   />
                 </div>
                 <div className="col-7">
@@ -267,7 +313,6 @@ export const OrderModal = ({
                     placeholder="Av. Bernal"
                     value={orderData.direccionEnvio}
                     onChange={handleChange}
-                    required
                   />
                 </div>
               </div>

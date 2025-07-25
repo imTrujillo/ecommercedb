@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { apiServicePost, apiServiceUpdate } from "../apiService/apiService";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
 
 export const SuppliersModal = ({
   show,
@@ -13,6 +15,24 @@ export const SuppliersModal = ({
     nombre: "",
     telefono: "",
     email: "",
+  });
+
+  // VALIDACIONES CON YUP
+  const supplierSchema = Yup.object().shape({
+    nombre: Yup.string()
+      .min(3, "El nombre debe tener al menos 3 caracteres")
+      .required("El nombre es requerido")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    telefono: Yup.string()
+      .required("El teléfono es requerido")
+      .matches(/^[0-9]+$/, "El teléfono solo debe contener números")
+      .length(8, "El teléfono debe contener exactamente 8 dígitos"),
+    email: Yup.string()
+      .email("Debe ser un correo válido")
+      .required("El correo es requerido"),
   });
 
   useEffect(() => {
@@ -40,16 +60,37 @@ export const SuppliersModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isEdit) {
-      await apiServiceUpdate(
-        `Proveedores/proveedor/update/${formData.id}`,
-        formData
-      );
-    } else {
-      await apiServicePost("Proveedores", formData);
+
+    try {
+      // Validar el formulario con Yup
+      await supplierSchema.validate(formData, { abortEarly: false });
+
+      if (isEdit) {
+        await apiServiceUpdate(
+          `Proveedores/proveedor/update/${formData.id}`,
+          formData
+        );
+      } else {
+        await apiServicePost("Proveedores", formData);
+      }
+      closeModal();
+      fetchData();
+    } catch (err) {
+      if (err.name === "ValidationError") {
+        if (err.inner.length > 4) {
+          toast.error("Formulario incompleto.");
+        } else {
+          err.inner.forEach((e) => {
+            if (e?.message) {
+              toast.error(e.message);
+            }
+          });
+        }
+      } else {
+        console.error("Error al guardar proveedor:", err);
+        toast.error("Error al guardar el proveedor.");
+      }
     }
-    closeModal();
-    fetchData();
   };
 
   if (!show) return null;
@@ -90,8 +131,6 @@ export const SuppliersModal = ({
                   className="form-control"
                   value={formData.nombre}
                   placeholder="Proveedor 01"
-                  pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                  required
                 />
               </div>
               <div className="row mb-3">
@@ -102,20 +141,18 @@ export const SuppliersModal = ({
                   onChange={handleChange}
                   className="form-control"
                   value={formData.telefono}
-                  placeholder="+503 0000 0000"
-                  required
+                  placeholder="0000 0000"
                 />
               </div>
               <div className="row mb-3">
                 <label className="form-label required">Correo</label>
                 <input
-                  type="email"
+                  type="text"
                   name="email"
                   onChange={handleChange}
                   className="form-control"
                   value={formData.email}
                   placeholder="example@example.com"
-                  required
                 />
               </div>
             </div>

@@ -5,6 +5,7 @@ import {
   apiServiceUpdate,
 } from "../apiService/apiService";
 import { toast } from "react-toastify";
+import * as Yup from "yup";
 
 export const ProductsModal = ({
   show,
@@ -23,6 +24,35 @@ export const ProductsModal = ({
     stock: 0,
     categoriaId: "",
     proveedorId: "",
+  });
+
+  // VALIDACIONES CON YUP
+  const productSchema = Yup.object().shape({
+    nombre: Yup.string()
+      .min(3, "El nombre debe tener al menos 3 caracteres")
+      .required("El nombre es requerido")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    descripcion: Yup.string()
+      .min(10, "La descripción debe tener al menos 10 caracteres")
+      .required("La descripción es requerida")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    precio: Yup.number()
+      .typeError("El precio debe ser un número")
+      .positive("El precio debe ser mayor que 0")
+      .required("El precio es requerido"),
+    stock: Yup.number()
+      .typeError("El stock debe ser un número")
+      .integer("El stock debe ser un número entero")
+      .min(0, "El stock no puede ser negativo")
+      .required("El stock es requerido"),
+    categoriaId: Yup.string().required("Selecciona una categoría"),
+    proveedorId: Yup.string().required("Selecciona un proveedor"),
   });
 
   useEffect(() => {
@@ -50,22 +80,19 @@ export const ProductsModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación
-    if (!formData.categoriaId || !formData.proveedorId) {
-      toast.error("Debes seleccionar categoría y proveedor");
-      return;
-    }
-
-    const payload = {
-      nombre: formData.nombre,
-      descripcion: formData.descripcion,
-      precio: parseFloat(formData.precio),
-      stock: parseInt(formData.stock),
-      categoriaId: parseInt(formData.categoriaId),
-      proveedorId: parseInt(formData.proveedorId),
-    };
-
     try {
+      // Validar el formulario con Yup
+      await productSchema.validate(formData, { abortEarly: false });
+
+      const payload = {
+        nombre: formData.nombre,
+        descripcion: formData.descripcion,
+        precio: parseFloat(formData.precio),
+        stock: parseInt(formData.stock),
+        categoriaId: parseInt(formData.categoriaId),
+        proveedorId: parseInt(formData.proveedorId),
+      };
+
       if (isEdit) {
         await apiServiceUpdate(`Productos/update/${product.id}`, {
           ...payload,
@@ -89,9 +116,21 @@ export const ProductsModal = ({
         categoriaId: "",
         proveedorId: "",
       });
-    } catch (error) {
-      console.error("Error al guardar producto:", error);
-      toast.error("Error al guardar el producto.");
+    } catch (err) {
+      if (err.name === "ValidationError") {
+        if (err.inner.length > 3) {
+          toast.error("Formulario incompleto.");
+        } else {
+          err.inner.forEach((e) => {
+            if (e?.message) {
+              toast.error(e.message);
+            }
+          });
+        }
+      } else {
+        console.error("Error al guardar producto:", err);
+        toast.error("Error al guardar el producto.");
+      }
     }
   };
 
@@ -130,7 +169,6 @@ export const ProductsModal = ({
                     value={formData.nombre}
                     onChange={handleChange}
                     placeholder="Producto 01"
-                    required
                   />
                 </div>
                 <div className="col-7">
@@ -141,8 +179,6 @@ export const ProductsModal = ({
                     value={formData.descripcion}
                     onChange={handleChange}
                     placeholder="Descripción del Producto 01"
-                    pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                    required
                   ></textarea>
                 </div>
               </div>
@@ -159,7 +195,6 @@ export const ProductsModal = ({
                     placeholder="99.99"
                     min={0}
                     step={0.01}
-                    required
                   />
                 </div>
                 <div className="col-6">
@@ -173,7 +208,6 @@ export const ProductsModal = ({
                     placeholder="99"
                     min={0}
                     step={1}
-                    required
                   />
                 </div>
               </div>
@@ -186,7 +220,6 @@ export const ProductsModal = ({
                     className="form-select"
                     value={formData.categoriaId}
                     onChange={handleChange}
-                    required
                   >
                     <option value="" disabled>
                       Selecciona aquí
@@ -205,7 +238,6 @@ export const ProductsModal = ({
                     className="form-select"
                     value={formData.proveedorId}
                     onChange={handleChange}
-                    required
                   >
                     <option value="" disabled>
                       Selecciona aquí

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { apiServiceGet, apiServicePost } from "../apiService/apiService";
 import { toast } from "react-toastify";
+import * as Yup from "yup";
 
 export const BuyModal = ({
   show,
   closeModal,
   productsCart,
+  setProductsCart,
   fetchData,
   customers,
 }) => {
@@ -37,6 +39,50 @@ export const BuyModal = ({
     setOrderData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // VALIDACIONES CON YUP
+  const customerSchema = Yup.object().shape({
+    nombre: Yup.string()
+      .min(3, "El nombre debe tener al menos 3 caracteres")
+      .required("El nombre es requerido")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    telefono: Yup.string()
+      .required("El teléfono es requerido")
+      .matches(/^[0-9]+$/, "El teléfono solo debe contener números")
+      .length(8, "El teléfono debe contener exactamente 8 dígitos"),
+    direccion: Yup.string()
+      .min(10, "La dirección debe tener al menos 10 caracteres")
+      .required("La dirección es requerida")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    email: Yup.string()
+      .email("Debe ser un correo válido")
+      .required("El correo es requerido"),
+  });
+
+  const orderSchema = Yup.object().shape({
+    metodoPago: Yup.string()
+      .min(3, "El método de pago debe tener al menos 3 caracteres")
+      .required("El método de pago es requerido")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    direccionEnvio: Yup.string()
+      .min(10, "La dirección de envío debe tener al menos 10 caracteres")
+      .required("La dirección de envío es requerida")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    estado: Yup.string().required("Selecciona un estado"),
+    clienteId: Yup.string().required("Selecciona un cliente"),
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -58,6 +104,9 @@ export const BuyModal = ({
         (c) => c.email === customerData.email
       );
 
+      // Validar el formulario con Yup
+      await customerSchema.validate(customerData, { abortEarly: false });
+
       let clienteResponse;
 
       if (!clienteExistente) {
@@ -74,6 +123,9 @@ export const BuyModal = ({
         detalles: detalles,
       };
       console.log("payload a enviar:", pedidoPayload);
+
+      // Validar el formulario con Yup
+      await orderSchema.validate(pedidoPayload, { abortEarly: false });
 
       const ordenResponse = await apiServicePost(
         "pedidos/crear-con-detalles",
@@ -100,12 +152,25 @@ export const BuyModal = ({
           detalles: [],
         });
         setOrderDetailsData([]);
+        setProductsCart([]);
       } else {
         toast.error("Error al crear el pedido. Intenta nuevamente.");
       }
-    } catch (error) {
-      console.error("Error en el envío del pedido:", error);
-      toast.error("Ocurrió un error al registrar el pedido.");
+    } catch (err) {
+      if (err.name === "ValidationError") {
+        if (err.inner.length > 3) {
+          toast.error("Formulario incompleto.");
+        } else {
+          err.inner.forEach((e) => {
+            if (e?.message) {
+              toast.error(e.message);
+            }
+          });
+        }
+      } else {
+        console.error("Error al guardar el pedido:", err);
+        toast.error("Error al guardar el pedido.");
+      }
     }
   };
 
@@ -140,8 +205,6 @@ export const BuyModal = ({
                     className="form-control"
                     value={customerData.nombre}
                     placeholder="Juan Pérez"
-                    pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                    required
                   />
                 </div>
                 <div className="col-6">
@@ -153,7 +216,6 @@ export const BuyModal = ({
                     placeholder="+503 0000 0000"
                     value={customerData.telefono}
                     onChange={handleChangeCustomer}
-                    required
                   />
                 </div>
               </div>
@@ -162,13 +224,12 @@ export const BuyModal = ({
                 <div className="col-5">
                   <label className="form-label required">Email</label>
                   <input
-                    type="email"
+                    type="text"
                     name="email"
                     className="form-control"
                     value={customerData.email}
                     onChange={handleChangeCustomer}
                     placeholder="example@example.com"
-                    required
                   />
                 </div>
                 <div className="col-7">
@@ -178,10 +239,8 @@ export const BuyModal = ({
                     name="metodoPago"
                     className="form-control"
                     placeholder="Efectivo"
-                    pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                     value={orderData.metodoPago}
                     onChange={handleChangeOrder}
-                    required
                   />
                 </div>
               </div>
@@ -195,7 +254,6 @@ export const BuyModal = ({
                     value={customerData.direccion}
                     onChange={handleChangeCustomer}
                     placeholder="Ubicación de la residencia del cliente"
-                    required
                   ></textarea>
                 </div>
                 <div className="col-6">
@@ -208,7 +266,6 @@ export const BuyModal = ({
                     placeholder="Ubicación de la recepción de pedido"
                     value={orderData.direccionEnvio}
                     onChange={handleChangeOrder}
-                    required
                   ></textarea>
                 </div>
               </div>
