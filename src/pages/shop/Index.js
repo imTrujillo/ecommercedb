@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { ShopCategories } from "../../components/ShopCategories";
-import { BuyModal } from "../../components/BuyModal";
-import { ShopCart } from "../../components/ShopCart";
-import { apiServiceGet } from "../../apiService/apiService";
+import { ShopCategories } from "../../components/shopping/ShopCategories";
+import { BuyModal } from "../../components/modals/BuyModal";
+import { ShopCart } from "../../components/shopping/ShopCart";
+import { apiServiceGet } from "../../API/apiService";
 
 export const Index = () => {
   // CARGAR CARRITO DESDE SESSIONSTORAGE

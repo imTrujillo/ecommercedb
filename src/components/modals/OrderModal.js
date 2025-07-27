@@ -4,7 +4,7 @@ import {
   apiServiceGet,
   apiServicePost,
   apiServiceUpdate,
-} from "../apiService/apiService";
+} from "../../API/apiService";
 import { DateTimePicker } from "@progress/kendo-react-dateinputs";
 import "@progress/kendo-theme-bootstrap/dist/all.css";
 import { toast } from "react-toastify";

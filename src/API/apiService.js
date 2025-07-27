@@ -1,15 +1,17 @@
 import axios from "axios";
 
-import React from "react";
 import { toast } from "react-toastify";
 
 const baseUrl = "https://localhost:7160/api/";
 
-export const apiServiceGet = async (endpoint, id) => {
+export const apiServiceGet = async (endpoint, id, token = null) => {
   try {
     const url = id ? baseUrl + endpoint + "/" + id : baseUrl + endpoint;
 
-    const response = await axios.get(url);
+    const response = await axios.get(
+      url,
+      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+    );
     if (response.status === 200) {
       return response.data;
     } else {
@@ -26,9 +28,13 @@ export const apiServiceGet = async (endpoint, id) => {
   }
 };
 
-export const apiServicePost = async (endpoint, object) => {
+export const apiServicePost = async (endpoint, object, token = null) => {
   try {
-    const response = await axios.post(baseUrl + endpoint, object);
+    const response = await axios.post(
+      baseUrl + endpoint,
+      object,
+      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+    );
 
     if (response.status === 200 || response.status === 201) {
       return response.data;
@@ -40,9 +46,13 @@ export const apiServicePost = async (endpoint, object) => {
   }
 };
 
-export const apiServiceUpdate = async (endpoint, object) => {
+export const apiServiceUpdate = async (endpoint, object, token = null) => {
   try {
-    const response = await axios.put(baseUrl + endpoint, object);
+    const response = await axios.put(
+      baseUrl + endpoint,
+      object,
+      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+    );
 
     if (response.status >= 200 && response.status < 300) {
       // Consideracion de todos los 2xx
@@ -63,9 +73,12 @@ export const apiServiceUpdate = async (endpoint, object) => {
   }
 };
 
-export const apiServiceDelete = async (endpoint) => {
+export const apiServiceDelete = async (endpoint, token = null) => {
   try {
-    const response = await axios.delete(baseUrl + endpoint);
+    const response = await axios.delete(
+      baseUrl + endpoint,
+      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+    );
 
     if (response.status == 200) {
       toast.success("¡Elemento borrado exitosamente!");

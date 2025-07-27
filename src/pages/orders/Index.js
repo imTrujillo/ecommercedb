@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Show from "./Show";
-import { OrderModal } from "../../components/OrderModal";
+import { OrderModal } from "../../components/modals/OrderModal";
 import { IconPlus } from "@tabler/icons-react";
-import { DeleteModal } from "../../components/DeleteModal";
-import { apiServiceGet } from "../../apiService/apiService";
-import { ProductsOrderModal } from "../../components/ProductsOrderModal";
+import { DeleteModal } from "../../components/modals/DeleteModal";
+import { apiServiceGet } from "../../API/apiService";
+import { ProductsOrderModal } from "../../components/modals/ProductsOrderModal";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
 

@@ -3,7 +3,7 @@ import {
   apiServiceGet,
   apiServicePost,
   apiServiceUpdate,
-} from "../apiService/apiService";
+} from "../../API/apiService";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 

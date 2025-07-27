@@ -1,6 +1,6 @@
 import React from "react";
 import { toast } from "react-toastify";
-import photo from "../assets/images/producto.jpg";
+import photo from "../../assets/images/producto.jpg";
 import { IconReportMoney } from "@tabler/icons-react";
 
 const ShopProducts = ({
@@ -20,18 +20,11 @@ const ShopProducts = ({
     }
   };
 
-  const supplier = suppliers.filter(
-    (supplier) => supplier.id === product.id
-  );
+  const supplier = suppliers.filter((supplier) => supplier.id === product.id);
 
   return (
     <div className="card w-100">
-      <img
-        src={photo}
-        alt={product.nombre}
-        loading="lazy"
-        className="w-100"
-      />
+      <img src={photo} alt={product.nombre} loading="lazy" className="w-100" />
       <div className="card-body">
         <p className="text-secondary">{supplier.nombre}</p>
 

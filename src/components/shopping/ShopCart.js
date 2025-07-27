@@ -1,5 +1,5 @@
 import React from "react";
-import photo from "../assets/images/producto.jpg";
+import photo from "../../assets/images/producto.jpg";
 
 export const ShopCart = ({ productBuy, setProductsCart }) => {
   // BORRAR UN PRODUCTO DEL CARRITO

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PaginationControl from "./../assets/PaginationControl";
+import PaginationControl from "../../assets/PaginationControl";
 
 export const ProductsOrderModal = ({
   show,

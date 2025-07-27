@@ -1,6 +1,6 @@
 import React from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
-import { ProductsModal } from "../../components/ProductsModal";
+
 const Show = ({ product, onEdit, onDelete, suppliers, categories }) => {
   const supplier = suppliers.find((s) => s.id === product.proveedorId);
 

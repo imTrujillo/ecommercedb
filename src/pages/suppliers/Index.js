@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Show from "./Show";
-import { SuppliersModal } from "../../components/SuppliersModal";
+import { SuppliersModal } from "../../components/modals/SuppliersModal";
 import { IconPlus } from "@tabler/icons-react";
-import { DeleteModal } from "../../components/DeleteModal";
-import { apiServiceGet } from "../../apiService/apiService";
+import { DeleteModal } from "../../components/modals/DeleteModal";
+import { apiServiceGet } from "../../API/apiService";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { apiServiceGet, apiServicePost } from "../apiService/apiService";
+import { apiServicePost } from "../../API/apiService";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { apiServiceDelete } from "../apiService/apiService";
+import { apiServiceDelete } from "../../API/apiService";
 
 export const DeleteModal = ({ show, closeModal, id, endpoint, fetchData }) => {
   const handleDelete = async (e) => {
