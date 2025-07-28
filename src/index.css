@@ -19,3 +19,9 @@ code {
 .navbar-brand-image {
   filter: none !important;
 }
+
+.modal {
+  z-index: 100 !important;
+  overflow: visible !important;
+  position: absolute !important;
+}

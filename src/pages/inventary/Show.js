@@ -1,31 +1,35 @@
 import React from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
-import { ProductsModal } from "../../components/ProductsModal";
-const Show = ({ product, onEdit, onDelete }) => {
+
+const Show = ({ product, onEdit, onDelete, suppliers, categories }) => {
+  const supplier = suppliers.find((s) => s.id === product.proveedorId);
+
+  const category = categories.find((c) => c.id === product.categoriaId);
+
   return (
     <tr>
       <td data-label="IDProducto">
         <div className="d-flex py-1 align-items-center">
-          <span>{product.IDProducto}</span>
+          <span>{product.id}</span>
         </div>
       </td>
       <td data-label="NombreProducto">
-        <div className="font-weight-medium">{product.NombreProducto}</div>
+        <div className="font-weight-medium">{product.nombre}</div>
       </td>
       <td className="text-secondary" data-label="Role">
-        {product.Descripción}
+        {product.descripcion}
       </td>
       <td className="text-secondary" data-label="Role">
-        $ {product.Precio}
+        $ {product.precio}
       </td>
       <td className="text-secondary" data-label="Role">
-        {product.Stock}
+        {product.stock}
       </td>
       <td className="text-secondary" data-label="Role">
-        {product.Categoria}
+        {category.nombre}
       </td>
       <td className="text-secondary" data-label="Role">
-        {product.Proveedor}
+        {supplier.nombre}
       </td>
       <td>
         <div className="btn-list flex-nowrap">
@@ -46,7 +50,7 @@ const Show = ({ product, onEdit, onDelete }) => {
               </button>
               <button
                 className="dropdown-item text-danger"
-                onClick={() => onDelete(product)}
+                onClick={() => onDelete(product.id)}
               >
                 <IconTrash />
                 Eliminar

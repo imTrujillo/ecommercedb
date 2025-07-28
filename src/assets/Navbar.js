@@ -13,61 +13,45 @@ import {
   IconPackages,
   IconUsersPlus,
   IconShoppingCart,
+  IconLogin2,
 } from "@tabler/icons-react";
+import { useAuth } from "../pages/session/AuthProvider";
 
-export default function Navbar() {
+export default function Navbar({ darkTheme, handleTheme }) {
   var location = useLocation();
-
-  const params = new URLSearchParams(window.location.search);
-  const theme = params.get("theme") || "light";
-  document.documentElement.classList.remove("theme-light", "theme-dark");
-  document.documentElement.classList.add(`theme-${theme}`);
-
-  document.querySelectorAll(".hide-theme-light").forEach((el) => {
-    el.style.display = theme === "light" ? "none" : "";
-  });
-  document.querySelectorAll(".hide-theme-dark").forEach((el) => {
-    el.style.display = theme === "dark" ? "none" : "";
-  });
+  const { rol } = useAuth();
 
   return (
     <nav>
       <header className="navbar d-md-none d-print-none">
         <div className="container-xl">
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbar-menu"
-            aria-controls="navbar-menu"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-
-          <div className=" d-flex flex-row gap-3">
+          {rol ? (
             <button
-              className="nav-link px-0 hide-theme-dark"
-              title="Modo oscuro"
-              data-bs-toggle="tooltip"
-              data-bs-placement="bottom"
-              onClick={() => {
-                window.location.href = "?theme=dark";
-              }}
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbar-menu"
+              aria-controls="navbar-menu"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
             >
-              <IconMoon size={24} stroke={2} />
+              <span className="navbar-toggler-icon"></span>
             </button>
+          ) : (
+            ""
+          )}
+
+          <div className=" d-flex align-items-center flex-row gap-3">
             <button
-              className="nav-link px-0 hide-theme-light"
-              title="Modo claro"
-              data-bs-toggle="tooltip"
-              data-bs-placement="bottom"
-              onClick={() => {
-                window.location.href = "?theme=light";
-              }}
+              className="nav-link px-0"
+              title={darkTheme ? "Modo claro" : "Modo oscuro"}
+              onClick={handleTheme}
             >
-              <IconSun size={24} stroke={2} />
+              {darkTheme ? (
+                <IconMoon size={24} stroke={2} />
+              ) : (
+                <IconSun size={24} stroke={2} />
+              )}
             </button>
             <a
               className={`nav-item ${
@@ -94,18 +78,26 @@ export default function Navbar() {
                 />
               </div>
             </form>
+            <div className="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+              {/* <a href=".">
+                <img
+                  src="/logo.png"
+                  width="110"
+                  height="32"
+                  alt="ECommerce"
+                  className="z-1 navbar-brand-image theme-light-dark-fix"
+                />
+              </a> */}
+              <div className="p-0 d-md-none align-self-center">
+                <Link
+                  to="/login"
+                  className="btn btn-outline-success px-3 space-x-2"
+                >
+                  <IconLogin2 />
+                </Link>
+              </div>
+            </div>
           </div>
-          <h1 className="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href=".">
-              <img
-                src="/logo.png"
-                width="110"
-                height="32"
-                alt="ECommerce"
-                className="z-1 navbar-brand-image  theme-light-dark-fix"
-              />
-            </a>
-          </h1>
         </div>
       </header>
       <header className="navbar-expand-md">
@@ -124,99 +116,99 @@ export default function Navbar() {
                     />
                   </a>
                 </h1>
-                <li
-                  className={`nav-item ${
-                    location.pathname === "/" ? "active" : ""
-                  }`}
-                >
-                  <Link to="/" className="nav-link">
-                    <span className="nav-link-icon d-md-none d-lg-inline-block">
-                      <IconBuildingStore size={24} stroke={2} />
-                    </span>
-                    <span className="nav-link-title"> Tienda </span>
-                  </Link>
-                </li>
-                <li
-                  className={`nav-item ${
-                    location.pathname === "/inventario" ? "active" : ""
-                  }`}
-                >
-                  <Link to="/inventario" className="nav-link">
-                    <span className="nav-link-icon d-md-none d-lg-inline-block">
-                      <IconPackage size={24} stroke={2} />
-                    </span>
-                    <span className="nav-link-title"> Inventario </span>
-                  </Link>
-                </li>
-                <li
-                  className={`nav-item ${
-                    location.pathname === "/categorias" ? "active" : ""
-                  }`}
-                >
-                  <Link to="/categorias" className="nav-link">
-                    <span className="nav-link-icon d-md-none d-lg-inline-block">
-                      <IconBox size={24} stroke={2} />
-                    </span>
-                    <span className="nav-link-title"> Categorías </span>
-                  </Link>
-                </li>
-                <li
-                  className={`nav-item ${
-                    location.pathname === "/proveedores" ? "active" : ""
-                  }`}
-                >
-                  <Link to="/proveedores" className="nav-link">
-                    <span className="nav-link-icon d-md-none d-lg-inline-block">
-                      <IconTruckDelivery size={24} stroke={2} />
-                    </span>
-                    <span className="nav-link-title"> Proveedores </span>
-                  </Link>
-                </li>
-                <li
-                  className={`nav-item ${
-                    location.pathname === "/pedidos" ? "active" : ""
-                  }`}
-                >
-                  <Link to="/pedidos" className="nav-link">
-                    <span className="nav-link-icon d-md-none d-lg-inline-block">
-                      <IconPackages size={24} stroke={2} />
-                    </span>
-                    <span className="nav-link-title"> Pedidos </span>
-                  </Link>
-                </li>
-                <li
-                  className={`nav-item ${
-                    location.pathname === "/clientes" ? "active" : ""
-                  }`}
-                >
-                  <Link to="/clientes" className="nav-link">
-                    <span className="nav-link-icon d-md-none d-lg-inline-block">
-                      <IconUsersPlus size={24} stroke={2} />
-                    </span>
-                    <span className="nav-link-title"> Clientes </span>
-                  </Link>
-                </li>
+
+                {rol ? (
+                  <>
+                    <li
+                      className={`nav-item ${
+                        location.pathname === "/" ? "active" : ""
+                      }`}
+                    >
+                      <Link to="/" className="nav-link">
+                        <span className="nav-link-icon d-md-none d-lg-inline-block">
+                          <IconBuildingStore size={24} stroke={2} />
+                        </span>
+                        <span className="nav-link-title"> Tienda </span>
+                      </Link>
+                    </li>
+                    <li
+                      className={`nav-item ${
+                        location.pathname === "/inventario" ? "active" : ""
+                      }`}
+                    >
+                      <Link to="/inventario" className="nav-link">
+                        <span className="nav-link-icon d-md-none d-lg-inline-block">
+                          <IconPackage size={24} stroke={2} />
+                        </span>
+                        <span className="nav-link-title"> Inventario </span>
+                      </Link>
+                    </li>
+                    <li
+                      className={`nav-item ${
+                        location.pathname === "/categorias" ? "active" : ""
+                      }`}
+                    >
+                      <Link to="/categorias" className="nav-link">
+                        <span className="nav-link-icon d-md-none d-lg-inline-block">
+                          <IconBox size={24} stroke={2} />
+                        </span>
+                        <span className="nav-link-title"> Categorías </span>
+                      </Link>
+                    </li>
+                    <li
+                      className={`nav-item ${
+                        location.pathname === "/proveedores" ? "active" : ""
+                      }`}
+                    >
+                      <Link to="/proveedores" className="nav-link">
+                        <span className="nav-link-icon d-md-none d-lg-inline-block">
+                          <IconTruckDelivery size={24} stroke={2} />
+                        </span>
+                        <span className="nav-link-title"> Proveedores </span>
+                      </Link>
+                    </li>
+                    <li
+                      className={`nav-item ${
+                        location.pathname === "/pedidos" ? "active" : ""
+                      }`}
+                    >
+                      <Link to="/pedidos" className="nav-link">
+                        <span className="nav-link-icon d-md-none d-lg-inline-block">
+                          <IconPackages size={24} stroke={2} />
+                        </span>
+                        <span className="nav-link-title"> Pedidos </span>
+                      </Link>
+                    </li>
+                    <li
+                      className={`nav-item ${
+                        location.pathname === "/clientes" ? "active" : ""
+                      }`}
+                    >
+                      <Link to="/clientes" className="nav-link">
+                        <span className="nav-link-icon d-md-none d-lg-inline-block">
+                          <IconUsersPlus size={24} stroke={2} />
+                        </span>
+                        <span className="nav-link-title"> Clientes </span>
+                      </Link>
+                    </li>
+                  </>
+                ) : (
+                  ""
+                )}
               </ul>
               <div className="d-none d-md-flex flex-row gap-3">
                 {/* ACTIVAR MODO CLARO/OSCURO */}
-                <a
-                  href="?theme=light"
-                  className="nav-link px-0 hide-theme-light"
-                  title="Activar modo claro"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="bottom"
+                <button
+                  className="nav-link px-0"
+                  onClick={handleTheme}
+                  title={darkTheme ? "Modo claro" : "Modo oscuro"}
                 >
-                  <IconSun size={24} stroke={2} />
-                </a>
-                <a
-                  href="?theme=dark"
-                  className="nav-link px-0 hide-theme-dark"
-                  title="Activar modo oscuro"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="bottom"
-                >
-                  <IconMoon size={24} stroke={2} />
-                </a>
+                  {darkTheme ? (
+                    <IconSun size={24} stroke={2} />
+                  ) : (
+                    <IconMoon size={24} stroke={2} />
+                  )}
+                </button>
 
                 {/* CARRITO DE COMPRAS */}
                 <a
@@ -241,6 +233,14 @@ export default function Navbar() {
                     "table-suppliers",
                   ]}
                 />
+                <div className="p-0 align-self-center">
+                  <Link
+                    to="/login"
+                    className="btn btn-outline-success px-3 space-x-2"
+                  >
+                    <IconLogin2 /> Iniciar Sesión
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

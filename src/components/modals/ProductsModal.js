@@ -3,7 +3,9 @@ import {
   apiServiceGet,
   apiServicePost,
   apiServiceUpdate,
-} from "../apiService/apiService";
+} from "../../API/apiService";
+import { toast } from "react-toastify";
+import * as Yup from "yup";
 
 export const ProductsModal = ({
   show,
@@ -11,6 +13,8 @@ export const ProductsModal = ({
   isEdit,
   product,
   fetchData,
+  suppliers,
+  categories,
 }) => {
   const [formData, setFormData] = useState({
     id: 0,
@@ -18,23 +22,38 @@ export const ProductsModal = ({
     descripcion: "",
     precio: 0.0,
     stock: 0,
-    categoriaId: 0,
-    proveedorId: 0,
+    categoriaId: "",
+    proveedorId: "",
   });
 
-  const [categories, setCategories] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-
-  // Cargar categorías y proveedores al montar el modal
-  useEffect(() => {
-    const fetchDependencies = async () => {
-        const cats = await apiServiceGet("Categorias", "");
-        const sups = await apiServiceGet("Proveedores", "");
-        setCategories(cats || []);
-        setSuppliers(sups || []);
-    };
-    fetchDependencies();
-}, []);
+  // VALIDACIONES CON YUP
+  const productSchema = Yup.object().shape({
+    nombre: Yup.string()
+      .min(3, "El nombre debe tener al menos 3 caracteres")
+      .required("El nombre es requerido")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    descripcion: Yup.string()
+      .min(10, "La descripción debe tener al menos 10 caracteres")
+      .required("La descripción es requerida")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    precio: Yup.number()
+      .typeError("El precio debe ser un número")
+      .positive("El precio debe ser mayor que 0")
+      .required("El precio es requerido"),
+    stock: Yup.number()
+      .typeError("El stock debe ser un número")
+      .integer("El stock debe ser un número entero")
+      .min(0, "El stock no puede ser negativo")
+      .required("El stock es requerido"),
+    categoriaId: Yup.string().required("Selecciona una categoría"),
+    proveedorId: Yup.string().required("Selecciona un proveedor"),
+  });
 
   useEffect(() => {
     if (product) {
@@ -44,50 +63,75 @@ export const ProductsModal = ({
         descripcion: product.descripcion,
         precio: product.precio,
         stock: product.stock,
-        categoriaId: product.categoriaId,
-        proveedorId: product.proveedorId
+        categoriaId: product.categoriaId.toString(),
+        proveedorId: product.proveedorId.toString(),
       });
-    } else {
-      // Resetear formulario si no hay producto (para crear nuevo)
-            setFormData({
-                id: 0,
-                nombre: "",
-                descripcion: "",
-                precio: 0.0,
-                stock: 0,
-                categoriaId: 0,
-                proveedorId: 0,
-            });
     }
   }, [product]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-     // Convierte a número solo si el campo es numérico para evitar problemas de tipo
-    setFormData((prev) => ({ 
-      ...prev, 
-      [name]: ['precio', 'stock', 'categoriaId', 'proveedorId'].includes(name) ? Number(value) : value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // para asegurar de que los IDs sean números antes de enviar
-        const dataToSend = {
-            ...formData,
-            precio: Number(formData.precio),
-            stock: Number(formData.stock),
-            categoriaId: Number(formData.categoriaId),
-            proveedorId: Number(formData.proveedorId),
-        };
+    try {
+      // Validar el formulario con Yup
+      await productSchema.validate(formData, { abortEarly: false });
 
-    if (isEdit) {
-      await apiServiceUpdate(`Productos/update/${dataToSend.id}`, dataToSend);
-    } else {
-      await apiServicePost("Productos", dataToSend);
+      const payload = {
+        nombre: formData.nombre,
+        descripcion: formData.descripcion,
+        precio: parseFloat(formData.precio),
+        stock: parseInt(formData.stock),
+        categoriaId: parseInt(formData.categoriaId),
+        proveedorId: parseInt(formData.proveedorId),
+      };
+
+      if (isEdit) {
+        await apiServiceUpdate(`Productos/update/${product.id}`, {
+          ...payload,
+          id: product.id,
+        });
+      } else {
+        await apiServicePost("Productos", payload);
+      }
+
+      toast.success(isEdit ? "¡Producto actualizado!" : "¡Producto agregado!");
+      fetchData();
+      closeModal();
+
+      // Limpiar formulario
+      setFormData({
+        id: 0,
+        nombre: "",
+        descripcion: "",
+        precio: 0.0,
+        stock: 0,
+        categoriaId: "",
+        proveedorId: "",
+      });
+    } catch (err) {
+      if (err.name === "ValidationError") {
+        if (err.inner.length > 3) {
+          toast.error("Formulario incompleto.");
+        } else {
+          err.inner.forEach((e) => {
+            if (e?.message) {
+              toast.error(e.message);
+            }
+          });
+        }
+      } else {
+        console.error("Error al guardar producto:", err);
+        toast.error("Error al guardar el producto.");
+      }
     }
-    closeModal();
-    fetchData();
   };
 
   if (!show) return null;
@@ -100,15 +144,7 @@ export const ProductsModal = ({
     >
       <div className="modal-dialog modal-lg">
         <form onSubmit={handleSubmit}>
-          {isEdit ? (
-            <input
-              type="hidden"
-              name="id"
-              value={formData.id}
-            ></input>
-          ) : (
-            ""
-          )}
+          {isEdit && <input type="hidden" name="id" value={product.id} />}
 
           <div className="modal-content">
             <div className="modal-header">
@@ -125,36 +161,31 @@ export const ProductsModal = ({
             <div className="modal-body">
               <div className="row mb-3">
                 <div className="col-5">
-                  <label className="form-label required">nombre</label>
+                  <label className="form-label required">Nombre</label>
                   <input
                     type="text"
                     name="nombre"
-                    onChange={handleChange}
                     className="form-control"
                     value={formData.nombre}
+                    onChange={handleChange}
                     placeholder="Producto 01"
-                    pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                    required
                   />
                 </div>
                 <div className="col-7">
-                  <label className="form-label required">descripcion</label>
+                  <label className="form-label required">Descripción</label>
                   <textarea
-                    type="text"
                     name="descripcion"
                     className="form-control"
-                    placeholder="descripcion del Producto 01"
-                    pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                     value={formData.descripcion}
                     onChange={handleChange}
-                    required
+                    placeholder="Descripción del Producto 01"
                   ></textarea>
                 </div>
               </div>
 
               <div className="row mb-3">
                 <div className="col-6">
-                  <label className="form-label required">precio</label>
+                  <label className="form-label required">Precio</label>
                   <input
                     type="number"
                     name="precio"
@@ -164,11 +195,10 @@ export const ProductsModal = ({
                     placeholder="99.99"
                     min={0}
                     step={0.01}
-                    required
                   />
                 </div>
                 <div className="col-6">
-                  <label className="form-label required">stock</label>
+                  <label className="form-label required">Stock</label>
                   <input
                     type="number"
                     name="stock"
@@ -178,7 +208,6 @@ export const ProductsModal = ({
                     placeholder="99"
                     min={0}
                     step={1}
-                    required
                   />
                 </div>
               </div>
@@ -187,21 +216,16 @@ export const ProductsModal = ({
                 <div className="col-5">
                   <label className="form-label required">Categoría</label>
                   <select
-                    type="text"
                     name="categoriaId"
                     className="form-select"
                     value={formData.categoriaId}
                     onChange={handleChange}
-                    required
                   >
                     <option value="" disabled>
                       Selecciona aquí
                     </option>
                     {categories.map((category) => (
-                      <option
-                        key={category.id}
-                        value={category.id}
-                      >
+                      <option key={category.id} value={category.id}>
                         {category.nombre}
                       </option>
                     ))}
@@ -210,21 +234,16 @@ export const ProductsModal = ({
                 <div className="col-7">
                   <label className="form-label required">Proveedor</label>
                   <select
-                    type="text"
                     name="proveedorId"
                     className="form-select"
                     value={formData.proveedorId}
                     onChange={handleChange}
-                    required
                   >
                     <option value="" disabled>
                       Selecciona aquí
                     </option>
                     {suppliers.map((supplier) => (
-                      <option
-                        key={supplier.id}
-                        value={supplier.id}
-                      >
+                      <option key={supplier.id} value={supplier.id}>
                         {supplier.nombre}
                       </option>
                     ))}
@@ -232,6 +251,7 @@ export const ProductsModal = ({
                 </div>
               </div>
             </div>
+
             <div className="modal-footer">
               <button type="button" className="btn" onClick={closeModal}>
                 Cancelar

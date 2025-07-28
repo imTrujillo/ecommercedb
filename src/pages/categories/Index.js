@@ -1,67 +1,60 @@
 import React, { useEffect, useState } from "react";
 import Show from "./Show";
-import { CategoryModal } from "../../components/CategoryModal";
+import { CategoryModal } from "../../components/modals/CategoryModal";
 import { IconPlus } from "@tabler/icons-react";
-import { DeleteModal } from "../../components/DeleteModal";
-import { apiServiceGet } from "../../apiService/apiService";
+import { DeleteModal } from "../../components/modals/DeleteModal";
+import { apiServiceGet } from "../../API/apiService";
+import { Header } from "../../assets/Header";
+import PaginationControl from "../../assets/PaginationControl";
 
 export const Index = () => {
-  //LLAMAR LA API
   const [categories, setCategories] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
   const fetchData = async () => {
-    const cat = apiServiceGet("categories", "");
+    const cat = await apiServiceGet("categorias", "");
     setCategories(cat);
   };
+
   useEffect(() => {
     fetchData();
   }, []);
 
-  // [
-  //   {
-  //     IDCategoria: "1",
-  //     NombreCategoria: "Prueba1",
-  //     Descripción: "Descripción de prueba",
-  //   },
-  //   {
-  //     IDCategoria: "2",
-  //     NombreCategoria: "Prueba2",
-  //     Descripción: "Descripción de prueba",
-  //   },
-  //   {
-  //     IDCategoria: "3",
-  //     NombreCategoria: "Prueba3",
-  //     Descripción: "Descripción de prueba",
-  //   },
-  // ];
+  const totalPages = Math.ceil(categories.length / rowsPerPage);
 
-  //CREAR/EDITAR UNA CATEGORIA
+  const visibleData = categories.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  // Modal y lógica
   const [showModal, setShowModal] = useState(false);
-  const closeModal = () => {
-    setCategory({
-      IDCategoria: 0,
-      NombreCategoria: "",
-      Descripción: "",
-    });
-    setShowModal(false);
-  };
   const [category, setCategory] = useState({
-    IDCategoria: 0,
-    NombreCategoria: "",
-    Descripción: "",
+    id: 0,
+    nombre: "",
+    descripcion: "",
   });
   const [edit, setEdit] = useState(false);
+  const closeModal = () => {
+    setCategory({ id: 0, nombre: "", descripcion: "" });
+    setShowModal(false);
+  };
   const onEdit = (categoryEdit) => {
     setShowModal(true);
     setEdit(true);
     setCategory(categoryEdit);
   };
+  const handleModal = () => {
+    setShowModal(true);
+    setEdit(false);
+  };
 
-  //ELIMINAR UNA CATEGORIA
   const [showModalDelete, setShowModalDelete] = useState(false);
   const [categoryDelete, setCategoryDelete] = useState(0);
   const closeModalDelete = () => {
     setShowModalDelete(false);
-    setCategoryDelete({ id: 0 });
+    setCategoryDelete(0);
   };
   const onDelete = (categoryId) => {
     setShowModalDelete(true);
@@ -72,31 +65,16 @@ export const Index = () => {
     <div className="page-wrapper">
       <div className="container-xl">
         <div className="row row-cards">
-          {/* ENCABEZADO DE CATEOGRIAS */}
-          <div className="page-header d-print-none">
-            <div className="container-xl">
-              <div className="row g-2 align-items-center">
-                <div className="col">
-                  <h2 className="page-title">Categorías</h2>
-                  <div className="page-pretitle">Clasifica tus productos</div>
-                </div>
+          <Header title="Categorías" subtitle="Clasifica tus productos">
+            <button
+              className="btn btn-primary d-inline-block"
+              onClick={handleModal}
+            >
+              <IconPlus className="me-3" />
+              Agregar categoría
+            </button>
+          </Header>
 
-                <div className="col-auto ms-auto d-print-none">
-                  <div className="btn-list">
-                    <button
-                      className="btn btn-primary d-none d-sm-inline-block"
-                      onClick={() => setShowModal(true)}
-                    >
-                      <IconPlus className="me-3" />
-                      Agregar categoría
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* TABLA DE CATEGORIAS */}
           <div className="col-12">
             <div className="card">
               <div className="table-responsive">
@@ -113,12 +91,35 @@ export const Index = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {categories.length === 0 ? (
-                      <div>No hay categorías disponibles</div>
+                    {visibleData.length <= 0 ? (
+                      <tr>
+                        <td colSpan="100%" className="text-center py-4">
+                          <div className="d-flex flex-column align-items-center justify-content-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="48" // más grande
+                              height="48" // más grande
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="mb-2"
+                            >
+                              <path
+                                stroke="none"
+                                d="M0 0h24v24H0z"
+                                fill="none"
+                              />
+                              <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-2 10.66h-6l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h6l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-5.99 -5l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm6 0l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" />
+                            </svg>
+                            <span className="fw-semibold">
+                              No hay categorías disponibles
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
                     ) : (
-                      categories.map((category) => (
+                      visibleData.map((category, index) => (
                         <Show
-                          key={category.IDCategoria}
+                          key={category.id}
                           category={category}
                           onEdit={onEdit}
                           onDelete={onDelete}
@@ -129,6 +130,12 @@ export const Index = () => {
                 </table>
               </div>
             </div>
+
+            <PaginationControl
+              count={totalPages}
+              page={currentPage}
+              onChange={(event, value) => setCurrentPage(value)}
+            />
           </div>
         </div>
       </div>

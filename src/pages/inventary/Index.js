@@ -1,83 +1,63 @@
 import React, { useEffect, useState } from "react";
 import Show from "./Show";
-import { ProductsModal } from "../../components/ProductsModal";
+import { ProductsModal } from "../../components/modals/ProductsModal";
 import { IconPlus } from "@tabler/icons-react";
-import { DeleteModal } from "../../components/DeleteModal";
-import { apiServiceGet } from "../../apiService/apiService";
+import { DeleteModal } from "../../components/modals/DeleteModal";
+import { apiServiceGet } from "../../API/apiService";
+import { Header } from "../../assets/Header";
+import PaginationControl from "../../assets/PaginationControl";
 
 export const Index = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
   //LLAMAR LA API
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const fetchData = async () => {
-    const prods = await apiServiceGet("Productos");
+
+    const prods = await apiServiceGet("productos", "");
+    const cat = await apiServiceGet("categorias", "");
+    const sup = await apiServiceGet("proveedores", "");
+
     setProducts(prods);
+    setSuppliers(sup);
+    setCategories(cat);
   };
   useEffect(() => {
     fetchData();
   }, []);
-  // DATOS ESTATICOS
-  // const products = [
-  //   {
-  //     IDProducto: "1",
-  //     NombreProducto: "Prueba",
-  //     Descripción: "Descripción de prueba",
-  //     Precio: 24.23,
-  //     Stock: 23,
-  //     CategoriaID: 1,
-  //     ProveedorID: 1,
-  //     Categoria: "Prueba",
-  //     Proveedor: "Universidad",
-  //   },
-  //   {
-  //     IDProducto: "2",
-  //     NombreProducto: "Prueba2",
-  //     Descripción: "Descripción de prueba2",
-  //     Precio: 123.12,
-  //     Stock: 10,
-  //     CategoriaID: 2,
-  //     ProveedorID: 2,
-  //     Categoria: "Prueba2",
-  //     Proveedor: "Universidad2",
-  //   },
-  //   {
-  //     IDProducto: "3",
-  //     NombreProducto: "Prueba3",
-  //     Descripción: "Descripción de prueba3",
-  //     Precio: 99.99,
-  //     Stock: 0,
-  //     CategoriaID: 3,
-  //     ProveedorID: 3,
-  //     Categoria: "Prueba3",
-  //     Proveedor: "Universidad3",
-  //   },
-  // ];
+
+  const totalPages = Math.ceil(products.length / rowsPerPage);
+
+  const visibleData = products.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
   //CREAR/EDITAR UN PRODUCTO
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setProduct({
-      IDProducto: 0,
-      NombreProducto: "",
-      Descripción: "",
-      Precio: 0,
-      Stock: 0,
-      CategoriaID: "",
-      Categoria: "",
-      IDProveedor: "",
-      Proveedor: "",
+      id: 0,
+      nombre: "",
+      descripcion: "",
+      precio: 0,
+      stock: 0,
+      categoriaId: "",
+      proveedorId: "",
     });
     setShowModal(false);
   };
   const [product, setProduct] = useState({
-    IDProducto: 0,
-    NombreProducto: "",
-    Descripción: "",
-    Precio: 0,
-    Stock: 0,
-    CategoriaID: "",
-    Categoria: "",
-    IDProveedor: "",
-    Proveedor: "",
+    id: 0,
+    nombre: "",
+    descripcion: "",
+    precio: 0,
+    stock: 0,
+    categoriaId: "",
+    proveedorId: "",
   });
   const [edit, setEdit] = useState(false);
   const onEdit = (productEdit) => {
@@ -85,25 +65,28 @@ export const Index = () => {
     setEdit(true);
     setProduct(productEdit);
   };
+  const handleModal = () => {
+    setShowModal(true);
+    setEdit(false);
+  };
 
   //ELIMINAR UN PRODUCTO
   const [showModalDelete, setShowModalDelete] = useState(false);
+  const [productDelete, setProductDelete] = useState(0);
   const closeModalDelete = () => {
     setProduct({
-      IDProducto: 0,
-      NombreProducto: "",
-      Descripción: "",
-      Precio: 0,
-      Stock: 0,
-      CategoriaID: "",
-      Categoria: "",
-      IDProveedor: "",
-      Proveedor: "",
+      id: 0,
+      nombre: "",
+      descripcion: "",
+      precio: 0,
+      stock: 0,
+      categoriaId: "",
+      proveedorId: "",
     });
     setShowModalDelete(false);
   };
-  const onDelete = (productDelete) => {
-    setProduct(productDelete);
+  const onDelete = (productId) => {
+    setProductDelete(productId);
     setShowModalDelete(true);
   };
 
@@ -112,30 +95,15 @@ export const Index = () => {
       <div className="container-xl">
         <div className="row row-cards">
           {/* ENCABEZADO DE INVENTARIO */}
-          <div className="page-header d-print-none">
-            <div className="container-xl">
-              <div className="row g-2 align-items-center">
-                <div className="col">
-                  <h2 className="page-title">Inventario</h2>
-                  <div className="page-pretitle">
-                    Registra y elimina productos
-                  </div>
-                </div>
-
-                <div className="col-auto ms-auto d-print-none">
-                  <div className="btn-list">
-                    <button
-                      className="btn btn-primary d-none d-sm-inline-block"
-                      onClick={() => setShowModal(true)}
-                    >
-                      <IconPlus className="me-3" />
-                      Agregar producto
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Header title="Inventario" subtitle="Registra y elimina productos">
+            <button
+              className="btn btn-primary d-inline-block"
+              onClick={handleModal}
+            >
+              <IconPlus className="me-3" />
+              Agregar producto
+            </button>
+          </Header>
 
           {/* TABLA DE PRODUCTOS */}
           <div className="col-12">
@@ -158,13 +126,38 @@ export const Index = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {products.length === 0 ? (
-                      <div>No hay productos disponibles</div>
+                    {visibleData.length <= 0 ? (
+                      <tr>
+                        <td colSpan="100%" className="text-center py-4">
+                          <div className="d-flex flex-column align-items-center justify-content-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="48" // más grande
+                              height="48" // más grande
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="mb-2"
+                            >
+                              <path
+                                stroke="none"
+                                d="M0 0h24v24H0z"
+                                fill="none"
+                              />
+                              <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-2 10.66h-6l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h6l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-5.99 -5l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm6 0l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" />
+                            </svg>
+                            <span className="fw-semibold">
+                              No hay productos disponibles
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
                     ) : (
-                      products.map((product) => (
+                      visibleData.map((product) => (
                         <Show
-                          key={product.IDProducto}
+                          key={product.id}
                           product={product}
+                          categories={categories}
+                          suppliers={suppliers}
                           onEdit={onEdit}
                           onDelete={onDelete}
                         />
@@ -174,6 +167,12 @@ export const Index = () => {
                 </table>
               </div>
             </div>
+
+            <PaginationControl
+              count={totalPages}
+              page={currentPage}
+              onChange={(event, value) => setCurrentPage(value)}
+            />
           </div>
         </div>
       </div>
@@ -182,13 +181,15 @@ export const Index = () => {
         closeModal={closeModal}
         isEdit={edit}
         product={product}
+        suppliers={suppliers}
+        categories={categories}
         fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
-        id={product.IDProducto}
-        endpoint="products/"
+        id={productDelete}
+        endpoint="productos/delete/"
         fetchData={fetchData}
       />
     </div>

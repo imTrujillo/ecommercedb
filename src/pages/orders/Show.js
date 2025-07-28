@@ -1,51 +1,56 @@
-import React from "react";
+import React, { useState } from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
-const Show = ({ order, onEdit, onDelete, products }) => {
-  var bullet_color = "";
-  switch (order.Estado) {
+const Show = ({ openProductsModal, order, onEdit, onDelete, customers }) => {
+  dayjs.extend(relativeTime);
+  let bullet_color = "";
+  switch (order.estado) {
     case "Realizado":
       bullet_color = "bg-blue text-blue-fg";
       break;
     case "Pendiente":
       bullet_color = "bg-orange text-orange-fg";
       break;
+    default:
+      bullet_color = "bg-muted";
+      break;
   }
-  const orderProducts = products.filter(
-    (product) => product.IDProducto === order.ProductoID
-  );
+
+  const customer = customers.find((c) => c.id === order.clienteId);
+
   return (
     <tr>
       <td data-label="IDPedido">
         <div className="d-flex py-1 align-items-center">
-          <span>{order.IDPedido}</span>
+          <span>{order.id}</span>
         </div>
       </td>
       <td data-label="Fecha">
-        <div className="font-weight-medium">{order.Fecha}</div>
+        <div className="font-weight-medium">
+          {dayjs(order.fecha).format(" MMMM D, YYYY. h:mm a")}
+        </div>
       </td>
-      <td className="text-secondary" data-label="Role">
-        <span className={`badge ${bullet_color} w-max`}>{order.Estado}</span>
+      <td className="text-secondary" data-label="Estado">
+        <span className={`badge ${bullet_color} w-max`}>{order.estado}</span>
       </td>
-      <td className="text-secondary" data-label="Role">
-        {order.MetodoPago}
+      <td className="text-secondary" data-label="Método de pago">
+        {order.metodoPago}
       </td>
-      <td className="text-secondary" data-label="Role">
-        {order.DireccionEnvio}
+      <td className="text-secondary" data-label="Dirección de envío">
+        {order.direccionEnvio}
       </td>
-      <td className="text-secondary" data-label="Role">
-        {order.Cliente}
+      <td className="text-secondary" data-label="Cliente">
+        {customer ? customer.nombre : "Cliente no encontrado"}
       </td>
-      <td className="text-secondary" data-label="Role">
-        $ {order.PrecioTotal}
-      </td>
-      <td className="text-secondary markdown" data-label="Role">
-        {orderProducts.map((product) => (
-          <li key={product.IDProducto}>
-            {product.NombreProducto}, {product.Cantidad} unidades, $
-            {product.PrecioUnitario}
-          </li>
-        ))}
+      <td className="text-secondary markdown" data-label="Productos">
+        <button
+          onClick={() => openProductsModal(order.orderDetails)}
+          className="btn btn-action"
+        >
+          Mostrar ↓
+        </button>
       </td>
       <td>
         <div className="btn-list flex-nowrap">
@@ -61,15 +66,13 @@ const Show = ({ order, onEdit, onDelete, products }) => {
                 className="dropdown-item text-yellow"
                 onClick={() => onEdit(order)}
               >
-                <IconPencil />
-                Editar
+                <IconPencil /> Editar
               </button>
               <button
                 className="dropdown-item text-danger"
-                onClick={() => onDelete(order)}
+                onClick={() => onDelete(order.id)}
               >
-                <IconTrash />
-                Eliminar
+                <IconTrash /> Eliminar
               </button>
             </div>
           </div>
