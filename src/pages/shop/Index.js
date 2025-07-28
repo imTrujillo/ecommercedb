@@ -16,16 +16,16 @@ export const Index = () => {
   };
 
   //LLAMAR APIS PARA TIENDA
-  const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [customers, setCustomers] = useState([]);
+  const [categorias, setCategories] = useState([]);
+  const [productos, setProducts] = useState([]);
+  const [proveedores, setSuppliers] = useState([]);
+  const [clientes, setCustomers] = useState([]);
 
   const fetchData = async () => {
-    const cats = await apiServiceGet("categories", "");
-    const prods = await apiServiceGet("products", "");
-    const sups = await apiServiceGet("suppliers", "");
-    const custs = await apiServiceGet("customers", "");
+    const cats = await apiServiceGet("Categorias", "");
+    const prods = await apiServiceGet("Productos", "");
+    const sups = await apiServiceGet("Proveedores", "");
+    const custs = await apiServiceGet("Clientes", "");
 
     setCategories(cats);
     setProducts(prods);
@@ -37,9 +37,9 @@ export const Index = () => {
   }, []);
 
   //DATOS EsTATICOS
-  // const categories = [
+  // const categorias = [
   //   {
-  //     IDCategoria: 1,
+  //     id: 1,
   //     NombreCategoría: "Motocicletas",
   //     Descripción: "Una aventura sobre ruedas",
   //     Productos: [
@@ -68,7 +68,7 @@ export const Index = () => {
   //     ],
   //   },
   //   {
-  //     IDCategoria: 2,
+  //     id: 2,
   //     NombreCategoría: "Cocina",
   //     Descripción: "Para los amantes a la cocina",
   //     Productos: [
@@ -133,16 +133,18 @@ export const Index = () => {
       <div className="page-wrapper">
         <div className="container-xl">
           <div className="row row-cards">
-            {categories.length <= 0 ? (
-              <div>No hay categorías disponibles</div>
+            {categorias.length <= 0 ? (
+              <div className="col-12 text-center mt-3">
+                No hay categorias disponibles
+              </div>
             ) : (
-              categories.map((category) => (
+              categorias.map((category) => (
                 <ShopCategories
-                  products={products}
-                  suppliers={suppliers}
+                  productos={productos}
+                  proveedores={proveedores}
                   category={category}
                   setProductsCart={setProductsCart}
-                  key={category.IDCategoria}
+                  key={category.id}
                 />
               ))
             )}
@@ -170,7 +172,9 @@ export const Index = () => {
           <div className="offcanvas-body">
             {/* PRODUCTOS DEL CARRITO DE COMPRAS */}
             {productsCart.length <= 0 ? (
-              <div>¡Tu carrito está vacío!</div>
+              <div className="col-12 text-center mt-3">
+                No hay categorias disponibles
+              </div>
             ) : (
               <>
                 {productsCart.map((productBuy, id) => (

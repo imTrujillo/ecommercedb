@@ -13,9 +13,9 @@ export const CategoryModal = ({
   fetchData,
 }) => {
   const [formData, setFormData] = useState({
-    IDCategoria: 0,
-    NombreCategoria: "",
-    Descripción: "",
+    Id: 0,
+    Nombre: "",
+    Descripcion: "",
   });
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export const CategoryModal = ({
   const handleSubmit = async () => {
     if (isEdit) {
       await apiServiceUpdate(
-        `categorias/categoria/update/${category.IDCategoria}`,
+        `categorias/categoria/update/${category.Id}`,
         formData
       );
     } else {
@@ -40,9 +40,9 @@ export const CategoryModal = ({
     }
     closeModal();
     setFormData({
-      IDCategoria: 0,
-      NombreCategoria: "",
-      Descripción: "",
+      Id: 0,
+      Nombre: "",
+      Descripcion: "",
     });
     fetchData();
   };
@@ -61,7 +61,7 @@ export const CategoryModal = ({
             <input
               type="hidden"
               name="IDCategory"
-              value={category.IDCategoria}
+              value={category.Id}
             ></input>
           ) : (
             ""
@@ -84,24 +84,24 @@ export const CategoryModal = ({
                 <label className="form-label required">Nombre</label>
                 <input
                   type="text"
-                  name="NombreCategoria"
+                  name="Nombre"
                   onChange={handleChange}
                   className="form-control"
-                  value={formData.NombreCategoria}
+                  value={formData.Nombre}
                   placeholder="Categoria 01"
                   pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
                   required
                 />
               </div>
               <div className="row mb-3">
-                <label className="form-label required">Descripción</label>
+                <label className="form-label required">Descripcion</label>
                 <textarea
                   type="text"
-                  name="Descripción"
+                  name="Descripcion"
                   className="form-control"
-                  placeholder="Descripción de Categoria 01"
+                  placeholder="Descripcion de Categoria 01"
                   pattern="[A-Za-zÁÉÍÓÚáéíóúñ\s]+"
-                  value={formData.Descripción}
+                  value={formData.Descripcion}
                   onChange={handleChange}
                   required
                 ></textarea>

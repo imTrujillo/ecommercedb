@@ -9,22 +9,22 @@ const ShopProducts = ({ product, setProductsCart, suppliers }) => {
     setProductsCart((prev) => [...prev, product]);
   };
   const supplier = suppliers.filter(
-    (supplier) => supplier.IDProveedor === product.IDProveedor
+    (supplier) => supplier.id === product.id
   );
 
   return (
     <div className="card w-100">
       <img
         src={photo}
-        alt={product.NombreProducto}
+        alt={product.nombre}
         loading="lazy"
         className="w-100"
       />
       <div className="card-body">
-        <p className="text-secondary">{supplier.NombreProveedor}</p>
-        <h3 className="card-title">{product.NombreProducto}</h3>
-        <p className="text-secondary">{product.Descripción}</p>
-        <h5>$ {product.Precio.toFixed(2)}</h5>
+        <p className="text-secondary">{supplier.nombre}</p>
+        <h3 className="card-title">{product.nombre}</h3>
+        <p className="text-secondary">{product.descripcion}</p>
+        <h5>$ {product.precio.toFixed(2)}</h5>
         <button
           className="btn btn-primary"
           onClick={() => handleProduct(product)}
