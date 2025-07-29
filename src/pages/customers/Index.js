@@ -14,36 +14,19 @@ export const Index = () => {
   //LLAMAR LA API
   const [customers, setCustomers] = useState([]);
   const fetchData = async () => {
-    const cust = apiServiceGet("customers");
+    const cust = apiServiceGet("customers", "");
     setCustomers(cust);
   };
   useEffect(() => {
     fetchData();
   }, []);
-  // DATOS ESTATICOS
-  // const customers = [
-  //   {
-  //     IDCliente: "1",
-  //     NombreCliente: "Mati",
-  //     Teléfono: "+503 7364 6423",
-  //     Email: "example@example1.com",
-  //     Dirección: "Av. Bernal",
-  //   },
-  //   {
-  //     IDCliente: "2",
-  //     NombreCliente: "Santi",
-  //     Teléfono: "+503 6450 5134",
-  //     Email: "example@example2.com",
-  //     Dirección: "Av. Bernal",
-  //   },
-  //   {
-  //     IDCliente: "3",
-  //     NombreCliente: "Milli",
-  //     Teléfono: "+503 9784 2534",
-  //     Email: "example@example3.com",
-  //     Dirección: "Av. Bernal",
-  //   },
-  // ];
+
+  const totalPages = Math.ceil(customers.length / rowsPerPage);
+
+  const visibleData = customers.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
   //CREAR/EDITAR UN CLIENTE
   const [showModal, setShowModal] = useState(false);
@@ -122,8 +105,31 @@ export const Index = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {customers.length === 0 ? (
-                      <tr>No hay clientes disponibles</tr>
+                    {customers.length <= 0 ? (
+                      <tr>
+                        <td colSpan="100%" className="text-center py-4">
+                          <div className="d-flex flex-column align-items-center justify-content-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="48" // más grande
+                              height="48" // más grande
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="mb-2"
+                            >
+                              <path
+                                stroke="none"
+                                d="M0 0h24v24H0z"
+                                fill="none"
+                              />
+                              <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-2 10.66h-6l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h6l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-5.99 -5l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm6 0l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" />
+                            </svg>
+                            <span className="fw-semibold">
+                              No hay clientes disponibles
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
                     ) : (
                       visibleData.map((customer) => (
                         <Show

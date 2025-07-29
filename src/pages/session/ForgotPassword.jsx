@@ -1,224 +1,150 @@
 import React, { useState } from "react";
-import "./ForgotPassword.css";
+import style from "../../css/Auth.module.css";
 import { Link } from "react-router-dom";
-// Si usas toastify, asegúrate de importarlo y configurarlo en tu App.js
-// import { toast } from 'react-toastify';
+import * as Yup from "yup";
+import {
+  IconId,
+  IconKeyFilled,
+  IconLockFilled,
+  IconShieldLockFilled,
+  IconUserFilled,
+} from "@tabler/icons-react";
+import { useAuth } from "./AuthProvider";
+import { toast } from "react-toastify";
 
 export const ForgotPassword = () => {
-    // Estado para controlar el paso actual del formulario (1 para verificación, 2 para nueva contraseña)
-    const [currentStep, setCurrentStep] = useState(1);
+  const [inputs, setInputs] = useState({
+    username: "",
+    dui: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
-    // Estados para los inputs de cada paso
-    const [verificationInputs, setVerificationInputs] = useState({
-        username: "",
-        dui: "",
-    });
-    const [newPasswordInputs, setNewPasswordInputs] = useState({
-        newPassword: "",
-        confirmNewPassword: "",
-    });
+  // VALIDACIONES CON YUP
+  const setNewPasswordSchema = Yup.object().shape({
+    username: Yup.string()
+      .required("El nombre de usuario es requerido.")
+      .min(5, "El usuario debe tener al menos 5 caracteres.")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s]+$/,
+        "No se permiten caracteres especiales"
+      ),
+    dui: Yup.string()
+      .matches(/^[0-9]+$/, "El DUI solo debe contener números")
+      .length(9, "El DUI debe contener 9 caracteres.")
+      .required("El DUI es requerido."),
+    newPassword: Yup.string()
+      .min(6, "La contraseña debe tener al menos 8 caracteres.")
+      .required("La contraseña es requerida."),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref("newPassword"), null], "Las contraseñas no coinciden.")
+      .min(6, "La contraseña debe tener al menos 8 caracteres.")
+      .required("La contraseña es requerida."),
+  });
 
-    // Estados para los mensajes de la aplicación
-    const [message, setMessage] = useState("");
-    const [messageType, setMessageType] = useState(""); // 'success' o 'error'
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setInputs((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-    // Manejador genérico para actualizar los inputs del paso actual
-    const handleInputChange = (e, formType) => {
-        const { name, value } = e.target;
-        if (formType === "verification") {
-            setVerificationInputs((prev) => ({ ...prev, [name]: value }));
+  const auth = useAuth();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Validar el formulario con Yup
+      await setNewPasswordSchema.validate(inputs, { abortEarly: false });
+      inputs.dui = inputs.dui.replace(/^(\d{8})(\d{1})$/, "$1-$2");
+      auth.setNewPassword(inputs);
+    } catch (err) {
+      if (err.name === "ValidationError") {
+        if (err.inner.length > 4) {
+          toast.error("Formulario incompleto.");
         } else {
-            // formType === 'newPassword'
-            setNewPasswordInputs((prev) => ({ ...prev, [name]: value }));
-        }
-        // Limpiar mensajes al cambiar los inputs
-        setMessage("");
-        setMessageType("");
-    };
-
-    // Manejador para el envío del formulario de verificación (Paso 1)
-    const handleVerificationSubmit = async (e) => {
-        e.preventDefault();
-        // Aquí iría la lógica para enviar los datos de verificación (username, DUI) al backend y esperar una respuesta.
-        console.log("Verificando identidad con:", verificationInputs);
-
-        // *** SIMULACIÓN DE LLAMADA A LA API ***
-        // todo conexion con la API para verificación de datos
-        // const response = await apiServicePost('/url', verificationInputs);
-        // if (response.status === 200) { setCurrentStep(2); } else { setError/Message }
-
-        // Simulación: Si los datos son 'correctos', avanza al paso 2
-        if (
-            verificationInputs.username === "testuser" &&
-            verificationInputs.dui === "12345678"
-        ) {
-            setMessage(
-                "Identidad verificada. Ahora puedes ingresar tu nueva contraseña."
-            );
-            setMessageType("success");
-            setCurrentStep(2); // Avanzar al segundo paso
-        } else {
-            setMessage(
-                "Nombre de usuario o DUI incorrectos. Por favor, inténtalo de nuevo."
-            );
-            setMessageType("error");
-        }
-    };
-
-    // Manejador para el envío del formulario de nueva contraseña (Paso 2)
-    const handleNewPasswordSubmit = async (e) => {
-        e.preventDefault();
-        // Aquí iría la lógica para enviar la nueva contraseña al backend
-        console.log("Restableciendo contraseña a:", newPasswordInputs);
-
-        // *** SIMULACIÓN DE LLAMADA A LA API ***
-        // todo conexion con la API para registrar nueva contraseña
-        // const response = await apiServicePost('url', newPasswordInputs);
-        // if (response.status === 200) { showSuccessMessage; navigateToLogin; } else { setError/Message }
-
-        if (
-            newPasswordInputs.newPassword === newPasswordInputs.confirmNewPassword &&
-            newPasswordInputs.newPassword.length >= 6
-        ) {
-            setMessage(
-                "Contraseña restablecida con éxito. Redirigiendo al inicio de sesión..."
-            );
-            setMessageType("success");
-            // aqui podría ir el rediccionamiento
-            // navigate('/login');
-            // Por ahora, solo muestra el mensaje y restablece los campos
-            setNewPasswordInputs({ newPassword: "", confirmNewPassword: "" });
-            setTimeout(() => {
-                // Opcional: Volver al paso 1 o redirigir
-                setCurrentStep(1); // Para poder probar de nuevo
-                setMessage("");
-                setMessageType("");
-            }, 3000); // Redirige después de 3 segundos
-        } else {
-            if (
-                newPasswordInputs.newPassword !== newPasswordInputs.confirmNewPassword
-            ) {
-                setMessage("Las contraseñas no coinciden. Por favor, verifica.");
-            } else if (newPasswordInputs.newPassword.length < 6) {
-                setMessage("La nueva contraseña debe tener al menos 6 caracteres.");
+          err.inner.forEach((e) => {
+            if (e?.message) {
+              toast.error(e.message);
             }
-            setMessageType("error");
+          });
         }
-    };
+      } else {
+        console.error("Error de ectualización de contraseña:", err);
+        toast.error(
+          "Error al actualizar la contraseña. Por favor, inténtalo de nuevo."
+        );
+      }
+    }
+  };
 
-    return (
-        <div className="login-container">
-            <div className="login-card">
-                {/* Encabezado del Paso 1 */}
-                {currentStep === 1 && (
-                    <div className="login-header">
-                        <i className="fas fa-user-shield login-icon"></i>
-                        <h2>Verifica tu identidad</h2>
-                        <p>Ingresa tus datos para restablecer tu contraseña.</p>
-                    </div>
-                )}
-
-                {/* Encabezado del Paso 2 */}
-                {currentStep === 2 && (
-                    <div className="login-header">
-                        <i className="fas fa-key login-icon"></i>
-                        <h2>Nueva contraseña</h2>
-                        <p>Ingresa y confirma tu nueva contraseña.</p>
-                    </div>
-                )}
-
-                {/* Área para mostrar mensajes */}
-                {message && (
-                    <div
-                        className={`message-area ${messageType === "error" ? "error-message" : "success-message"
-                            }`}
-                    >
-                        <p>{message}</p>
-                    </div>
-                )}
-
-                {/* Formulario de Verificación (Paso 1) */}
-                {currentStep === 1 && (
-                    <form
-                        className="forgot-password-form"
-                        onSubmit={handleVerificationSubmit}
-                    >
-                        <div className="input-group">
-                            <i className="fas fa-user icon"></i>
-                            <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                placeholder="Nombre de usuario"
-                                required
-                                value={verificationInputs.username}
-                                onChange={(e) => handleInputChange(e, "verification")}
-                            />
-                        </div>
-                        <div className="input-group">
-                            <i className="fas fa-id-card icon"></i>
-                            <input
-                                type="text"
-                                id="dui"
-                                name="dui"
-                                placeholder="DUI"
-                                required
-                                value={verificationInputs.dui}
-                                onChange={(e) => handleInputChange(e, "verification")}
-                            />
-                        </div>
-                        <button type="submit" className="login-button">
-                            Continuar
-                        </button>
-                    </form>
-                )}
-
-                {/* Formulario de Nueva Contraseña (Paso 2) */}
-                {currentStep === 2 && (
-                    <form
-                        className="forgot-password-form"
-                        onSubmit={handleNewPasswordSubmit}
-                    >
-                        <div className="input-group">
-                            <i className="fas fa-lock icon"></i>
-                            <input
-                                type="password"
-                                id="new-password"
-                                name="newPassword"
-                                placeholder="Nueva contraseña"
-                                required
-                                value={newPasswordInputs.newPassword}
-                                onChange={(e) => handleInputChange(e, "newPassword")}
-                            />
-                        </div>
-                        <div className="input-group">
-                            <i className="fas fa-lock icon"></i>
-                            <input
-                                type="password"
-                                id="confirm-new-password"
-                                name="confirmNewPassword"
-                                placeholder="Confirmar nueva contraseña"
-                                required
-                                value={newPasswordInputs.confirmNewPassword}
-                                onChange={(e) => handleInputChange(e, "newPassword")}
-                            />
-                        </div>
-                        <button type="submit" className="login-button">
-                            Restablecer Contraseña
-                        </button>
-                    </form>
-                )}
-
-                <div className="signup-link">
-                    <p>
-                        ¿Recordaste tu contraseña?{" "}
-                        <Link
-                            to="/login">
-                            <a>Volver al inicio de sesión</a>
-                        </Link>
-                    </p>
-                </div>
-            </div>
+  return (
+    <div className={style.loginContainer}>
+      <div className={style.loginCard}>
+        <div className={style.loginHeader}>
+          <IconShieldLockFilled className={style.loginIcon} />
+          <h2>Verifica tu identidad</h2>
+          <p>Ingresa tus datos para restablecer tu contraseña.</p>
         </div>
-    );
+        <form className="forgot-password-form" onSubmit={handleSubmit}>
+          <div className={style.inputGroup}>
+            <IconUserFilled className={style.icon} />
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Nombre de usuario"
+              value={inputs.username}
+              onChange={(e) => handleInputChange(e, "verification")}
+            />
+          </div>
+          <div className={style.inputGroup}>
+            <IconId className={style.icon} />
+            <input
+              type="text"
+              id="dui"
+              name="dui"
+              placeholder="DUI"
+              value={inputs.dui}
+              onChange={(e) => handleInputChange(e, "verification")}
+            />
+          </div>
+          <div className={style.inputGroup}>
+            <IconLockFilled className={style.icon} />
+            <input
+              type="password"
+              id="new-password"
+              name="newPassword"
+              placeholder="Nueva contraseña"
+              value={inputs.newPassword}
+              onChange={(e) => handleInputChange(e, "newPassword")}
+            />
+          </div>
+          <div className={style.inputGroup}>
+            <IconLockFilled className={style.icon} />
+            <input
+              type="password"
+              id="confirm-new-password"
+              name="confirmPassword"
+              placeholder="Confirmar nueva contraseña"
+              value={inputs.confirmPassword}
+              onChange={(e) => handleInputChange(e, "newPassword")}
+            />
+          </div>
+          <button type="submit" className={style.loginButton}>
+            Restablecer Contraseña
+          </button>
+        </form>
+
+        <div className={style.signupLink}>
+          <p>
+            ¿Recordaste tu contraseña?{" "}
+            <Link to="/login">
+              <a>Volver al inicio de sesión</a>
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 };

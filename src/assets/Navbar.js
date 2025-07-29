@@ -14,12 +14,13 @@ import {
   IconUsersPlus,
   IconShoppingCart,
   IconLogin2,
+  IconLogout2,
 } from "@tabler/icons-react";
 import { useAuth } from "../pages/session/AuthProvider";
 
 export default function Navbar({ darkTheme, handleTheme }) {
   var location = useLocation();
-  const { rol } = useAuth();
+  const { rol, logout, token } = useAuth();
 
   return (
     <nav>
@@ -41,7 +42,7 @@ export default function Navbar({ darkTheme, handleTheme }) {
             ""
           )}
 
-          <div className=" d-flex align-items-center flex-row gap-3">
+          <div className=" d-flex align-items-center flex-row gap-2">
             <button
               className="nav-link px-0"
               title={darkTheme ? "Modo claro" : "Modo oscuro"}
@@ -89,12 +90,21 @@ export default function Navbar({ darkTheme, handleTheme }) {
                 />
               </a> */}
               <div className="p-0 d-md-none align-self-center">
-                <Link
-                  to="/login"
-                  className="btn btn-outline-success px-3 space-x-2"
-                >
-                  <IconLogin2 />
-                </Link>
+                {token ? (
+                  <button
+                    onClick={logout}
+                    className="btn btn-outline-danger px-3 space-x-2"
+                  >
+                    <IconLogout2 />
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="btn btn-outline-success px-3 space-x-2"
+                  >
+                    <IconLogin2 />
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -234,12 +244,21 @@ export default function Navbar({ darkTheme, handleTheme }) {
                   ]}
                 />
                 <div className="p-0 align-self-center">
-                  <Link
-                    to="/login"
-                    className="btn btn-outline-success px-3 space-x-2"
-                  >
-                    <IconLogin2 /> Iniciar Sesión
-                  </Link>
+                  {!token ? (
+                    <Link
+                      to="/login"
+                      className="btn btn-outline-success px-3 space-x-2"
+                    >
+                      <IconLogin2 /> Iniciar Sesión
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={logout}
+                      className="btn btn-outline-danger px-3 space-x-2"
+                    >
+                      <IconLogout2 /> Cerrar Sesión
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

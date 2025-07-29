@@ -1,4 +1,5 @@
 import App from "../layouts/App";
+import Guest from "../layouts/Guest";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Index as InventaryIndex } from "../pages/inventary/Index";
 import { Index as SuppliersIndex } from "../pages/suppliers/Index";
@@ -8,10 +9,9 @@ import { Index as OrdersIndex } from "../pages/orders/Index";
 import { Index as CustomersIndex } from "../pages/customers/Index";
 import { Login } from "../pages/session/Login";
 import { SignUp } from "../pages/session/Signup";
-import { ForgotPassword } from "../pages/session/ForgotPassword"
+import { ForgotPassword } from "../pages/session/ForgotPassword";
 import AuthProvider from "../pages/session/AuthProvider";
 import PrivateRoute from "../pages/session/PrivateRoute";
-
 
 export default function AppRoutes() {
   return (
@@ -32,33 +32,33 @@ export default function AppRoutes() {
             <Route
               path="/login"
               element={
-                <App>
+                <Guest>
                   <Login />
-                </App>
+                </Guest>
               }
             ></Route>
 
             <Route
               path="/sign-up"
               element={
-              <App>
-                <SignUp/>
-              </App>
+                <Guest>
+                  <SignUp />
+                </Guest>
               }
             ></Route>
 
             <Route
               path="/forgotpassword"
               element={
-                <App>
-                  <ForgotPassword/>
-                </App>
+                <Guest>
+                  <ForgotPassword />
+                </Guest>
               }
             ></Route>
 
             {/* RUTAS PROTEGIDAS */}
             <Route
-              element={<PrivateRoute allowedRoles={["employee", "admin"]} />}
+              element={<PrivateRoute allowedRoles={["Employee", "Customer"]} />}
             >
               <Route
                 path="/inventario"

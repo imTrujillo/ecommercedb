@@ -2,9 +2,10 @@ import axios from "axios";
 
 import { toast } from "react-toastify";
 
-const baseUrl = "https://localhost:7160/api/";
+// const baseUrl = "https://localhost:7160/api/";
+const baseUrl = "https://localhost:7084/api/";
 
-export const apiServiceGet = async (endpoint, id, token = null) => {
+export const apiServiceGet = async (endpoint, id = null, token = null) => {
   try {
     const url = id ? baseUrl + endpoint + "/" + id : baseUrl + endpoint;
 
@@ -29,21 +30,13 @@ export const apiServiceGet = async (endpoint, id, token = null) => {
 };
 
 export const apiServicePost = async (endpoint, object, token = null) => {
-  try {
-    const response = await axios.post(
-      baseUrl + endpoint,
-      object,
-      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
-    );
+  const config = token
+    ? { headers: { Authorization: `Bearer ${token}` } }
+    : undefined;
 
-    if (response.status === 200 || response.status === 201) {
-      return response.data;
-    }
-  } catch (error) {
-    console.error("Ocurrió un error", error.message);
+  const response = await axios.post(baseUrl + endpoint, object, config);
 
-    return [];
-  }
+  return response;
 };
 
 export const apiServiceUpdate = async (endpoint, object, token = null) => {

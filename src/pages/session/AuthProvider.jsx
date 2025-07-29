@@ -6,92 +6,152 @@ import { toast } from "react-toastify";
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-  // Inicializa el estado desde sessionStorage al cargar el componente
-  const getInitialAuthState = () => {
-    try {
-      const storedTokenData = sessionStorage.getItem("token");
-      if (storedTokenData) {
-        const parsedData = JSON.parse(storedTokenData);
-        return {
-          user: parsedData.user || null,
-          rol: parsedData.rol || null,
-          token: parsedData.token || null,
-        };
-      }
-    } catch (error) {
-      console.error("Error parsing token from sessionStorage:", error);
-      // Limpia el sessionStorage si hay un error al parsear
-      sessionStorage.removeItem("token");
-    }
-    return { user: null, rol: null, token: null };
-  };
+  const [token, setToken] = useState(() => {
+    const stored = sessionStorage.getItem("token");
+    return stored ? JSON.parse(stored) : null;
+  });
 
-  const initialAuthState = getInitialAuthState();
-  const [user, setUser] = useState(initialAuthState.user);
-  const [rol, setRol] = useState(initialAuthState.rol);
-  const [token, setToken] = useState(initialAuthState.token);
+  const [refreshToken, setRefreshToken] = useState(() => {
+    const stored = sessionStorage.getItem("refreshToken");
+    return stored ? JSON.parse(stored) : null;
+  });
+
+  const [rol, setRol] = useState(() => {
+    const stored = sessionStorage.getItem("rol");
+    return stored ? JSON.parse(stored) : null;
+  });
+
+  const [user, setUser] = useState(() => {
+    const stored = sessionStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  });
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
 
   const navigate = useNavigate();
 
-  const login = async (data) => {
+  const signup = async (data, rol) => {
     try {
-            const response = await apiServicePost("login", data);
+      const response = await apiServicePost(`auth/register/${rol}`, data);
 
-      if (response && response.status === 200) {
-        setUser(response.data.username);
-        setRol(response.data.rol);
-        setToken(response.data.token);
-
-        //Guarda el objeto como una cadena JSON en sessionStorage
-        sessionStorage.setItem(
-          "token",
-          JSON.stringify({
-            user: response.data.username,
-            rol: response.data.rol,
-            token: response.data.token,
-          })
-        );
-
-        if (response.data.rol === "admin") {
-          navigate("/admin");
-        } else if (response.data.rol === "employee") {
-          navigate("/employee");
-        } else {
-          // Si el rol no es ni admin ni employee, puedes redirigir a una página por defecto o mostrar un mensaje
-          navigate("/dashboard"); // Ejemplo: Redirigir a un dashboard genérico
-        }
-        toast.success("Inicio de sesión exitoso.");
+      if (response.status >= 200 && response.status < 300) {
+        navigate("/login");
+        toast.success("Usuario creado exitosamente.");
       } else {
-        // Manejo de errores si el status no es 200 o la respuesta es inesperada
-        toast.error("Credenciales incorrectas o error en el servidor.");
-        console.error("Login failed with status:", response?.status);
+        throw { response };
       }
     } catch (error) {
-      // Captura errores de red o errores lanzados por apiServicePost
-      console.error("Error durante el inicio de sesión:", error);
-      toast.error("Ocurrió un error al intentar iniciar sesión.");
+      if (error.response && Array.isArray(error.response.data)) {
+        error.response.data.forEach((err) => {
+          const prop = err.property || "Campo";
+          const message = err.error || "Error desconocido";
+          toast.error(`${prop}: ${message}`);
+        });
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Ocurrió un error al intentar registrarte.");
+      }
+    }
+  };
+
+  const login = async (data) => {
+    try {
+      const response = await apiServicePost("auth/login", data);
+
+      if (response.status >= 200 && response.status < 300) {
+        const { refreshToken, accessToken, user } = response.data;
+
+        setUser(user.username);
+        setRol(user.role);
+        setToken(accessToken);
+        setRefreshToken(refreshToken);
+
+        sessionStorage.setItem("user", JSON.stringify(user.username));
+        sessionStorage.setItem("rol", JSON.stringify(user.role));
+        sessionStorage.setItem("token", JSON.stringify(accessToken));
+        sessionStorage.setItem("refreshToken", JSON.stringify(refreshToken));
+
+        navigate("/inventario");
+        toast.success("Inicio de sesión exitoso.");
+      } else {
+        throw { response };
+      }
+    } catch (error) {
+      if (error.response && Array.isArray(error.response.data)) {
+        error.response.data.forEach((err) => {
+          const prop = err.property || "Campo";
+          const message = err.error || "Error desconocido";
+          toast.error(`${prop}: ${message}`);
+        });
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Ocurrió un error al iniciar sesión.");
+      }
+    }
+  };
+
+  const setNewPassword = async (data) => {
+    try {
+      const response = await apiServicePost("auth/reset-password", data);
+
+      if (response && response.status >= 200 && response.status < 300) {
+        navigate("/login");
+        toast.success("Contraseña actualizada exitosamente.");
+      } else {
+        throw { response };
+      }
+    } catch (error) {
+      if (error.response && Array.isArray(error.response.data)) {
+        error.response.data.forEach((err) => {
+          const prop = err.property || "Campo";
+          const message = err.error || "Error desconocido";
+          toast.error(`${prop}: ${message}`);
+        });
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Ocurrió un error al iniciar sesión.");
+      }
     }
   };
 
   const logout = async () => {
     try {
-      await apiServiceDelete("logout", token);
+      const body = {
+        accessToken: token,
+        refreshToken: refreshToken,
+      };
+      await apiServicePost("auth/logout", body, token);
+      toast.success("Sesión cerrada.");
     } catch (error) {
       console.error("Error durante el logout en la API:", error);
-      toast.error("Error al cerrar sesión en el servidor, pero su sesión local ha sido cerrada.");
     } finally {
-      // Siempre limpia el estado y el sessionStorage localmente
       setUser(null);
       setRol(null);
       setToken(null);
       sessionStorage.removeItem("token");
+      sessionStorage.removeItem("refreshToken");
       navigate("/");
     }
   };
 
+  if (isLoading) return <div>Cargando...</div>;
+
   return (
     //Pasa los valores como un objeto
-    <AuthContext.Provider value={{ user, token, rol, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, rol, signup, setNewPassword, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

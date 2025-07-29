@@ -36,11 +36,8 @@ export default function App({ children }) {
 
   return (
     <>
-      {location.pathname == "/login" ? (
-        ""
-      ) : (
-        <Navbar darkTheme={darkTheme} handleTheme={handleTheme} />
-      )}
+      <Navbar darkTheme={darkTheme} handleTheme={handleTheme} />
+
       <main>{children}</main>
       <ToastContainer
         id="toast-popup"
