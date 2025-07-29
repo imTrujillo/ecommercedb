@@ -7,8 +7,11 @@ import { Index as CategoriesIndex } from "../pages/categories/Index";
 import { Index as OrdersIndex } from "../pages/orders/Index";
 import { Index as CustomersIndex } from "../pages/customers/Index";
 import { Login } from "../pages/session/Login";
+import { SignUp } from "../pages/session/Signup";
+import { ForgotPassword } from "../pages/session/ForgotPassword"
 import AuthProvider from "../pages/session/AuthProvider";
 import PrivateRoute from "../pages/session/PrivateRoute";
+
 
 export default function AppRoutes() {
   return (
@@ -31,6 +34,24 @@ export default function AppRoutes() {
               element={
                 <App>
                   <Login />
+                </App>
+              }
+            ></Route>
+
+            <Route
+              path="/sign-up"
+              element={
+              <App>
+                <SignUp/>
+              </App>
+              }
+            ></Route>
+
+            <Route
+              path="/forgotpassword"
+              element={
+                <App>
+                  <ForgotPassword/>
                 </App>
               }
             ></Route>

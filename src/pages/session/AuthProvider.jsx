@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react"; // Añadido useEffect
 import { useNavigate } from "react-router-dom";
 import { apiServiceDelete, apiServicePost } from "../../API/apiService";
 import { toast } from "react-toastify";
@@ -6,57 +6,92 @@ import { toast } from "react-toastify";
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [rol, setRol] = useState(null);
-  const [token, setToken] = useState(sessionStorage.getItem("token") || []);
+  // Inicializa el estado desde sessionStorage al cargar el componente
+  const getInitialAuthState = () => {
+    try {
+      const storedTokenData = sessionStorage.getItem("token");
+      if (storedTokenData) {
+        const parsedData = JSON.parse(storedTokenData);
+        return {
+          user: parsedData.user || null,
+          rol: parsedData.rol || null,
+          token: parsedData.token || null,
+        };
+      }
+    } catch (error) {
+      console.error("Error parsing token from sessionStorage:", error);
+      // Limpia el sessionStorage si hay un error al parsear
+      sessionStorage.removeItem("token");
+    }
+    return { user: null, rol: null, token: null };
+  };
+
+  const initialAuthState = getInitialAuthState();
+  const [user, setUser] = useState(initialAuthState.user);
+  const [rol, setRol] = useState(initialAuthState.rol);
+  const [token, setToken] = useState(initialAuthState.token);
 
   const navigate = useNavigate();
 
   const login = async (data) => {
     try {
-      const response = apiServicePost("login", data);
+            const response = await apiServicePost("login", data);
 
-      if (response.status == 200) {
+      if (response && response.status === 200) {
         setUser(response.data.username);
+        setRol(response.data.rol);
         setToken(response.data.token);
 
-        if (response.data.rol == "admin") {
-          setRol("admin");
-          sessionStorage.setItem("token", {
-            user: user,
-            rol: "admin",
+        //Guarda el objeto como una cadena JSON en sessionStorage
+        sessionStorage.setItem(
+          "token",
+          JSON.stringify({
+            user: response.data.username,
+            rol: response.data.rol,
             token: response.data.token,
-          });
+          })
+        );
 
+        if (response.data.rol === "admin") {
           navigate("/admin");
-          return;
-        } else if (response.data.rol == "employee") {
-          setRol("employee");
-          sessionStorage.setItem("token", {
-            user: user,
-            rol: "employee",
-            token: response.data.token,
-          });
-
+        } else if (response.data.rol === "employee") {
           navigate("/employee");
-          return;
+        } else {
+          // Si el rol no es ni admin ni employee, puedes redirigir a una página por defecto o mostrar un mensaje
+          navigate("/dashboard"); // Ejemplo: Redirigir a un dashboard genérico
         }
+        toast.success("Inicio de sesión exitoso.");
+      } else {
+        // Manejo de errores si el status no es 200 o la respuesta es inesperada
+        toast.error("Credenciales incorrectas o error en el servidor.");
+        console.error("Login failed with status:", response?.status);
       }
     } catch (error) {
-      toast.error("Error", "Ocurrió un error :/");
+      // Captura errores de red o errores lanzados por apiServicePost
+      console.error("Error durante el inicio de sesión:", error);
+      toast.error("Ocurrió un error al intentar iniciar sesión.");
     }
   };
 
-  const logout = () => {
-    const response = apiServiceDelete("logout", token);
-    setUser("");
-    setToken([]);
-    sessionStorage.removeItem("token");
-    navigate("/");
+  const logout = async () => {
+    try {
+      await apiServiceDelete("logout", token);
+    } catch (error) {
+      console.error("Error durante el logout en la API:", error);
+      toast.error("Error al cerrar sesión en el servidor, pero su sesión local ha sido cerrada.");
+    } finally {
+      // Siempre limpia el estado y el sessionStorage localmente
+      setUser(null);
+      setRol(null);
+      setToken(null);
+      sessionStorage.removeItem("token");
+      navigate("/");
+    }
   };
 
   return (
-    <AuthContext.Provider value={(user, token, rol, login, logout)}>
+    //Pasa los valores como un objeto
+    <AuthContext.Provider value={{ user, token, rol, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
