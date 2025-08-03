@@ -25,3 +25,7 @@ code {
   overflow: visible !important;
   position: absolute !important;
 }
+
+.search-input {
+  width: 140px !important;
+}

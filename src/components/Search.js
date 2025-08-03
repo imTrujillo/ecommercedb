@@ -37,7 +37,7 @@ export const Search = ({ tableIds }) => {
         </span>
         <input
           type="text"
-          className="form-control"
+          className="form-control search-input"
           placeholder="Buscar…"
           aria-label="Buscar"
           value={query}

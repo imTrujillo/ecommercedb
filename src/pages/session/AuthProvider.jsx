@@ -39,7 +39,7 @@ const AuthProvider = ({ children }) => {
       const response = await apiServicePost(`auth/register/${rol}`, data);
 
       if (response.status >= 200 && response.status < 300) {
-        navigate("/login");
+        login({ username: data.username, password: data.password });
         toast.success("Usuario creado exitosamente.");
       } else {
         throw { response };
@@ -109,18 +109,12 @@ const AuthProvider = ({ children }) => {
         throw { response };
       }
     } catch (error) {
-      if (error.response && Array.isArray(error.response.data)) {
-        error.response.data.forEach((err) => {
-          const prop = err.property || "Campo";
-          const message = err.error || "Error desconocido";
-          toast.error(`${prop}: ${message}`);
-        });
-      } else if (error.response?.data?.message) {
+      if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else if (error.response?.data?.error) {
         toast.error(error.response.data.error);
       } else {
-        toast.error("Ocurrió un error al iniciar sesión.");
+        toast.error("Ocurrió un error al cambiar la contraseña.");
       }
     }
   };
@@ -141,6 +135,8 @@ const AuthProvider = ({ children }) => {
       setToken(null);
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("refreshToken");
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("rol");
       navigate("/");
     }
   };

@@ -113,7 +113,7 @@ export default function Navbar({ darkTheme, handleTheme }) {
       <header className="navbar-expand-md">
         <div className="collapse navbar-collapse" id="navbar-menu">
           <div className="navbar">
-            <div className=" container-xl">
+            <div className="container-xl gap-3 d-flex">
               <ul className="navbar-nav">
                 <h1 className="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
                   <a href=".">
@@ -206,7 +206,7 @@ export default function Navbar({ darkTheme, handleTheme }) {
                   ""
                 )}
               </ul>
-              <div className="d-none d-md-flex flex-row gap-3">
+              <div className="d-none d-md-flex flex-row align-items-center gap-3">
                 {/* ACTIVAR MODO CLARO/OSCURO */}
                 <button
                   className="nav-link px-0"

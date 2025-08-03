@@ -1,77 +1,83 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import style from "../../css/Auth.module.css";
 import {
-  IconId,
   IconLockFilled,
-  IconLogin2,
   IconShieldCheck,
   IconUserFilled,
 } from "@tabler/icons-react";
+import { FormProvider, useForm } from "react-hook-form";
+import { Input } from "../../components/Input";
 
 export const Login = () => {
+  // se utiliza el localStorage para recordar username
   const rememberedUser = localStorage.getItem("rememberedUser");
-
   const [rememberUser, setRememberUser] = useState(!!rememberedUser); // convierte string a boolean
-  const [inputs, setInputs] = useState({
-    username: rememberedUser || "",
-    password: "",
-  });
 
-  const auth = useAuth();
-  const navigate = useNavigate();
-
+  //VALIDACIONES PARA CADA CAMPO DEL FORM
   const loginSchema = Yup.object().shape({
     username: Yup.string()
-      .required("El nombre de usuario es requerido.")
-      .min(3, "El usuario debe tener al menos 5 caracteres.")
-      .matches(
-        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s]+$/,
-        "No se permiten caracteres especiales"
-      ),
+      .required("requerido")
+      .min(5, "min 5 caracteres")
+      .max(50, "max 50 caracteres")
+      .matches(/^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "solo letras y números"),
     password: Yup.string()
-      .min(6, "La contraseña debe tener al menos 8 caracteres.")
-      .required("La contraseña es requerida."),
+      .min(6, "min 8 caracteres.")
+      .matches(/[a-z]/, "falta letra minúscula")
+      .matches(/[A-Z]/, "falta letra mayúscula")
+      .matches(/\d/, "falta un número")
+      .matches(/[!@#$%^&*(),.?":{}|<>]/, "falta carácter especial")
+      .required("requerido"),
   });
 
-  const handleInput = (e) => {
-    const { name, value } = e.target;
-    setInputs((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  //Utilizar yup para validar formulario
+  const methods = useForm({
+    resolver: yupResolver(loginSchema),
+    defaultValues: {
+      username: rememberedUser || "",
+      password: "",
+    },
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  // Envio de los datos a la API
+  const auth = useAuth();
+  const onSubmit = methods.handleSubmit(async (data) => {
     // Guardar o eliminar username según el checkbox
     if (rememberUser) {
-      localStorage.setItem("rememberedUser", inputs.username);
+      localStorage.setItem("rememberedUser", data.username);
     } else {
       localStorage.removeItem("rememberedUser");
     }
 
     try {
-      await loginSchema.validate(inputs, { abortEarly: false });
-      auth.login(inputs); // aquí podrías redirigir si lo necesitas
+      auth.login(data);
     } catch (err) {
-      if (err.name === "ValidationError") {
-        if (err.inner.length > 4) {
-          toast.error("Formulario incompleto.");
-        } else {
-          err.inner.forEach((e) => {
-            if (e?.message) toast.error(e.message);
-          });
-        }
-      } else {
-        console.error("Error en login:", err);
-        toast.error("Error al iniciar sesión. Intenta de nuevo.");
-      }
+      console.error("Error en login:", err);
+      toast.error("Error al iniciar sesión. Intenta de nuevo.");
     }
+  });
+
+  // Datos de cada input
+  const userValidation = {
+    icon: <IconUserFilled className={style.icon} />,
+    type: "text",
+    id: "username",
+    name: "username",
+    placeholder: "Nombre de usuario",
+    isAuthInput: true,
+  };
+
+  const passwordValidation = {
+    icon: <IconLockFilled className={style.icon} />,
+    type: "password",
+    id: "password",
+    name: "password",
+    placeholder: "Contraseña",
+    isAuthInput: true,
   };
 
   return (
@@ -82,49 +88,36 @@ export const Login = () => {
           <h2>Bienvenido de nuevo</h2>
           <p>Inicia sesión para continuar comprando</p>
         </div>
-        <form className={style.loginForm} onSubmit={handleSubmit}>
-          <div className={style.inputGroup}>
-            <IconUserFilled className={style.icon} />
-            <input
-              type="text"
-              id="username"
-              name="username"
-              placeholder="Nombre de usuario"
-              value={inputs.username}
-              onChange={handleInput}
-            />
-          </div>
-          <div className={style.inputGroup}>
-            <IconLockFilled className={style.icon} />
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Contraseña"
-              value={inputs.password}
-              onChange={handleInput}
-            />
-          </div>
-          <div className={style.optionsGroup}>
-            <div className={style.rememberMe}>
-              <input
-                type="checkbox"
-                id="rememberMe"
-                checked={rememberUser}
-                onChange={(e) => setRememberUser(e.target.checked)}
-              />
-              <label htmlFor="rememberMe">Recordarme</label>
+        <FormProvider {...methods}>
+          <form className={style.loginForm} onSubmit={onSubmit} noValidate>
+            <Input {...userValidation} />
+            <Input {...passwordValidation} />
+
+            <div className={style.optionsGroup}>
+              <div className={style.rememberMe}>
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberUser}
+                  onChange={(e) => setRememberUser(e.target.checked)}
+                />
+                <label htmlFor="rememberMe">Recordarme</label>
+              </div>
+              <Link to="/forgotpassword" className={style.forgotPassword}>
+                ¿Olvidaste tu contraseña?
+              </Link>
             </div>
-            <Link to="/forgotpassword" className={style.forgotPassword}>
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </div>
-          <button type="submit" className={style.loginButton}>
-            Iniciar Sesión
-          </button>
-        </form>
+            <button
+              type="submit"
+              onClick={onSubmit}
+              className={style.loginButton}
+            >
+              Iniciar Sesión
+            </button>
+          </form>
+        </FormProvider>
         <div className={style.signupLink}>
-          <p>
+          <p className="d-flex justify-content-center gap-2">
             ¿No tienes una cuenta?
             <Link to="/sign-up">Regístrate aquí</Link>
           </p>
