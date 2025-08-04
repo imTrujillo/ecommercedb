@@ -16,10 +16,9 @@ export const Index = () => {
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const fetchData = async () => {
-
-    const prods = await apiServiceGet("productos", "");
-    const cat = await apiServiceGet("categorias", "");
-    const sup = await apiServiceGet("proveedores", "");
+    const prods = await apiServiceGet("productos");
+    const cat = await apiServiceGet("categorias");
+    const sup = await apiServiceGet("proveedores");
 
     setProducts(prods);
     setSuppliers(sup);

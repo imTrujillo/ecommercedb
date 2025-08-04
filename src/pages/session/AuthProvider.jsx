@@ -36,10 +36,16 @@ const AuthProvider = ({ children }) => {
 
   const signup = async (data, rol) => {
     try {
-      const response = await apiServicePost(`auth/register/${rol}`, data);
+      const response = await apiServicePost(
+        `auth/register/${rol}`,
+        data,
+        token
+      );
 
       if (response.status >= 200 && response.status < 300) {
-        login({ username: data.username, password: data.password });
+        if (rol === "customer") {
+          login({ username: data.username, password: data.password });
+        }
         toast.success("Usuario creado exitosamente.");
       } else {
         throw { response };
@@ -76,7 +82,20 @@ const AuthProvider = ({ children }) => {
         sessionStorage.setItem("token", JSON.stringify(accessToken));
         sessionStorage.setItem("refreshToken", JSON.stringify(refreshToken));
 
-        navigate("/inventario");
+        switch (user.role) {
+          case "Employee":
+            navigate("/inventario");
+            break;
+          case "Customer":
+            navigate("/pedidos");
+            break;
+          case "Admin":
+            navigate("/empleados");
+            break;
+          default:
+            navigate("/");
+        }
+
         toast.success("Inicio de sesión exitoso.");
       } else {
         throw { response };

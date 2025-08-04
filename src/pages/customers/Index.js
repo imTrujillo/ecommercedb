@@ -14,7 +14,7 @@ export const Index = () => {
   //LLAMAR LA API
   const [customers, setCustomers] = useState([]);
   const fetchData = async () => {
-    const cust = apiServiceGet("customers", "");
+    const cust = await apiServiceGet("customers");
     setCustomers(cust);
   };
   useEffect(() => {

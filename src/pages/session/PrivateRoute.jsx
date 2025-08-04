@@ -9,7 +9,14 @@ const PrivateRoute = ({ allowedRoles }) => {
   }
 
   if (allowedRoles && !allowedRoles.includes(rol)) {
-    return <Navigate to="/login" replace={true} />;
+    switch (rol) {
+      case "Customer":
+        return <Navigate to="/pedidos" replace={true} />;
+      case "Employee":
+        return <Navigate to="/inventario" replace={true} />;
+      default:
+        return <Navigate to="/login" replace={true} />;
+    }
   }
 
   // Si el usuario tiene token y el rol es permitido, renderiza el componente hijo

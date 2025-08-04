@@ -1,126 +1,133 @@
 import React, { useEffect, useState } from "react";
 import Show from "./Show";
-import { CategoryModal } from "../../components/modals/CategoryModal";
-import { IconPlus } from "@tabler/icons-react";
+import { EmployeeModal } from "../../components/modals/EmployeeModal";
+import { IconCactus, IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/modals/DeleteModal";
 import { apiServiceGet } from "../../API/apiService";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
 
+// NOTA: LA PAGINA DE EMPLEADOS POR AHORITA ES UNA COPIA DE CUSTOMERS,
+// CUANDO SE AGREGUE EL CRUD DE EMPLEADOS, SE MODIFICARÁ EL INDEX Y EL SHOW
+
 export const Index = () => {
-  const [categories, setCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
 
+  //LLAMAR LA API
+  const [customers, setCustomers] = useState([]);
   const fetchData = async () => {
-    const cat = await apiServiceGet("categorias");
-    setCategories(cat);
+    const cust = await apiServiceGet("customers");
+    setCustomers(cust);
   };
-
   useEffect(() => {
     fetchData();
   }, []);
 
-  const totalPages = Math.ceil(categories.length / rowsPerPage);
+  const totalPages = Math.ceil(customers.length / rowsPerPage);
 
-  const visibleData = categories.slice(
+  const visibleData = customers.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
 
-  // Modal y lógica
+  //CREAR/EDITAR UN CLIENTE
   const [showModal, setShowModal] = useState(false);
-  const [category, setCategory] = useState({
-    id: 0,
-    nombre: "",
-    descripcion: "",
-  });
-  const [edit, setEdit] = useState(false);
   const closeModal = () => {
-    setCategory({ id: 0, nombre: "", descripcion: "" });
+    setCustomer({
+      id: "",
+      nombre: "",
+      telefono: "",
+      email: "",
+      direccion: "",
+    });
     setShowModal(false);
   };
-  const onEdit = (categoryEdit) => {
+  const [customer, setCustomer] = useState({
+    id: "",
+    nombre: "",
+    telefono: "",
+    email: "",
+    direccion: "",
+  });
+  const [edit, setEdit] = useState(false);
+  const onEdit = (customerEdit) => {
     setShowModal(true);
     setEdit(true);
-    setCategory(categoryEdit);
-  };
-  const handleModal = () => {
-    setShowModal(true);
-    setEdit(false);
+    setCustomer(customerEdit);
   };
 
+  //ELIMINAR UN CLIENTE
   const [showModalDelete, setShowModalDelete] = useState(false);
-  const [categoryDelete, setCategoryDelete] = useState(0);
   const closeModalDelete = () => {
+    setCustomer({
+      id: "",
+      nombre: "",
+      telefono: "",
+      email: "",
+      direccion: "",
+    });
     setShowModalDelete(false);
-    setCategoryDelete(0);
   };
-  const onDelete = (categoryId) => {
+  const onDelete = (customerDelete) => {
+    setCustomer(customerDelete);
     setShowModalDelete(true);
-    setCategoryDelete(categoryId);
   };
 
   return (
     <div className="page-wrapper">
       <div className="container-xl">
         <div className="row row-cards">
-          <Header title="Categorías" subtitle="Clasifica tus productos">
+          {/* ENCABEZADO DE CLIENTES*/}
+          <Header title="Empleados" subtitle="Agrega y administra empleados">
             <button
               className="btn btn-primary d-inline-block"
-              onClick={handleModal}
+              onClick={() => setShowModal(true)}
             >
               <IconPlus className="me-3" />
-              Agregar categoría
+              Agregar empleado
             </button>
           </Header>
 
+          {/* TABLA DE CLIENTES */}
           <div className="col-12">
             <div className="card">
               <div className="table-responsive">
                 <table
                   className="table table-vcenter card-table table-striped"
-                  id="table-categories"
+                  id="table-customers"
                 >
                   <thead>
                     <tr>
                       <th>No.</th>
-                      <th>Nombre</th>
-                      <th>Descripción</th>
+                      <th>nombre completo</th>
+                      <th>nombre de usuario</th>
+                      <th>email</th>
+                      <th>fecha de nacimiento</th>
+                      <th>fecha de contratación</th>
+                      <th>nit</th>
+                      <th>dirección</th>
+                      <th>salario</th>
                       <th className="w-1"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {visibleData.length <= 0 ? (
+                    {customers.length <= 0 ? (
                       <tr>
                         <td colSpan="100%" className="text-center py-4">
                           <div className="d-flex flex-column align-items-center justify-content-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="48" // más grande
-                              height="48" // más grande
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              className="mb-2"
-                            >
-                              <path
-                                stroke="none"
-                                d="M0 0h24v24H0z"
-                                fill="none"
-                              />
-                              <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-2 10.66h-6l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h6l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-5.99 -5l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm6 0l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" />
-                            </svg>
+                            <IconCactus />
                             <span className="fw-semibold">
-                              No hay categorías disponibles
+                              Aquí aparecerán los empleados (en proceso...)
                             </span>
                           </div>
                         </td>
                       </tr>
                     ) : (
-                      visibleData.map((category, index) => (
+                      visibleData.map((customer) => (
                         <Show
-                          key={category.id}
-                          category={category}
+                          key={customer.id}
+                          customer={customer}
                           onEdit={onEdit}
                           onDelete={onDelete}
                         />
@@ -130,7 +137,6 @@ export const Index = () => {
                 </table>
               </div>
             </div>
-
             <PaginationControl
               count={totalPages}
               page={currentPage}
@@ -139,18 +145,18 @@ export const Index = () => {
           </div>
         </div>
       </div>
-      <CategoryModal
+      <EmployeeModal
         show={showModal}
         closeModal={closeModal}
         isEdit={edit}
-        category={category}
+        customer={customer}
         fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
-        id={categoryDelete}
-        endpoint="categorias/categoria/delete/"
+        id={customer.id}
+        endpoint="Clientes/cliente/delete/"
         fetchData={fetchData}
       />
     </div>

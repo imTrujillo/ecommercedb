@@ -15,10 +15,12 @@ import {
   IconShoppingCart,
   IconLogin2,
   IconLogout2,
+  IconBriefcase2Filled,
+  IconBriefcase2,
 } from "@tabler/icons-react";
 import { useAuth } from "../pages/session/AuthProvider";
 
-export default function Navbar({ darkTheme, handleTheme }) {
+export default function Navbar({ theme, handleTheme }) {
   var location = useLocation();
   const { rol, logout, token } = useAuth();
 
@@ -26,7 +28,7 @@ export default function Navbar({ darkTheme, handleTheme }) {
     <nav>
       <header className="navbar d-md-none d-print-none">
         <div className="container-xl">
-          {rol ? (
+          {rol && token ? (
             <button
               className="navbar-toggler"
               type="button"
@@ -45,10 +47,10 @@ export default function Navbar({ darkTheme, handleTheme }) {
           <div className=" d-flex align-items-center flex-row gap-2">
             <button
               className="nav-link px-0"
-              title={darkTheme ? "Modo claro" : "Modo oscuro"}
+              title={theme ? "Modo claro" : "Modo oscuro"}
               onClick={handleTheme}
             >
-              {darkTheme ? (
+              {theme ? (
                 <IconMoon size={24} stroke={2} />
               ) : (
                 <IconSun size={24} stroke={2} />
@@ -113,7 +115,7 @@ export default function Navbar({ darkTheme, handleTheme }) {
       <header className="navbar-expand-md">
         <div className="collapse navbar-collapse" id="navbar-menu">
           <div className="navbar">
-            <div className="container-xl gap-3 d-flex">
+            <div className="px-5 w-100 d-flex justify-content-between flex-wrap gap-3">
               <ul className="navbar-nav">
                 <h1 className="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
                   <a href=".">
@@ -127,8 +129,9 @@ export default function Navbar({ darkTheme, handleTheme }) {
                   </a>
                 </h1>
 
-                {rol ? (
+                {rol && token && (
                   <>
+                    {/* TIENDA: visible para todos */}
                     <li
                       className={`nav-item ${
                         location.pathname === "/" ? "active" : ""
@@ -138,72 +141,100 @@ export default function Navbar({ darkTheme, handleTheme }) {
                         <span className="nav-link-icon d-md-none d-lg-inline-block">
                           <IconBuildingStore size={24} stroke={2} />
                         </span>
-                        <span className="nav-link-title"> Tienda </span>
+                        <span className="nav-link-title">Tienda</span>
                       </Link>
                     </li>
-                    <li
-                      className={`nav-item ${
-                        location.pathname === "/inventario" ? "active" : ""
-                      }`}
-                    >
-                      <Link to="/inventario" className="nav-link">
-                        <span className="nav-link-icon d-md-none d-lg-inline-block">
-                          <IconPackage size={24} stroke={2} />
-                        </span>
-                        <span className="nav-link-title"> Inventario </span>
-                      </Link>
-                    </li>
-                    <li
-                      className={`nav-item ${
-                        location.pathname === "/categorias" ? "active" : ""
-                      }`}
-                    >
-                      <Link to="/categorias" className="nav-link">
-                        <span className="nav-link-icon d-md-none d-lg-inline-block">
-                          <IconBox size={24} stroke={2} />
-                        </span>
-                        <span className="nav-link-title"> Categorías </span>
-                      </Link>
-                    </li>
-                    <li
-                      className={`nav-item ${
-                        location.pathname === "/proveedores" ? "active" : ""
-                      }`}
-                    >
-                      <Link to="/proveedores" className="nav-link">
-                        <span className="nav-link-icon d-md-none d-lg-inline-block">
-                          <IconTruckDelivery size={24} stroke={2} />
-                        </span>
-                        <span className="nav-link-title"> Proveedores </span>
-                      </Link>
-                    </li>
-                    <li
-                      className={`nav-item ${
-                        location.pathname === "/pedidos" ? "active" : ""
-                      }`}
-                    >
-                      <Link to="/pedidos" className="nav-link">
-                        <span className="nav-link-icon d-md-none d-lg-inline-block">
-                          <IconPackages size={24} stroke={2} />
-                        </span>
-                        <span className="nav-link-title"> Pedidos </span>
-                      </Link>
-                    </li>
-                    <li
-                      className={`nav-item ${
-                        location.pathname === "/clientes" ? "active" : ""
-                      }`}
-                    >
-                      <Link to="/clientes" className="nav-link">
-                        <span className="nav-link-icon d-md-none d-lg-inline-block">
-                          <IconUsersPlus size={24} stroke={2} />
-                        </span>
-                        <span className="nav-link-title"> Clientes </span>
-                      </Link>
-                    </li>
+
+                    {/* EMPLOYEE o ADMIN */}
+                    {(rol === "Employee" || rol === "Admin") && (
+                      <>
+                        <li
+                          className={`nav-item ${
+                            location.pathname === "/inventario" ? "active" : ""
+                          }`}
+                        >
+                          <Link to="/inventario" className="nav-link">
+                            <span className="nav-link-icon d-md-none d-lg-inline-block">
+                              <IconPackage size={24} stroke={2} />
+                            </span>
+                            <span className="nav-link-title">Inventario</span>
+                          </Link>
+                        </li>
+                      </>
+                    )}
+
+                    {/* ADMIN únicamente */}
+                    {rol === "Admin" && (
+                      <>
+                        <li
+                          className={`nav-item ${
+                            location.pathname === "/categorias" ? "active" : ""
+                          }`}
+                        >
+                          <Link to="/categorias" className="nav-link">
+                            <span className="nav-link-icon d-md-none d-lg-inline-block">
+                              <IconBox size={24} stroke={2} />
+                            </span>
+                            <span className="nav-link-title">Categorías</span>
+                          </Link>
+                        </li>
+                        <li
+                          className={`nav-item ${
+                            location.pathname === "/proveedores" ? "active" : ""
+                          }`}
+                        >
+                          <Link to="/proveedores" className="nav-link">
+                            <span className="nav-link-icon d-md-none d-lg-inline-block">
+                              <IconTruckDelivery size={24} stroke={2} />
+                            </span>
+                            <span className="nav-link-title">Proveedores</span>
+                          </Link>
+                        </li>
+                        <li
+                          className={`nav-item ${
+                            location.pathname === "/clientes" ? "active" : ""
+                          }`}
+                        >
+                          <Link to="/clientes" className="nav-link">
+                            <span className="nav-link-icon d-md-none d-lg-inline-block">
+                              <IconUsersPlus size={24} stroke={2} />
+                            </span>
+                            <span className="nav-link-title">Clientes</span>
+                          </Link>
+                        </li>
+                        <li
+                          className={`nav-item ${
+                            location.pathname === "/empleados" ? "active" : ""
+                          }`}
+                        >
+                          <Link to="/empleados" className="nav-link">
+                            <span className="nav-link-icon d-md-none d-lg-inline-block">
+                              <IconBriefcase2 size={24} stroke={2} />
+                            </span>
+                            <span className="nav-link-title">Empleados</span>
+                          </Link>
+                        </li>
+                      </>
+                    )}
+
+                    {/* TODOS LOS LOGUEADOS */}
+                    {(rol === "Customer" ||
+                      rol === "Employee" ||
+                      rol === "Admin") && (
+                      <li
+                        className={`nav-item ${
+                          location.pathname === "/pedidos" ? "active" : ""
+                        }`}
+                      >
+                        <Link to="/pedidos" className="nav-link">
+                          <span className="nav-link-icon d-md-none d-lg-inline-block">
+                            <IconPackages size={24} stroke={2} />
+                          </span>
+                          <span className="nav-link-title">Pedidos</span>
+                        </Link>
+                      </li>
+                    )}
                   </>
-                ) : (
-                  ""
                 )}
               </ul>
               <div className="d-none d-md-flex flex-row align-items-center gap-3">
@@ -211,9 +242,9 @@ export default function Navbar({ darkTheme, handleTheme }) {
                 <button
                   className="nav-link px-0"
                   onClick={handleTheme}
-                  title={darkTheme ? "Modo claro" : "Modo oscuro"}
+                  title={theme ? "Modo claro" : "Modo oscuro"}
                 >
-                  {darkTheme ? (
+                  {theme ? (
                     <IconSun size={24} stroke={2} />
                   ) : (
                     <IconMoon size={24} stroke={2} />

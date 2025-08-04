@@ -25,13 +25,7 @@ export const Login = () => {
       .min(5, "min 5 caracteres")
       .max(50, "max 50 caracteres")
       .matches(/^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "solo letras y números"),
-    password: Yup.string()
-      .min(6, "min 8 caracteres.")
-      .matches(/[a-z]/, "falta letra minúscula")
-      .matches(/[A-Z]/, "falta letra mayúscula")
-      .matches(/\d/, "falta un número")
-      .matches(/[!@#$%^&*(),.?":{}|<>]/, "falta carácter especial")
-      .required("requerido"),
+    password: Yup.string().min(6, "min 8 caracteres.").required("requerido"),
   });
 
   //Utilizar yup para validar formulario

@@ -29,7 +29,7 @@ export const SignUp = () => {
       .required("requerido")
       .min(2, "min 2 caracteres")
       .max(100, "max 100 caracteres")
-      .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "solo letras y espacios"),
+      .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s]+$/, "solo letras y espacios"),
     username: Yup.string()
       .required("requerido")
       .min(5, "min 5 caracteres")
@@ -56,7 +56,7 @@ export const SignUp = () => {
       .matches(/[a-z]/, "falta letra minúscula")
       .matches(/[A-Z]/, "falta letra mayúscula")
       .matches(/\d/, "falta un número")
-      .matches(/[!@#$%^&*(),.?":{}|<>]/, "falta carácter especial")
+      .matches(/[!@#$%^&*(),.?":{}|<>]/, "falta caracter especial")
       .required("requerido"),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref("password"), null], "las contraseñas no coinciden")

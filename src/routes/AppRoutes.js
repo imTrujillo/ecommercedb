@@ -7,6 +7,7 @@ import { Index as ShopIndex } from "../pages/shop/Index";
 import { Index as CategoriesIndex } from "../pages/categories/Index";
 import { Index as OrdersIndex } from "../pages/orders/Index";
 import { Index as CustomersIndex } from "../pages/customers/Index";
+import { Index as EmployeesIndex } from "../pages/employees/Index";
 import { Login } from "../pages/session/Login";
 import { SignUp } from "../pages/session/Signup";
 import { ForgotPassword } from "../pages/session/ForgotPassword";
@@ -56,15 +57,21 @@ export default function AppRoutes() {
               }
             ></Route>
 
-            {/* RUTAS PROTEGIDAS */}
-            <Route
-              element={<PrivateRoute allowedRoles={["Employee", "Customer"]} />}
-            >
+            {/* RUTAS DEL ADMIN */}
+            <Route element={<PrivateRoute allowedRoles={["Admin"]} />}>
               <Route
-                path="/inventario"
+                path="/empleados"
                 element={
                   <App>
-                    <InventaryIndex />
+                    <EmployeesIndex />
+                  </App>
+                }
+              ></Route>
+              <Route
+                path="/clientes"
+                element={
+                  <App>
+                    <CustomersIndex />
                   </App>
                 }
               ></Route>
@@ -84,19 +91,35 @@ export default function AppRoutes() {
                   </App>
                 }
               ></Route>
+            </Route>
+
+            {/* RUTAS DEL EMPLEADO */}
+            <Route
+              element={<PrivateRoute allowedRoles={["Employee", "Admin"]} />}
+            >
+              <Route
+                path="/inventario"
+                element={
+                  <App>
+                    <InventaryIndex />
+                  </App>
+                }
+              ></Route>
+            </Route>
+
+            {/* RUTAS DEL CLIENTE */}
+            <Route
+              element={
+                <PrivateRoute
+                  allowedRoles={["Customer", "Employee", "Admin"]}
+                />
+              }
+            >
               <Route
                 path="/pedidos"
                 element={
                   <App>
                     <OrdersIndex />
-                  </App>
-                }
-              ></Route>
-              <Route
-                path="/clientes"
-                element={
-                  <App>
-                    <CustomersIndex />
                   </App>
                 }
               ></Route>

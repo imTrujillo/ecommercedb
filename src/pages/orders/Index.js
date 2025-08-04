@@ -18,9 +18,9 @@ export const Index = () => {
   const [products, setProducts] = useState([]);
 
   const fetchData = async () => {
-    const ords = await apiServiceGet("pedidos", "");
-    const cats = await apiServiceGet("clientes", "");
-    const prods = await apiServiceGet("productos", "");
+    const ords = await apiServiceGet("pedidos");
+    const cats = await apiServiceGet("clientes");
+    const prods = await apiServiceGet("productos");
 
     setOrders(ords);
     setCustomers(cats);
@@ -29,8 +29,7 @@ export const Index = () => {
     const ordersWithDetailsFetched = await Promise.all(
       ords.map(async (order) => {
         const orderDetails = await apiServiceGet(
-          `pedidos/${order.id}/detalles`,
-          ""
+          `pedidos/${order.id}/detalles`
         );
         return { ...order, orderDetails };
       })
