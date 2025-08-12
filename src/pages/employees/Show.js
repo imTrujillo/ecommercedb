@@ -1,27 +1,38 @@
 import React from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
 
-const Show = ({ customer, onEdit, onDelete }) => {
+const Show = ({ employee, onEdit, onDelete }) => {
   return (
     <tr>
       <td data-label="IDProducto">
         <div className="d-flex py-1 align-items-center">
-          <span>{customer.id}</span>
+          <span>{employee.id}</span>
         </div>
       </td>
       <td data-label="nombreProducto">
-        <div className="font-weight-medium">{customer.nombre}</div>
+        <div className="font-weight-medium">{employee.nombreCompleto}</div>
       </td>
       <td className="text-secondary" data-label="Role">
-        {customer.telefono}
+        {employee.nombreUsuario}
       </td>
       <td className="text-secondary" data-label="Role">
-        {customer.email}
+        {employee.email}
       </td>
       <td className="text-secondary" data-label="Role">
-        {customer.direccion}
+        {employee.fechaNacimiento}
       </td>
-
+      <td className="text-secondary" data-label="Role">
+        {employee.fechaContratacion}
+      </td>
+      <td className="text-secondary" data-label="Role">
+        {employee.nit}
+      </td>
+      <td className="text-secondary" data-label="Role">
+        {employee.direccion}
+      </td>
+      <td className="text-secondary" data-label="Role">
+        ${employee.salario}
+      </td>
       <td>
         <div className="btn-list flex-nowrap">
           <div className="dropdown">
@@ -34,14 +45,14 @@ const Show = ({ customer, onEdit, onDelete }) => {
             <div className="dropdown-menu dropdown-menu-end">
               <button
                 className="dropdown-item text-yellow"
-                onClick={() => onEdit(customer)}
+                onClick={() => onEdit(employee)}
               >
                 <IconPencil />
                 Editar
               </button>
               <button
                 className="dropdown-item text-danger"
-                onClick={() => onDelete(customer)}
+                onClick={() => onDelete(employee)}
               >
                 <IconTrash />
                 Eliminar

@@ -2,8 +2,8 @@ import axios from "axios";
 
 import { toast } from "react-toastify";
 
-// const baseUrl = "https://localhost:7160/api/";
-const baseUrl = "https://localhost:7084/api/";
+const baseUrl = "https://localhost:7160/api/";
+const authUrl = "https://localhost:7084/api/";
 
 export const apiServiceGet = async (endpoint, id = null, token = null) => {
   try {
@@ -29,12 +29,20 @@ export const apiServiceGet = async (endpoint, id = null, token = null) => {
   }
 };
 
-export const apiServicePost = async (endpoint, object, token = null) => {
+export const apiServicePost = async (
+  endpoint,
+  object,
+  token = null,
+  apiAuth = false
+) => {
   const config = token
     ? { headers: { Authorization: `Bearer ${token}` } }
     : undefined;
 
-  const response = await axios.post(baseUrl + endpoint, object, config);
+  let response = "";
+  apiAuth
+    ? (response = await axios.post(authUrl + endpoint, object, config))
+    : (response = await axios.post(baseUrl + endpoint, object, config));
 
   return response;
 };

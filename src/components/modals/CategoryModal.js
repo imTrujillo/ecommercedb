@@ -6,6 +6,9 @@ import {
 } from "../../API/apiService";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
+import { FormProvider, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Input } from "../Input";
 
 export const CategoryModal = ({
   show,
@@ -14,82 +17,82 @@ export const CategoryModal = ({
   category,
   fetchData,
 }) => {
-  const [formData, setFormData] = useState({
-    id: 0,
-    nombre: "",
-    descripcion: "",
-  });
-
   // VALIDACIONES CON YUP
   const categorySchema = Yup.object().shape({
     nombre: Yup.string()
-      .min(3, "El nombre debe tener al menos 3 caracteres")
-      .required("El nombre es requerido")
-      .matches(
-        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s]+$/,
-        "No se permiten caracteres especiales"
-      ),
-    descripcion: Yup.string()
-      .min(10, "La descripción debe tener al menos 10 caracteres")
-      .required("La descripción es requerida")
+      .required("requerido")
+      .min(2, "min 2 caracteres")
+      .max(100, "max 100 caracteres")
       .matches(
         /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
-        "No se permiten caracteres especiales"
+        "sin caracteres especiales"
       ),
+    descripcion: Yup.string()
+      .required("requerido")
+      .min(10, "min 10 caracteres")
+      .max(200, "max 200 caracteres")
+      .matches(
+        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+        "sin caracteres especiales"
+      ),
+  });
+
+  //Utilizar yup para validar formulario
+  const methods = useForm({
+    resolver: yupResolver(categorySchema),
+    defaultValues: {
+      nombre: "",
+      descripcion: "",
+    },
   });
 
   useEffect(() => {
     if (category) {
-      setFormData(category);
+      methods.reset({
+        id: category.id || 0,
+        nombre: category.nombre || "",
+        descripcion: category.descripcion || "",
+      });
     }
   }, [category]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  //Envío de los datos a la API
+  const onSubmit = methods.handleSubmit(async (data) => {
     try {
-      // Validar el formulario con Yup
-      await categorySchema.validate(formData, { abortEarly: false });
-
       if (isEdit) {
         await apiServiceUpdate(`categorias/categoria/update/${category.id}`, {
-          ...formData,
+          ...data,
           id: category.id,
         });
       } else {
-        await apiServicePost("categorias", formData);
+        await apiServicePost("categorias", data);
       }
       closeModal();
-      setFormData({
-        id: 0,
-        nombre: "",
-        descripcion: "",
-      });
+      fetchData();
       toast.success(
         isEdit ? "¡Categoría actualizado!" : "¡Categoría agregada!"
       );
-      fetchData();
+      console.log(data);
     } catch (err) {
-      if (err.name === "ValidationError") {
-        if (err.inner.length > 3) {
-          toast.error("Formulario incompleto.");
-        } else {
-          err.inner.forEach((e) => {
-            if (e?.message) {
-              toast.error(e.message);
-            }
-          });
-        }
-      } else {
-        console.error("Error al guardar la categoría:", err);
-        toast.error("Error al guardar la categoría.");
-      }
+      console.error("Error al guardar la categoría:", err);
+      toast.error("Error al guardar la categoría. Intenta de nuevo.");
     }
+  });
+
+  const nombreValidation = {
+    id: "nombre",
+    label: "Nombre",
+    type: "text",
+    name: "nombre",
+    placeholder: "Categoría 01",
+  };
+
+  const descripcionValidation = {
+    id: "descripcion",
+    label: "Descripción",
+    type: "textarea",
+    name: "descripcion",
+    placeholder: "Descripcion de Categoría 01",
   };
 
   if (!show) return null;
@@ -101,64 +104,39 @@ export const CategoryModal = ({
       role="dialog"
     >
       <div className="modal-dialog modal-lg">
-        <form onSubmit={(e) => handleSubmit(e)}>
-          {isEdit ? (
-            <input
-              type="hidden"
-              name="id"
-              onChange={handleChange}
-              value={category.id}
-            ></input>
-          ) : (
-            ""
-          )}
-
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">
-                {isEdit ? "Editar Categoría" : "Agregar Categoría"}
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={closeModal}
-              ></button>
-            </div>
-
-            <div className="modal-body">
-              <div className="row mb-3">
-                <label className="form-label required">Nombre</label>
-                <input
-                  type="text"
-                  name="nombre"
-                  onChange={handleChange}
-                  className="form-control"
-                  value={formData.nombre}
-                  placeholder="Categoría 01"
-                />
+        <FormProvider {...methods}>
+          <form noValidate onSubmit={onSubmit}>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {isEdit ? "Editar Categoría" : "Agregar Categoría"}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={closeModal}
+                ></button>
               </div>
-              <div className="row mb-3">
-                <label className="form-label required">Descripción</label>
-                <textarea
-                  type="text"
-                  name="descripcion"
-                  className="form-control"
-                  placeholder="Descripcion de Categoría 01"
-                  value={formData.descripcion}
-                  onChange={handleChange}
-                ></textarea>
+
+              <div className="modal-body">
+                <div className="row mb-3">
+                  <Input {...nombreValidation} />
+                </div>
+                <div className="row mb-3">
+                  <Input {...descripcionValidation} />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn" onClick={closeModal}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  {isEdit ? "Editar" : "Guardar"}
+                </button>
               </div>
             </div>
-            <div className="modal-footer">
-              <button type="button" className="btn" onClick={closeModal}>
-                Cancelar
-              </button>
-              <button type="submit" className="btn btn-primary">
-                {isEdit ? "Editar" : "Guardar"}
-              </button>
-            </div>
-          </div>
-        </form>
+          </form>
+        </FormProvider>
       </div>
     </div>
   );

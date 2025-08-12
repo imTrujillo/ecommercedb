@@ -7,7 +7,7 @@ import { apiServiceGet } from "../../API/apiService";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
 
-// NOTA: LA PAGINA DE EMPLEADOS POR AHORITA ES UNA COPIA DE CUSTOMERS,
+// NOTA: LA PAGINA DE EMPLEADOS POR AHORITA ES UNA COPIA DE employees,
 // CUANDO SE AGREGUE EL CRUD DE EMPLEADOS, SE MODIFICARÁ EL INDEX Y EL SHOW
 
 export const Index = () => {
@@ -15,18 +15,60 @@ export const Index = () => {
   const rowsPerPage = 5;
 
   //LLAMAR LA API
-  const [customers, setCustomers] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const fetchData = async () => {
-    const cust = await apiServiceGet("customers");
-    setCustomers(cust);
+    // const cust = await apiServiceGet("employees");
+    // setEmployees(cust);
   };
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
 
-  const totalPages = Math.ceil(customers.length / rowsPerPage);
+  //DATOS ESTATICOS
+  useEffect(
+    () =>
+      setEmployees([
+        {
+          id: 1,
+          nombreCompleto: "Juan Pérez",
+          nombreUsuario: "juanp",
+          email: "juan.perez@example.com",
+          fechaNacimiento: "1990-05-15",
+          fechaContratacion: "2018-03-20",
+          nit: "0614-250395-102-3",
+          direccion: "Calle 123, San Salvador",
+          salario: 500.0,
+        },
+        {
+          id: 2,
+          nombreCompleto: "María López",
+          nombreUsuario: "marial",
+          email: "maria.lopez@example.com",
+          fechaNacimiento: "1985-11-08",
+          fechaContratacion: "2015-07-10",
+          nit: "0614-080985-203-9",
+          direccion: "Avenida Central 456, San Miguel",
+          salario: 650.5,
+        },
+        {
+          id: 3,
+          nombreCompleto: "Carlos Ramírez",
+          nombreUsuario: "carlosr",
+          email: "carlos.ramirez@example.com",
+          fechaNacimiento: "1992-01-22",
+          fechaContratacion: "2019-12-01",
+          nit: "0614-220192-309-7",
+          direccion: "Boulevard Los Héroes, Santa Ana",
+          salario: 480.75,
+        },
+      ]),
 
-  const visibleData = customers.slice(
+    []
+  );
+
+  const totalPages = Math.ceil(employees.length / rowsPerPage);
+
+  const visibleData = employees.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -34,43 +76,55 @@ export const Index = () => {
   //CREAR/EDITAR UN CLIENTE
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
-    setCustomer({
-      id: "",
-      nombre: "",
-      telefono: "",
+    setEmployee({
+      id: 0,
+      nombreCompleto: "",
+      nombreUsuario: "",
       email: "",
+      fechaNacimiento: "",
+      fechaContratacion: "",
+      nit: "",
       direccion: "",
+      salario: 0,
     });
     setShowModal(false);
   };
-  const [customer, setCustomer] = useState({
-    id: "",
-    nombre: "",
-    telefono: "",
+  const [employee, setEmployee] = useState({
+    id: 0,
+    nombreCompleto: "",
+    nombreUsuario: "",
     email: "",
+    fechaNacimiento: "",
+    fechaContratacion: "",
+    nit: "",
     direccion: "",
+    salario: 0,
   });
   const [edit, setEdit] = useState(false);
-  const onEdit = (customerEdit) => {
+  const onEdit = (employeeEdit) => {
     setShowModal(true);
     setEdit(true);
-    setCustomer(customerEdit);
+    setEmployee(employeeEdit);
   };
 
   //ELIMINAR UN CLIENTE
   const [showModalDelete, setShowModalDelete] = useState(false);
   const closeModalDelete = () => {
-    setCustomer({
-      id: "",
-      nombre: "",
-      telefono: "",
+    setEmployee({
+      id: 0,
+      nombreCompleto: "",
+      nombreUsuario: "",
       email: "",
+      fechaNacimiento: "",
+      fechaContratacion: "",
+      nit: "",
       direccion: "",
+      salario: 0,
     });
     setShowModalDelete(false);
   };
-  const onDelete = (customerDelete) => {
-    setCustomer(customerDelete);
+  const onDelete = (employeeDelete) => {
+    setEmployee(employeeDelete);
     setShowModalDelete(true);
   };
 
@@ -95,7 +149,7 @@ export const Index = () => {
               <div className="table-responsive">
                 <table
                   className="table table-vcenter card-table table-striped"
-                  id="table-customers"
+                  id="table-employees"
                 >
                   <thead>
                     <tr>
@@ -112,7 +166,7 @@ export const Index = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {customers.length <= 0 ? (
+                    {employees.length <= 0 ? (
                       <tr>
                         <td colSpan="100%" className="text-center py-4">
                           <div className="d-flex flex-column align-items-center justify-content-center">
@@ -124,10 +178,10 @@ export const Index = () => {
                         </td>
                       </tr>
                     ) : (
-                      visibleData.map((customer) => (
+                      visibleData.map((employee) => (
                         <Show
-                          key={customer.id}
-                          customer={customer}
+                          key={employee.id}
+                          employee={employee}
                           onEdit={onEdit}
                           onDelete={onDelete}
                         />
@@ -149,13 +203,13 @@ export const Index = () => {
         show={showModal}
         closeModal={closeModal}
         isEdit={edit}
-        customer={customer}
+        employee={employee}
         fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
-        id={customer.id}
+        id={employee.id}
         endpoint="Clientes/cliente/delete/"
         fetchData={fetchData}
       />

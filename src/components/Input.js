@@ -33,11 +33,20 @@ export const Input = ({
           className="form-control"
           {...register(name)}
         >
-          {options.map((optionValue, index) => (
-            <option key={index} value={optionValue}>
-              {optionValue}
-            </option>
-          ))}
+          <option value="" selected>
+            Selecciona una opción
+          </option>
+          {options.map((option, index) =>
+            typeof option === "object" ? (
+              <option key={option.id || index} value={option.id}>
+                {option.nombre}
+              </option>
+            ) : (
+              <option key={index} value={option}>
+                {option}
+              </option>
+            )
+          )}
         </select>
       );
     }

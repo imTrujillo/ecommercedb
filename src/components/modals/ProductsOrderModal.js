@@ -37,8 +37,8 @@ export const ProductsOrderModal = ({
             ></button>
           </div>
           <div className="modal-body">
-            <div class="table-responsive">
-              <table class="table table-vcenter card-table">
+            <div className="table-responsive">
+              <table className="table table-vcenter card-table">
                 <thead>
                   <tr>
                     <th>Producto</th>
@@ -56,11 +56,13 @@ export const ProductsOrderModal = ({
                         <td>
                           {product ? product.nombre : "Producto no encontrado"}
                         </td>
-                        <td class="text-secondary">
+                        <td className="text-secondary">
                           {detail.cantidad}{" "}
                           {detail.cantidad == 1 ? "unidad" : "unidades"}
                         </td>
-                        <td class="text-secondary">${detail.precioUnitario}</td>
+                        <td className="text-secondary">
+                          ${detail.precioUnitario}
+                        </td>
                       </tr>
                     );
                   })}

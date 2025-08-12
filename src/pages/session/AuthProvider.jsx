@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react"; // Añadido useEffect
 import { useNavigate } from "react-router-dom";
-import { apiServiceDelete, apiServicePost } from "../../API/apiService";
+import { apiServicePost } from "../../API/apiService";
 import { toast } from "react-toastify";
 
 const AuthContext = createContext();
@@ -39,26 +39,22 @@ const AuthProvider = ({ children }) => {
       const response = await apiServicePost(
         `auth/register/${rol}`,
         data,
-        token
+        token,
+        true
       );
 
       if (response.status >= 200 && response.status < 300) {
         if (rol === "customer") {
           login({ username: data.username, password: data.password });
         }
-        toast.success("Usuario creado exitosamente.");
-      } else {
-        throw { response };
       }
     } catch (error) {
       if (error.response && Array.isArray(error.response.data)) {
         error.response.data.forEach((err) => {
-          const prop = err.property || "Campo";
-          const message = err.error || "Error desconocido";
-          toast.error(`${prop}: ${message}`);
+          toast.error(`${err.property}: ${err.error}`);
         });
-      } else if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
+      } else if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
       } else {
         toast.error("Ocurrió un error al intentar registrarte.");
       }
@@ -67,7 +63,7 @@ const AuthProvider = ({ children }) => {
 
   const login = async (data) => {
     try {
-      const response = await apiServicePost("auth/login", data);
+      const response = await apiServicePost("auth/login", data, null, true);
 
       if (response.status >= 200 && response.status < 300) {
         const { refreshToken, accessToken, user } = response.data;
@@ -97,18 +93,12 @@ const AuthProvider = ({ children }) => {
         }
 
         toast.success("Inicio de sesión exitoso.");
-      } else {
-        throw { response };
       }
     } catch (error) {
       if (error.response && Array.isArray(error.response.data)) {
         error.response.data.forEach((err) => {
-          const prop = err.property || "Campo";
-          const message = err.error || "Error desconocido";
-          toast.error(`${prop}: ${message}`);
+          toast.error(`${err.property}: ${err.error}`);
         });
-      } else if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
       } else if (error.response?.data?.error) {
         toast.error(error.response.data.error);
       } else {
@@ -119,17 +109,22 @@ const AuthProvider = ({ children }) => {
 
   const setNewPassword = async (data) => {
     try {
-      const response = await apiServicePost("auth/reset-password", data);
+      const response = await apiServicePost(
+        "auth/reset-password",
+        data,
+        null,
+        true
+      );
 
       if (response && response.status >= 200 && response.status < 300) {
         navigate("/login");
         toast.success("Contraseña actualizada exitosamente.");
-      } else {
-        throw { response };
       }
     } catch (error) {
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
+      if (error.response && Array.isArray(error.response.data)) {
+        error.response.data.forEach((err) => {
+          toast.error(`${err.property}: ${err.error}`);
+        });
       } else if (error.response?.data?.error) {
         toast.error(error.response.data.error);
       } else {
@@ -144,8 +139,7 @@ const AuthProvider = ({ children }) => {
         accessToken: token,
         refreshToken: refreshToken,
       };
-      await apiServicePost("auth/logout", body, token);
-      toast.success("Sesión cerrada.");
+      await apiServicePost("auth/logout", body, token, true);
     } catch (error) {
       console.error("Error durante el logout en la API:", error);
     } finally {
@@ -157,6 +151,7 @@ const AuthProvider = ({ children }) => {
       sessionStorage.removeItem("user");
       sessionStorage.removeItem("rol");
       navigate("/");
+      toast.success("Sesión cerrada.");
     }
   };
 

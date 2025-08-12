@@ -129,7 +129,7 @@ export const EmployeeModal = ({
       }
       closeModal();
       fetchData();
-      console.log(data);
+      toast.success(isEdit ? "¡Empleado actualizado!" : "¡Empleado agregado!");
     } catch (err) {
       console.error("Error al guardar empleado:", err);
       toast.error("Error al guardar empleado. Intenta de nuevo.");

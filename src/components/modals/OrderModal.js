@@ -10,6 +10,9 @@ import "@progress/kendo-theme-bootstrap/dist/all.css";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 import addMonths from "date-fns/addMonths";
+import { FormProvider, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Input } from "../Input";
 
 export const OrderModal = ({
   show,
@@ -20,56 +23,49 @@ export const OrderModal = ({
   products,
   customers,
 }) => {
-  const [orderData, setOrderData] = useState({
-    fecha: new Date(),
-    estado: "Pendiente",
-    metodoPago: "",
-    direccionEnvio: "",
-    clienteId: null,
-    detalles: [],
-  });
-  const [orderProducts, setOrderProducts] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
+  const [orderProducts, setOrderProducts] = useState([]);
 
   // VALIDACIONES CON YUP
   const orderSchema = Yup.object().shape({
     fecha: Yup.date()
-      .min(new Date(1950, 0, 1), "La fecha no puede ser anterior a 1950")
-      .max(
-        addMonths(new Date(), 6),
-        "La fecha no puede ocurrir después de 6 meses"
-      )
-      .required("La fecha es requerida"),
+      .min(new Date(2020, 0, 1), "min 2020")
+      .max(addMonths(new Date(), 6), "max 6 meses")
+      .required("requerida"),
     metodoPago: Yup.string()
-      .min(3, "El método de pago debe tener al menos 3 caracteres")
-      .required("El método de pago es requerido")
+      .min(3, "min 3 caracteres")
+      .required("requerido")
       .matches(
         /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
-        "No se permiten caracteres especiales"
+        "sin caracteres especiales"
       ),
     direccionEnvio: Yup.string()
-      .min(10, "La dirección de envío debe tener al menos 10 caracteres")
-      .required("La dirección de envío es requerida")
+      .required("requerido")
+      .min(20, "min 20 caracteres")
+      .max(200, "max 200 caracteres")
       .matches(
         /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
-        "No se permiten caracteres especiales"
+        "sin caracteres especiales"
       ),
-    estado: Yup.string().required("Selecciona un estado"),
-    clienteId: Yup.string().required("Selecciona un cliente"),
+    estado: Yup.string().required("requerido"),
+    clienteId: Yup.string().required("requerido"),
+  });
+
+  //Utilizar yup para validar formulario
+  const methods = useForm({
+    resolver: yupResolver(orderSchema),
+    defaultValues: {
+      fecha: "",
+      estado: "",
+      metodoPago: "",
+      direccionEnvio: "",
+      clienteId: null,
+      detalles: [],
+    },
   });
 
   useEffect(() => {
-    if (show && isEdit && order) {
-      setOrderData({
-        id: order.id,
-        fecha: new Date(order.fecha),
-        estado: order.estado,
-        metodoPago: order.metodoPago,
-        direccionEnvio: order.direccionEnvio,
-        clienteId: order.clienteId,
-        detalles: order.detalles,
-      });
-
+    if (order) {
       const productosAdaptados = (order.orderDetails || []).map((d) => {
         const producto = products.find((p) => p.id === d.productoId);
         return {
@@ -79,39 +75,25 @@ export const OrderModal = ({
           precioUnitario: d.precioUnitario ?? 0,
         };
       });
-
       setOrderProducts(productosAdaptados);
-      setSelectedProductId("");
-    } else if (show && !isEdit) {
-      setOrderData({
-        fecha: new Date(),
-        estado: "Pendiente",
-        metodoPago: "",
-        direccionEnvio: "",
-        clienteId: null,
-        detalles: [],
+
+      methods.reset({
+        id: order.id || 0,
+        fecha: new Date(order.fecha) || "",
+        estado: order.estado || "",
+        metodoPago: order.metodoPago,
+        direccionEnvio: order.direccionEnvio || "",
+        clienteId: order.clienteId || 0,
+        detalles: productosAdaptados || [],
       });
-      setOrderProducts([]);
-      setSelectedProductId("");
     }
-  }, [show, isEdit, order, products]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setOrderData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleDateChange = (e) => {
-    setOrderData((prev) => ({ ...prev, fecha: e.value }));
-  };
+  }, [order, products]);
 
   const handleAddProduct = (e) => {
     e.preventDefault();
+    if (isNaN(selectedProductId)) return;
 
-    const productoID = parseInt(selectedProductId);
-    if (isNaN(productoID)) return;
-
-    const prod = products.find((p) => p.id === productoID);
+    const prod = products.find((p) => p.id === Number(selectedProductId));
 
     if (prod) {
       if (orderProducts.some((p) => p.productoId === prod.id)) {
@@ -143,76 +125,78 @@ export const OrderModal = ({
     setOrderProducts(updated);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const detalles = orderProducts;
-
-    if (detalles.length <= 0) {
-      toast.error("No hay productos guardados.");
-      return;
-    }
-
-    const fullOrder = {
-      ...orderData,
-      detalles,
-    };
-    console.log(fullOrder);
-
+  //Envío de los datos a la API
+  const onSubmit = methods.handleSubmit(async (data) => {
     try {
-      // Validar el formulario con Yup
-      await orderSchema.validate(fullOrder, { abortEarly: false });
+      if (orderProducts.length <= 0) {
+        toast.error("No hay productos guardados.");
+        return;
+      }
 
+      const orderData = {
+        ...data,
+        detalles: orderProducts,
+      };
       let orderResponse;
       if (!isEdit) {
         orderResponse = await apiServicePost(
           "pedidos/crear-con-detalles",
-          fullOrder
+          orderData
         );
       } else {
         orderResponse = await apiServiceUpdate(
-          `pedidos/update/${fullOrder.id}`,
-          fullOrder
+          `pedidos/update/${data.id}`,
+          orderData
         );
       }
 
       if (orderResponse) {
-        if (isEdit) {
-          toast.success("¡Pedido actualizado con éxito!");
-        } else {
-          toast.success("¡Pedido registrado con éxito!");
-        }
-
-        setOrderData({
-          fecha: new Date(),
-          estado: "Pendiente",
-          metodoPago: "",
-          direccionEnvio: "",
-          clienteId: null,
-          id: 0,
-          detalles: [],
-        });
-        setOrderProducts([]);
-        fetchData();
+        toast.success(
+          isEdit
+            ? "¡Pedido actualizado con éxito!"
+            : "¡Pedido registrado con éxito!"
+        );
         closeModal();
+        fetchData();
       }
     } catch (err) {
-      if (err.name === "ValidationError") {
-        if (err.inner.length > 3) {
-          toast.error("Formulario incompleto.");
-        } else {
-          err.inner.forEach((e) => {
-            if (e?.message) {
-              toast.error(e.message);
-            }
-          });
-        }
-      } else {
-        console.error("Error al guardar el pedido:", err);
-        toast.error("Error al guardar el pedido.");
-      }
+      console.error("Error al guardar empleado:", err);
+      toast.error("Error al guardar empleado. Intenta de nuevo.");
     }
+  });
+
+  //Datos de cada input
+  const metodoPagoValidation = {
+    id: "metodoPago",
+    label: "Método de Pago",
+    type: "text",
+    name: "metodoPago",
+    placeholder: "Efectivo",
   };
+
+  const direccionEnvioValidation = {
+    id: "direccionEnvio",
+    label: "Dirección de Envío",
+    type: "textarea",
+    name: "direccionEnvio",
+    placeholder: "Ubicación de la recepción de pedido",
+  };
+
+  const estadoValidation = {
+    id: "estado",
+    label: "Estado",
+    type: "select",
+    options: ["Realizado", "Pendiente", "Cancelado"],
+    name: "estado",
+  };
+
+  const clienteValidation = (customers) => ({
+    id: "clienteId",
+    label: "Cliente",
+    type: "select",
+    options: customers,
+    name: "clienteId",
+  });
 
   if (!show) return null;
 
@@ -223,198 +207,159 @@ export const OrderModal = ({
       role="dialog"
     >
       <div className="modal-dialog modal-lg">
-        <form onSubmit={handleSubmit}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">
-                {isEdit ? "Editar Pedido" : "Agregar Pedido"}
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={closeModal}
-              ></button>
-            </div>
-            <div className="modal-body">
-              {/* Fecha */}
-              <div className="row mb-3">
-                <div>
-                  <label className="form-label required">Fecha</label>
-                  <fieldset>
-                    <DateTimePicker
-                      value={orderData.fecha}
-                      onChange={handleDateChange}
-                      popupSettings={{
-                        appendTo: document.querySelector(".modal"),
-                      }}
-                    />
-                  </fieldset>
-                </div>
+        <FormProvider {...methods}>
+          <form noValidate onSubmit={onSubmit}>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {isEdit ? "Editar Pedido" : "Agregar Pedido"}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={closeModal}
+                ></button>
               </div>
-
-              {/* Cliente, Estado */}
-              <div className="row mb-3">
-                <div className={isEdit ? "col-6" : "col-12"}>
-                  <label className="form-label required">Cliente</label>
-                  <select
-                    name="clienteId"
-                    className="form-select"
-                    value={orderData.clienteId}
-                    onChange={handleChange}
-                  >
-                    <option value="">Selecciona un cliente</option>
-                    {customers.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {isEdit ? (
-                  <div className="col-6">
-                    <label className="form-label required">Estado</label>
-                    <select
-                      name="estado"
-                      className="form-select"
-                      value={orderData.estado}
-                      onChange={handleChange}
-                    >
-                      <option value="Pendiente">Pendiente</option>
-                      <option value="Realizado">Realizado</option>
-                      <option value="Cancelado">Cancelado</option>
-                    </select>
-                  </div>
-                ) : (
-                  ""
-                )}
-              </div>
-
-              {/* Método de pago y dirección */}
-              <div className="row mb-3">
-                <div className="col-5">
-                  <label className="form-label required">Método de Pago</label>
-                  <input
-                    type="text"
-                    name="metodoPago"
-                    placeholder="Efectivo"
-                    className="form-control"
-                    value={orderData.metodoPago}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="col-7">
-                  <label className="form-label required">
-                    Dirección de Envío
-                  </label>
-                  <textarea
-                    name="direccionEnvio"
-                    className="form-control"
-                    placeholder="Av. Bernal"
-                    value={orderData.direccionEnvio}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              {/* Productos */}
-              <div className="row mb-3">
-                <h6 className="mt-6 mb-4 fs-2">Lista de Productos</h6>
+              <div className="modal-body">
+                {/* Fecha */}
                 <div className="row mb-3">
-                  <div className="col-9">
-                    <select
-                      name="productoId"
-                      className="form-select"
-                      value={selectedProductId}
-                      onChange={(e) => setSelectedProductId(e.target.value)}
-                    >
-                      <option value="">Selecciona un producto</option>
-                      {products.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.nombre}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-3">
-                    <button
-                      onClick={handleAddProduct}
-                      className="btn btn-primary w-100"
-                    >
-                      <IconPlus className="me-2" /> Agregar
-                    </button>
+                  <div>
+                    <label className="form-label required">Fecha</label>
+                    <fieldset>
+                      <DateTimePicker
+                        name="fecha"
+                        popupSettings={{
+                          appendTo: document.querySelector(".modal"),
+                        }}
+                      />
+                    </fieldset>
                   </div>
                 </div>
-                <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-                  {orderProducts.length > 0 && (
-                    <table className="table table-striped responsive">
-                      <thead className="sticky-top">
-                        <tr>
-                          <th>#</th>
-                          <th>Producto</th>
-                          <th>Cantidad</th>
-                          <th>Subtotal</th>
-                          <th>Acción</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {orderProducts.map((prod, idx) => (
-                          <tr key={idx}>
-                            <td>{idx + 1}</td>
-                            <td>{prod.nombre}</td>
-                            <td style={{ maxWidth: "60px" }}>
-                              <input
-                                type="number"
-                                className="form-control"
-                                value={prod.cantidad}
-                                onChange={(e) =>
-                                  handleChangeCantidad(idx, e.target.value)
-                                }
-                                min="1"
-                              />
-                            </td>
-                            <td>
-                              {(prod.cantidad * prod.precioUnitario).toFixed(2)}
-                            </td>
-                            <td>
-                              <button
-                                type="button"
-                                className="btn btn-danger"
-                                onClick={() => handleDeleteProduct(idx)}
-                              >
-                                X
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+
+                {/* Cliente, Estado */}
+                <div className="row mb-3">
+                  <div className={isEdit ? "col-6" : "col-12"}>
+                    <Input {...clienteValidation(customers)} />
+                  </div>
+
+                  {isEdit && (
+                    <div className="col-6">
+                      <Input {...estadoValidation} />
+                    </div>
                   )}
-                  <div className="text-end fs-4 p-4">
-                    <strong>
-                      Total: ${" "}
-                      {orderProducts
-                        .reduce(
-                          (acc, p) => acc + p.cantidad * p.precioUnitario,
-                          0
-                        )
-                        .toFixed(2)}
-                    </strong>
+                </div>
+
+                {/* Método de pago y dirección */}
+                <div className="row mb-3">
+                  <div className="col-5">
+                    <Input {...metodoPagoValidation} />
+                  </div>
+                  <div className="col-7">
+                    <Input {...direccionEnvioValidation} />
+                  </div>
+                </div>
+
+                {/* Productos */}
+                <div className="row mb-3">
+                  <h6 className="mt-6 mb-4 fs-2">Lista de Productos</h6>
+                  <div className="row mb-3">
+                    <div className="col-9">
+                      <select
+                        name="productoId"
+                        className="form-select"
+                        value={selectedProductId}
+                        onChange={(e) => setSelectedProductId(e.target.value)}
+                      >
+                        <option value="">Selecciona un producto</option>
+                        {products.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-3">
+                      <button
+                        onClick={handleAddProduct}
+                        className="btn btn-primary w-100"
+                      >
+                        <IconPlus className="me-2" /> Agregar
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                    {orderProducts.length > 0 && (
+                      <table className="table table-striped responsive">
+                        <thead className="sticky-top">
+                          <tr>
+                            <th>#</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                            <th>Acción</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {orderProducts.map((prod, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>{prod.nombre}</td>
+                              <td style={{ maxWidth: "60px" }}>
+                                <input
+                                  type="number"
+                                  className="form-control"
+                                  value={prod.cantidad}
+                                  onChange={(e) =>
+                                    handleChangeCantidad(idx, e.target.value)
+                                  }
+                                  min="1"
+                                />
+                              </td>
+                              <td>
+                                {(prod.cantidad * prod.precioUnitario).toFixed(
+                                  2
+                                )}
+                              </td>
+                              <td>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger"
+                                  onClick={() => handleDeleteProduct(idx)}
+                                >
+                                  X
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                    <div className="text-end fs-4 p-4">
+                      <strong>
+                        Total: ${" "}
+                        {orderProducts
+                          .reduce(
+                            (acc, p) => acc + p.cantidad * p.precioUnitario,
+                            0
+                          )
+                          .toFixed(2)}
+                      </strong>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="modal-footer">
-              <button type="button" className="btn" onClick={closeModal}>
-                Cancelar
-              </button>
-              <button type="submit" className="btn btn-primary">
-                {isEdit ? "Editar" : "Guardar"}
-              </button>
+              <div className="modal-footer">
+                <button type="button" className="btn" onClick={closeModal}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  {isEdit ? "Editar" : "Guardar"}
+                </button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </FormProvider>
       </div>
     </div>
   );
