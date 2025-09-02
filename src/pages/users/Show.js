@@ -1,27 +1,38 @@
 import React from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
 
-const Show = ({ customer, onEdit, onDelete }) => {
+const Show = ({ user, onEdit, onDelete }) => {
   return (
     <tr>
       <td data-label="IDProducto">
         <div className="d-flex py-1 align-items-center">
-          <span>{customer.id}</span>
+          <span>{user.id}</span>
         </div>
       </td>
       <td data-label="nombreProducto">
-        <div className="font-weight-medium">{customer.nombre}</div>
+        <div className="font-weight-medium">{user.nombreCompleto}</div>
       </td>
       <td className="text-secondary" data-label="Role">
-        {customer.telefono}
+        {user.nombreUsuario}
       </td>
       <td className="text-secondary" data-label="Role">
-        {customer.email}
+        {user.email}
       </td>
       <td className="text-secondary" data-label="Role">
-        {customer.direccion}
+        {user.fechaNacimiento}
       </td>
-
+      <td className="text-secondary" data-label="Role">
+        {user.fechaContratacion}
+      </td>
+      <td className="text-secondary" data-label="Role">
+        {user.nit}
+      </td>
+      <td className="text-secondary" data-label="Role">
+        {user.direccion}
+      </td>
+      <td className="text-secondary" data-label="Role">
+        ${user.salario}
+      </td>
       <td>
         <div className="btn-list flex-nowrap">
           <div className="dropdown">
@@ -34,14 +45,14 @@ const Show = ({ customer, onEdit, onDelete }) => {
             <div className="dropdown-menu dropdown-menu-end">
               <button
                 className="dropdown-item text-yellow"
-                onClick={() => onEdit(customer)}
+                onClick={() => onEdit(user)}
               >
                 <IconPencil />
                 Editar
               </button>
               <button
                 className="dropdown-item text-danger"
-                onClick={() => onDelete(customer)}
+                onClick={() => onDelete(user)}
               >
                 <IconTrash />
                 Eliminar

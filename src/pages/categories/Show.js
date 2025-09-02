@@ -2,6 +2,19 @@ import React from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
 
 const Show = ({ category, onEdit, onDelete }) => {
+  let bullet_color = "";
+  switch (category.isActive) {
+    case true:
+      bullet_color = "bg-blue text-blue-fg";
+      break;
+    case false:
+      bullet_color = "bg-orange text-orange-fg";
+      break;
+    default:
+      bullet_color = "bg-muted text-orange-fg";
+      break;
+  }
+
   return (
     <tr>
       <td data-label="IDCategory">
@@ -10,10 +23,15 @@ const Show = ({ category, onEdit, onDelete }) => {
         </div>
       </td>
       <td data-label="NombreCategoria">
-        <div className="font-weight-medium">{category.nombre}</div>
+        <div className="font-weight-medium">{category.name}</div>
       </td>
       <td className="text-secondary" data-label="Role">
-        {category.descripcion}
+        {category.description}
+      </td>
+      <td className="text-secondary" data-label="Role">
+        <span className={`badge ${bullet_color} w-max`}>
+          {category.isActive ? "Activo" : "Inactivo"}
+        </span>
       </td>
       <td>
         <div className="btn-list flex-nowrap">

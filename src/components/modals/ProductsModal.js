@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
-import {
-  apiServiceGet,
-  apiServicePost,
-  apiServiceUpdate,
-} from "../../API/apiService";
+import React, { useEffect } from "react";
+import { apiServicePost, apiServiceUpdate } from "../../API/apiService";
 import { toast } from "react-toastify";
-import * as Yup from "yup";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "../Input";
+import {
+  productSchema,
+  productValidations,
+} from "../../validations/productSchema"; // VALIDACIONES CON YUP
 
 export const ProductsModal = ({
   show,
@@ -20,131 +19,65 @@ export const ProductsModal = ({
   categories,
 }) => {
   // VALIDACIONES CON YUP
-  const productSchema = Yup.object().shape({
-    nombre: Yup.string()
-      .min(3, "min 3 caracteres")
-      .required("requerido")
-      .matches(
-        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
-        "sin caracteres especiales"
-      ),
-    descripcion: Yup.string()
-      .min(10, "min 10 caracteres")
-      .required("requerido")
-      .matches(
-        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
-        "sin caracteres especiales"
-      ),
-    precio: Yup.number()
-      .typeError("debe ser número")
-      .positive("min $0.01")
-      .required("requerido"),
-    stock: Yup.number()
-      .typeError("debe ser número")
-      .integer("debe ser número entero")
-      .min(0, "min 0")
-      .required("requerido"),
-    categoriaId: Yup.string().required("requerido"),
-    proveedorId: Yup.string().required("requerido"),
-  });
 
   //Utilizar yup para validar formulario
   const methods = useForm({
     resolver: yupResolver(productSchema),
     defaultValues: {
-      id: 0,
-      nombre: "",
-      descripcion: "",
-      precio: 0.0,
+      productId: 0,
+      productName: "",
+      description: "",
+      price: 0.0,
       stock: 0,
-      categoriaId: "",
-      proveedorId: "",
+      categoryId: "",
+      providerId: "",
+      images: [],
     },
   });
 
   useEffect(() => {
     if (product) {
+      const supplier = suppliers.find((s) => s.name === product.providerName);
+      const category = categories.find((c) => c.name === product.categoryName);
       methods.reset({
-        id: product.id || 0,
-        nombre: product.nombre || "",
-        descripcion: product.descripcion || "",
-        precio: product.precio || 0,
+        productId: product.productId || 0,
+        productName: product.productName || "",
+        description: product.description || "",
+        price: product.price || 0,
         stock: product.stock || 0,
-        categoriaId: product.categoriaId.toString() || "",
-        proveedorId: product.proveedorId.toString() || "",
+        categoryId: category?.id || "",
+        providerId: supplier?.id || "",
       });
     }
-  }, [product]);
+  }, [product, suppliers, categories, methods]);
 
   const onSubmit = methods.handleSubmit(async (data) => {
+    console.log(data);
     try {
       if (isEdit) {
-        await apiServiceUpdate(`Productos/update/${product.id}`, {
-          ...data,
-          id: product.id,
-        });
+        await apiServiceUpdate(`product/${product.productId}`, data);
       } else {
-        await apiServicePost("Productos", data);
+        const formData = new FormData();
+
+        Object.entries(data).forEach(([key, value]) => {
+          if (key !== "images") {
+            formData.append(key, value);
+          }
+        });
+
+        data.images.forEach((file) => {
+          formData.append("images", file);
+        });
+
+        await apiServicePost("product", formData);
       }
       closeModal();
       fetchData();
       toast.success(isEdit ? "¡Producto actualizado!" : "¡Producto agregado!");
-      console.log(data);
     } catch (err) {
       console.error("Error al guardar el producto:", err);
       toast.error("Error al guardar el producto. Intenta de nuevo.");
     }
-  });
-
-  //Datos de cada input
-  const nombreValidation = {
-    id: "nombre",
-    label: "Nombre",
-    type: "text",
-    name: "nombre",
-    placeholder: "Producto 01",
-  };
-
-  const descripcionValidation = {
-    id: "descripcion",
-    label: "Descripción",
-    type: "textarea",
-    name: "descripcion",
-    placeholder: "Descripcion de Producto 01",
-  };
-
-  const precioValidation = {
-    id: "precio",
-    label: "Precio",
-    type: "number",
-    name: "precio",
-    placeholder: "99.99",
-    step: 0.01,
-  };
-
-  const stockValidation = {
-    id: "stock",
-    label: "Cantidad",
-    type: "number",
-    name: "stock",
-    placeholder: "99",
-    setp: 1,
-  };
-
-  const categoriaValidation = (categories) => ({
-    id: "categoriaId",
-    label: "Categoría",
-    type: "select",
-    name: "categoriaId",
-    options: categories,
-  });
-
-  const proveedorValidation = (suppliers) => ({
-    id: "proveedorId",
-    label: "Proveedor",
-    type: "select",
-    name: "proveedorId",
-    options: suppliers,
   });
 
   if (!show) return null;
@@ -158,8 +91,6 @@ export const ProductsModal = ({
       <div className="modal-dialog modal-lg">
         <FormProvider {...methods}>
           <form noValidate onSubmit={onSubmit}>
-            {isEdit && <input type="hidden" name="id" value={product.id} />}
-
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
@@ -175,29 +106,39 @@ export const ProductsModal = ({
               <div className="modal-body">
                 <div className="row mb-3">
                   <div className="col-5">
-                    <Input {...nombreValidation} />
+                    <Input {...productValidations.productNameValidation} />
                   </div>
                   <div className="col-7">
-                    <Input {...descripcionValidation} />
+                    <Input {...productValidations.descriptionValidation} />
                   </div>
                 </div>
 
                 <div className="row mb-3">
                   <div className="col-6">
-                    <Input {...precioValidation} />
+                    <Input {...productValidations.priceValidation} />
                   </div>
                   <div className="col-6">
-                    <Input {...stockValidation} />
+                    <Input {...productValidations.stockValidation} />
                   </div>
 
                   <div className="row mb-3">
                     <div className="col-5">
-                      <Input {...categoriaValidation(categories)} />
+                      <Input
+                        {...productValidations.categoryValidation(categories)}
+                      />
                     </div>
                     <div className="col-7">
-                      <Input {...proveedorValidation(suppliers)} />
+                      <Input
+                        {...productValidations.providerValidation(suppliers)}
+                      />
                     </div>
                   </div>
+
+                  {!isEdit && (
+                    <div className="row mb-3">
+                      <Input {...productValidations.imageValidation} />
+                    </div>
+                  )}
                 </div>
               </div>
 

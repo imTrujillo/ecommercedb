@@ -9,10 +9,15 @@ export const ShopCart = ({ productBuy, setProductsCart }) => {
 
   // ACTUALIZAR CANTIDAD DE UN PRODUCTO
   const updateQuantity = (id, value) => {
-    const quantityNum = Number(value);
-    if (quantityNum >= 1) {
+    if (value >= 1) {
       setProductsCart((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, quantity: quantityNum } : p))
+        prev.map((p) => {
+          if (p.id === id) {
+            const newQuantity = Math.min(Math.max(value, 1), p.stock);
+            return { ...p, quantity: newQuantity };
+          }
+          return p;
+        })
       );
     }
   };
@@ -24,14 +29,14 @@ export const ShopCart = ({ productBuy, setProductsCart }) => {
     <div className="card">
       <div className="row row-0">
         <div className="col-3 my-auto">
-          <img src={photo} alt={productBuy.nombre} />
+          <img src={photo} alt={productBuy.name} />
         </div>
         <div className="col">
           <div className="card-body">
-            <h5>{productBuy.Proveedor}</h5>
-            <h3 className="card-title">{productBuy.nombre}</h3>
-            <p className="text-secondary">{productBuy.descripcion}</p>
-            <strong>$ {(productBuy.precio * quantity).toFixed(2)}</strong>
+            <h5>{productBuy.providerName}</h5>
+            <h3 className="card-title">{productBuy.name}</h3>
+            <p className="text-secondary">{productBuy.description}</p>
+            <strong>$ {(productBuy.price * quantity).toFixed(2)}</strong>
           </div>
         </div>
         <div className="col-2 py-3 pe-3 d-flex flex-column justify-content-between">
@@ -47,7 +52,9 @@ export const ShopCart = ({ productBuy, setProductsCart }) => {
             min="1"
             step="1"
             value={quantity}
-            onChange={(e) => updateQuantity(productBuy.id, e.target.value)}
+            onChange={(e) =>
+              updateQuantity(productBuy.id, Number(e.target.value))
+            }
           />
         </div>
       </div>

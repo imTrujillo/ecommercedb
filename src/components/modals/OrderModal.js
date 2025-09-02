@@ -1,112 +1,89 @@
 import React, { useEffect, useState } from "react";
-import { IconCalendar, IconPlus } from "@tabler/icons-react";
-import {
-  apiServiceGet,
-  apiServicePost,
-  apiServiceUpdate,
-} from "../../API/apiService";
-import { DateTimePicker } from "@progress/kendo-react-dateinputs";
+import { IconPlus } from "@tabler/icons-react";
+import { apiServicePost, apiServiceUpdate } from "../../API/apiService";
 import "@progress/kendo-theme-bootstrap/dist/all.css";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
-import addMonths from "date-fns/addMonths";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "../Input";
+import { useAuth } from "../../pages/session/AuthProvider";
+import { orderSchema, orderValidations } from "../../validations/orderSchema"; // VALIDACIONES CON YUP
 
 export const OrderModal = ({
   show,
   closeModal,
   isEdit,
   order,
-  fetchData,
   products,
-  customers,
+  fetchData,
 }) => {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [orderProducts, setOrderProducts] = useState([]);
 
-  // VALIDACIONES CON YUP
-  const orderSchema = Yup.object().shape({
-    fecha: Yup.date()
-      .min(new Date(2020, 0, 1), "min 2020")
-      .max(addMonths(new Date(), 6), "max 6 meses")
-      .required("requerida"),
-    metodoPago: Yup.string()
-      .min(3, "min 3 caracteres")
-      .required("requerido")
-      .matches(
-        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
-        "sin caracteres especiales"
-      ),
-    direccionEnvio: Yup.string()
-      .required("requerido")
-      .min(20, "min 20 caracteres")
-      .max(200, "max 200 caracteres")
-      .matches(
-        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
-        "sin caracteres especiales"
-      ),
-    estado: Yup.string().required("requerido"),
-    clienteId: Yup.string().required("requerido"),
-  });
-
   //Utilizar yup para validar formulario
+  const { user } = useAuth();
   const methods = useForm({
     resolver: yupResolver(orderSchema),
     defaultValues: {
-      fecha: "",
-      estado: "",
-      metodoPago: "",
-      direccionEnvio: "",
-      clienteId: null,
-      detalles: [],
+      userId: user?.id ?? 0,
+      orderStatus: 3,
+      address: "",
+      details: [],
     },
   });
 
   useEffect(() => {
-    if (order) {
-      const productosAdaptados = (order.orderDetails || []).map((d) => {
-        const producto = products.find((p) => p.id === d.productoId);
-        return {
-          productoId: d.productoId ?? 0,
-          nombre: producto?.nombre ?? "",
-          cantidad: d.cantidad ?? 1,
-          precioUnitario: d.precioUnitario ?? 0,
-        };
-      });
-      setOrderProducts(productosAdaptados);
+    if (order?.details) {
+      setOrderProducts(
+        order.details.map((p) => {
+          const product = products.find(
+            (prod) => prod.productName === p.productName
+          );
+          return {
+            quantity: p.quantity,
+            price: p.unitPrice,
+            productName: p.productName,
+            productId: product.productId,
+            stock: product.stock + p.quantity,
+          };
+        })
+      );
 
       methods.reset({
-        id: order.id || 0,
-        fecha: new Date(order.fecha) || "",
-        estado: order.estado || "",
-        metodoPago: order.metodoPago,
-        direccionEnvio: order.direccionEnvio || "",
-        clienteId: order.clienteId || 0,
-        detalles: productosAdaptados || [],
+        orderId: order?.orderId ?? 0,
+        userId: user?.id ?? 0,
+        orderStatus: order.status ?? 3,
+        address: "",
+        details: orderProducts ?? [],
       });
     }
-  }, [order, products]);
+  }, [order]);
 
   const handleAddProduct = (e) => {
     e.preventDefault();
     if (isNaN(selectedProductId)) return;
 
-    const prod = products.find((p) => p.id === Number(selectedProductId));
+    const prod = products?.find(
+      (p) => p.productId === Number(selectedProductId)
+    );
 
     if (prod) {
-      if (orderProducts.some((p) => p.productoId === prod.id)) {
+      if (orderProducts.some((p) => p.productId === prod.productId)) {
         toast("El producto ya fue agregado.");
+        return;
+      } else if (prod.stock <= 0) {
+        toast("Producto agotado.");
         return;
       }
       setOrderProducts((prev) => [
         ...prev,
         {
-          productoId: prod.id,
-          nombre: prod.nombre,
-          cantidad: 1,
-          precioUnitario: prod.precio,
+          productId: prod.productId,
+          quantity: 1,
+          price: prod.price,
+          productName: prod.productName,
+          stock: prod.stock,
         },
       ]);
 
@@ -116,7 +93,10 @@ export const OrderModal = ({
 
   const handleChangeCantidad = (index, value) => {
     const updated = [...orderProducts];
-    updated[index].cantidad = parseInt(value);
+    const product = updated[index];
+
+    product.quantity = Math.max(Math.min(value, product.stock), 1);
+
     setOrderProducts(updated);
   };
 
@@ -134,22 +114,21 @@ export const OrderModal = ({
       }
 
       const orderData = {
-        ...data,
-        detalles: orderProducts,
+        orderId: data.orderId,
+        userId: data.id ?? 0,
+        orderStatus: Number(data.orderStatus),
+        address: data.address ?? "",
+        details: orderProducts.map(({ stock, productName, ...rest }) => rest),
       };
       let orderResponse;
       if (!isEdit) {
-        orderResponse = await apiServicePost(
-          "pedidos/crear-con-detalles",
-          orderData
-        );
+        orderResponse = await apiServicePost("orders", orderData);
       } else {
         orderResponse = await apiServiceUpdate(
-          `pedidos/update/${data.id}`,
+          `orders/update/${data.orderId}`,
           orderData
         );
       }
-
       if (orderResponse) {
         toast.success(
           isEdit
@@ -160,42 +139,9 @@ export const OrderModal = ({
         fetchData();
       }
     } catch (err) {
-      console.error("Error al guardar empleado:", err);
-      toast.error("Error al guardar empleado. Intenta de nuevo.");
+      console.error("Error al guardar el pedido:", err);
+      toast.error("Error al guardar el pedido. Intenta de nuevo.");
     }
-  });
-
-  //Datos de cada input
-  const metodoPagoValidation = {
-    id: "metodoPago",
-    label: "Método de Pago",
-    type: "text",
-    name: "metodoPago",
-    placeholder: "Efectivo",
-  };
-
-  const direccionEnvioValidation = {
-    id: "direccionEnvio",
-    label: "Dirección de Envío",
-    type: "textarea",
-    name: "direccionEnvio",
-    placeholder: "Ubicación de la recepción de pedido",
-  };
-
-  const estadoValidation = {
-    id: "estado",
-    label: "Estado",
-    type: "select",
-    options: ["Realizado", "Pendiente", "Cancelado"],
-    name: "estado",
-  };
-
-  const clienteValidation = (customers) => ({
-    id: "clienteId",
-    label: "Cliente",
-    type: "select",
-    options: customers,
-    name: "clienteId",
   });
 
   if (!show) return null;
@@ -221,59 +167,31 @@ export const OrderModal = ({
                 ></button>
               </div>
               <div className="modal-body">
-                {/* Fecha */}
+                {/*  Estado */}
                 <div className="row mb-3">
-                  <div>
-                    <label className="form-label required">Fecha</label>
-                    <fieldset>
-                      <DateTimePicker
-                        name="fecha"
-                        popupSettings={{
-                          appendTo: document.querySelector(".modal"),
-                        }}
-                      />
-                    </fieldset>
-                  </div>
+                  <Input {...orderValidations.orderStatusValidation} />
                 </div>
 
-                {/* Cliente, Estado */}
+                {/* Dirección */}
                 <div className="row mb-3">
-                  <div className={isEdit ? "col-6" : "col-12"}>
-                    <Input {...clienteValidation(customers)} />
-                  </div>
-
-                  {isEdit && (
-                    <div className="col-6">
-                      <Input {...estadoValidation} />
-                    </div>
-                  )}
-                </div>
-
-                {/* Método de pago y dirección */}
-                <div className="row mb-3">
-                  <div className="col-5">
-                    <Input {...metodoPagoValidation} />
-                  </div>
-                  <div className="col-7">
-                    <Input {...direccionEnvioValidation} />
-                  </div>
+                  <Input {...orderValidations.addressValidation} />
                 </div>
 
                 {/* Productos */}
                 <div className="row mb-3">
-                  <h6 className="mt-6 mb-4 fs-2">Lista de Productos</h6>
+                  <h6 className="mt-2 mb-4 fs-2">Lista de Productos</h6>
                   <div className="row mb-3">
                     <div className="col-9">
                       <select
-                        name="productoId"
+                        name="productId"
                         className="form-select"
                         value={selectedProductId}
                         onChange={(e) => setSelectedProductId(e.target.value)}
                       >
                         <option value="">Selecciona un producto</option>
-                        {products.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.nombre}
+                        {products?.map((p) => (
+                          <option key={p.productId} value={p.productId}>
+                            {p.productName}
                           </option>
                         ))}
                       </select>
@@ -300,15 +218,15 @@ export const OrderModal = ({
                           </tr>
                         </thead>
                         <tbody>
-                          {orderProducts.map((prod, idx) => (
-                            <tr key={idx}>
+                          {orderProducts?.map((prod, idx) => (
+                            <tr key={idx} className="align-middle">
                               <td>{idx + 1}</td>
-                              <td>{prod.nombre}</td>
+                              <td>{prod.productName}</td>
                               <td style={{ maxWidth: "60px" }}>
                                 <input
                                   type="number"
                                   className="form-control"
-                                  value={prod.cantidad}
+                                  value={prod.quantity}
                                   onChange={(e) =>
                                     handleChangeCantidad(idx, e.target.value)
                                   }
@@ -316,9 +234,7 @@ export const OrderModal = ({
                                 />
                               </td>
                               <td>
-                                {(prod.cantidad * prod.precioUnitario).toFixed(
-                                  2
-                                )}
+                                $ {(prod.quantity * prod.price).toFixed(2)}
                               </td>
                               <td>
                                 <button
@@ -338,10 +254,7 @@ export const OrderModal = ({
                       <strong>
                         Total: ${" "}
                         {orderProducts
-                          .reduce(
-                            (acc, p) => acc + p.cantidad * p.precioUnitario,
-                            0
-                          )
+                          .reduce((acc, p) => acc + p.quantity * p.price, 0)
                           .toFixed(2)}
                       </strong>
                     </div>

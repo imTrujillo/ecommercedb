@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
-import {
-  apiServiceGet,
-  apiServicePost,
-  apiServiceUpdate,
-} from "../../API/apiService";
+import { useEffect } from "react";
+import { apiServicePost, apiServiceUpdate } from "../../API/apiService";
 import { toast } from "react-toastify";
-import * as Yup from "yup";
+
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "../Input";
+import {
+  categorySchema,
+  categoryValidations,
+} from "../../validations/categorySchema"; // VALIDACIONES CON YUP
+import { boolean } from "yup";
 
 export const CategoryModal = ({
   show,
@@ -17,32 +18,13 @@ export const CategoryModal = ({
   category,
   fetchData,
 }) => {
-  // VALIDACIONES CON YUP
-  const categorySchema = Yup.object().shape({
-    nombre: Yup.string()
-      .required("requerido")
-      .min(2, "min 2 caracteres")
-      .max(100, "max 100 caracteres")
-      .matches(
-        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
-        "sin caracteres especiales"
-      ),
-    descripcion: Yup.string()
-      .required("requerido")
-      .min(10, "min 10 caracteres")
-      .max(200, "max 200 caracteres")
-      .matches(
-        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
-        "sin caracteres especiales"
-      ),
-  });
-
   //Utilizar yup para validar formulario
   const methods = useForm({
     resolver: yupResolver(categorySchema),
     defaultValues: {
-      nombre: "",
-      descripcion: "",
+      name: "",
+      description: "",
+      isActive: true,
     },
   });
 
@@ -50,8 +32,9 @@ export const CategoryModal = ({
     if (category) {
       methods.reset({
         id: category.id || 0,
-        nombre: category.nombre || "",
-        descripcion: category.descripcion || "",
+        name: category.name || "",
+        description: category.description || "",
+        isActive: category.isActive ? "true" : "false",
       });
     }
   }, [category]);
@@ -60,12 +43,9 @@ export const CategoryModal = ({
   const onSubmit = methods.handleSubmit(async (data) => {
     try {
       if (isEdit) {
-        await apiServiceUpdate(`categorias/categoria/update/${category.id}`, {
-          ...data,
-          id: category.id,
-        });
+        await apiServiceUpdate(`category/category/update/${category.id}`, data);
       } else {
-        await apiServicePost("categorias", data);
+        await apiServicePost("category", data);
       }
       closeModal();
       fetchData();
@@ -78,22 +58,6 @@ export const CategoryModal = ({
       toast.error("Error al guardar la categoría. Intenta de nuevo.");
     }
   });
-
-  const nombreValidation = {
-    id: "nombre",
-    label: "Nombre",
-    type: "text",
-    name: "nombre",
-    placeholder: "Categoría 01",
-  };
-
-  const descripcionValidation = {
-    id: "descripcion",
-    label: "Descripción",
-    type: "textarea",
-    name: "descripcion",
-    placeholder: "Descripcion de Categoría 01",
-  };
 
   if (!show) return null;
 
@@ -120,10 +84,15 @@ export const CategoryModal = ({
 
               <div className="modal-body">
                 <div className="row mb-3">
-                  <Input {...nombreValidation} />
+                  <div className="col-6">
+                    <Input {...categoryValidations.nameValidation} />
+                  </div>
+                  <div className="col-6">
+                    <Input {...categoryValidations.isActiveValidation} />
+                  </div>
                 </div>
                 <div className="row mb-3">
-                  <Input {...descripcionValidation} />
+                  <Input {...categoryValidations.descriptionValidation} />
                 </div>
               </div>
               <div className="modal-footer">

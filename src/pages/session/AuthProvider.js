@@ -36,11 +36,11 @@ const AuthProvider = ({ children }) => {
 
   const signup = async (data, rol) => {
     try {
+      console.log(data);
       const response = await apiServicePost(
         `auth/register/${rol}`,
         data,
-        token,
-        true
+        token
       );
 
       if (response.status >= 200 && response.status < 300) {
@@ -48,6 +48,7 @@ const AuthProvider = ({ children }) => {
           login({ username: data.username, password: data.password });
         }
       }
+      toast.success("¡Usuario agregado!");
     } catch (error) {
       if (error.response && Array.isArray(error.response.data)) {
         error.response.data.forEach((err) => {
@@ -63,17 +64,17 @@ const AuthProvider = ({ children }) => {
 
   const login = async (data) => {
     try {
-      const response = await apiServicePost("auth/login", data, null, true);
+      const response = await apiServicePost("auth/login", data);
 
       if (response.status >= 200 && response.status < 300) {
         const { refreshToken, accessToken, user } = response.data;
 
-        setUser(user.username);
+        setUser(user);
         setRol(user.role);
         setToken(accessToken);
         setRefreshToken(refreshToken);
 
-        sessionStorage.setItem("user", JSON.stringify(user.username));
+        sessionStorage.setItem("user", JSON.stringify(user));
         sessionStorage.setItem("rol", JSON.stringify(user.role));
         sessionStorage.setItem("token", JSON.stringify(accessToken));
         sessionStorage.setItem("refreshToken", JSON.stringify(refreshToken));
@@ -86,7 +87,7 @@ const AuthProvider = ({ children }) => {
             navigate("/pedidos");
             break;
           case "Admin":
-            navigate("/empleados");
+            navigate("/usuarios");
             break;
           default:
             navigate("/");
@@ -109,12 +110,7 @@ const AuthProvider = ({ children }) => {
 
   const setNewPassword = async (data) => {
     try {
-      const response = await apiServicePost(
-        "auth/reset-password",
-        data,
-        null,
-        true
-      );
+      const response = await apiServicePost("auth/reset-password", data);
 
       if (response && response.status >= 200 && response.status < 300) {
         navigate("/login");

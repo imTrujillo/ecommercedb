@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { IconExclamationCircleFilled } from "@tabler/icons-react";
 import { findInputError } from "../utils/findInputError";
 import { isFormInvalid } from "../utils/isFormInvalid";
+import Dropzone from "dropzone";
+import { useEffect, useRef } from "react";
 
 export const Input = ({
   label = "",
@@ -14,14 +16,60 @@ export const Input = ({
   icon = null,
   isAuthInput = false,
   options = [],
+  required = true,
 }) => {
   const {
     register,
     formState: { errors },
+    setValue,
+    getValues,
   } = useFormContext();
 
   const inputError = findInputError(errors, name);
   const isInvalid = isFormInvalid(inputError);
+
+  //Crear un array para guardar las imagenes
+  const dropzoneRef = useRef(null);
+  useEffect(() => {
+    if (
+      type === "file" &&
+      dropzoneRef.current &&
+      !dropzoneRef.current.dropzone
+    ) {
+      const dz = new Dropzone(dropzoneRef.current, {
+        url: "#",
+        paramName: "file",
+        autoProcessQueue: false,
+        maxFilesize: 5,
+        acceptedFiles: "image/jpeg,image/jpg,image/webp,image/png",
+        addRemoveLinks: true,
+        dictDefaultMessage: "Arrastra tus imágenes aquí o haz clic",
+      });
+
+      dz.on("addedfile", (file) => {
+        if (file.previewElement) {
+          const progress = file.previewElement.querySelector(".dz-progress");
+          if (progress) progress.style.display = "none";
+        }
+
+        const current = Array.isArray(getValues(name)) ? getValues(name) : [];
+        setValue(name, [...current, file], { shouldValidate: true });
+      });
+
+      dz.on("removedfile", (file) => {
+        const current = Array.isArray(getValues(name)) ? getValues(name) : [];
+        setValue(
+          name,
+          current.filter((f) => f !== file),
+          { shouldValidate: true }
+        );
+      });
+
+      return () => {
+        dz.destroy();
+      };
+    }
+  }, [type, name, setValue, getValues]);
 
   //Se selecciona un input, select o textarea según "type"
   const renderInput = () => {
@@ -30,16 +78,14 @@ export const Input = ({
         <select
           id={id}
           name={name}
-          className="form-control"
           {...register(name)}
+          className="form-control"
         >
-          <option value="" selected>
-            Selecciona una opción
-          </option>
+          <option value="">Selecciona una opción</option>
           {options.map((option, index) =>
             typeof option === "object" ? (
               <option key={option.id || index} value={option.id}>
-                {option.nombre}
+                {option.name}
               </option>
             ) : (
               <option key={index} value={option}>
@@ -60,6 +106,22 @@ export const Input = ({
           placeholder={placeholder}
           {...register(name)}
         />
+      );
+    }
+
+    if (type === "file") {
+      return (
+        <div className="dropzone border-info-subtle" id={id} ref={dropzoneRef}>
+          <div className="fallback">
+            <input {...register(name)} id={id} name={name} type="file" />
+          </div>
+          <div className="dz-message">
+            <h3 className="dropzone-msg-title">{label}</h3>
+            <span className="dropzone-msg-desc">
+              Haz click aquí o arrastra una imagen...
+            </span>
+          </div>
+        </div>
       );
     }
 
@@ -84,7 +146,9 @@ export const Input = ({
             <small className="text-secondary">{label}</small>
           </label>
         ) : (
-          <label className="form-label required">{label}</label>
+          <label className={`form-label ${required ? "required" : ""}`}>
+            {label}
+          </label>
         )
       ) : (
         ""

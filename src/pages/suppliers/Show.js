@@ -2,6 +2,19 @@ import React from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
 
 const Show = ({ supplier, onEdit, onDelete }) => {
+  let bullet_color = "";
+  switch (supplier.isActive) {
+    case true:
+      bullet_color = "bg-blue text-blue-fg";
+      break;
+    case false:
+      bullet_color = "bg-orange text-orange-fg";
+      break;
+    default:
+      bullet_color = "bg-muted text-orange-fg";
+      break;
+  }
+
   return (
     <tr>
       <td data-label="id">
@@ -10,13 +23,18 @@ const Show = ({ supplier, onEdit, onDelete }) => {
         </div>
       </td>
       <td data-label="nombre">
-        <div className="font-weight-medium">{supplier.nombre}</div>
+        <div className="font-weight-medium">{supplier.name}</div>
       </td>
       <td className="text-secondary" data-label="telefono">
-        {supplier.telefono}
+        {supplier.phoneNumber}
       </td>
       <td className="text-secondary" data-label="email">
         {supplier.email}
+      </td>
+      <td className="text-secondary" data-label="Role">
+        <span className={`badge ${bullet_color} w-max`}>
+          {supplier.isActive ? "Activo" : "Inactivo"}
+        </span>
       </td>
       <td>
         <div className="btn-list flex-nowrap">

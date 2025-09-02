@@ -4,15 +4,14 @@ import PaginationControl from "../../assets/PaginationControl";
 export const ProductsOrderModal = ({
   show,
   closeProductsModal,
-  orderDetails,
-  products,
+  orderProducts,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
 
-  const totalPages = Math.ceil(orderDetails.length / rowsPerPage);
+  const totalPages = Math.ceil(orderProducts.length / rowsPerPage);
 
-  const visibleData = orderDetails.slice(
+  const visibleData = orderProducts.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -48,21 +47,16 @@ export const ProductsOrderModal = ({
                 </thead>
                 <tbody>
                   {visibleData.map((detail) => {
-                    const product = products.find(
-                      (p) => p.id === detail.productoId
-                    );
                     return (
                       <tr key={detail.id}>
                         <td>
-                          {product ? product.nombre : "Producto no encontrado"}
+                          {detail.productName ?? "Producto no encontrado"}
                         </td>
                         <td className="text-secondary">
-                          {detail.cantidad}{" "}
-                          {detail.cantidad == 1 ? "unidad" : "unidades"}
+                          {detail.quantity}{" "}
+                          {detail.quantity === 1 ? "unidad" : "unidades"}
                         </td>
-                        <td className="text-secondary">
-                          ${detail.precioUnitario}
-                        </td>
+                        <td className="text-secondary">${detail.unitPrice}</td>
                       </tr>
                     );
                   })}

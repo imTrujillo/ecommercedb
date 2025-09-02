@@ -25,7 +25,7 @@ export default function Navbar({ theme, handleTheme }) {
   const { rol, logout, token } = useAuth();
 
   return (
-    <nav>
+    <nav className="w-100">
       <header className="navbar d-md-none d-print-none">
         <div className="container-xl">
           {rol && token ? (
@@ -58,7 +58,10 @@ export default function Navbar({ theme, handleTheme }) {
             </button>
             <a
               className={`nav-item ${
-                location.pathname === "/" ? "btn" : "d-none"
+                location.pathname.startsWith("/product") ||
+                location.pathname === "/"
+                  ? "btn"
+                  : "d-none"
               }`}
               data-bs-toggle="offcanvas"
               href="#offcanvasEnd"
@@ -118,7 +121,7 @@ export default function Navbar({ theme, handleTheme }) {
             <div className="px-5 w-100 d-flex justify-content-between flex-wrap gap-3">
               <ul className="navbar-nav">
                 <h1 className="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-                  <a href=".">
+                  <Link to="/">
                     <img
                       src="/logo.png"
                       width="110"
@@ -126,7 +129,7 @@ export default function Navbar({ theme, handleTheme }) {
                       alt="ECommerce"
                       className="z-1 navbar-brand-image d-none d-md-block  theme-light-dark-fix"
                     />
-                  </a>
+                  </Link>
                 </h1>
 
                 {rol && token && (
@@ -134,7 +137,10 @@ export default function Navbar({ theme, handleTheme }) {
                     {/* TIENDA: visible para todos */}
                     <li
                       className={`nav-item ${
-                        location.pathname === "/" ? "active" : ""
+                        location.pathname.startsWith("/product") ||
+                        location.pathname === "/"
+                          ? "active"
+                          : ""
                       }`}
                     >
                       <Link to="/" className="nav-link">
@@ -150,7 +156,9 @@ export default function Navbar({ theme, handleTheme }) {
                       <>
                         <li
                           className={`nav-item ${
-                            location.pathname === "/inventario" ? "active" : ""
+                            location.pathname.startsWith("/inventario")
+                              ? "active"
+                              : ""
                           }`}
                         >
                           <Link to="/inventario" className="nav-link">
@@ -190,28 +198,17 @@ export default function Navbar({ theme, handleTheme }) {
                             <span className="nav-link-title">Proveedores</span>
                           </Link>
                         </li>
+
                         <li
                           className={`nav-item ${
-                            location.pathname === "/clientes" ? "active" : ""
+                            location.pathname === "/usuarios" ? "active" : ""
                           }`}
                         >
-                          <Link to="/clientes" className="nav-link">
+                          <Link to="/usuarios" className="nav-link">
                             <span className="nav-link-icon d-md-none d-lg-inline-block">
                               <IconUsersPlus size={24} stroke={2} />
                             </span>
-                            <span className="nav-link-title">Clientes</span>
-                          </Link>
-                        </li>
-                        <li
-                          className={`nav-item ${
-                            location.pathname === "/empleados" ? "active" : ""
-                          }`}
-                        >
-                          <Link to="/empleados" className="nav-link">
-                            <span className="nav-link-icon d-md-none d-lg-inline-block">
-                              <IconBriefcase2 size={24} stroke={2} />
-                            </span>
-                            <span className="nav-link-title">Empleados</span>
+                            <span className="nav-link-title">Usuarios</span>
                           </Link>
                         </li>
                       </>
@@ -254,7 +251,10 @@ export default function Navbar({ theme, handleTheme }) {
                 {/* CARRITO DE COMPRAS */}
                 <a
                   className={`nav-item ${
-                    location.pathname === "/" ? "btn" : "d-none"
+                    location.pathname.startsWith("/product") ||
+                    location.pathname === "/"
+                      ? "btn"
+                      : "d-none"
                   }`}
                   data-bs-toggle="offcanvas"
                   href="#offcanvasEnd"

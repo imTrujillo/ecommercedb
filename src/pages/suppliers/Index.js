@@ -6,6 +6,7 @@ import { DeleteModal } from "../../components/modals/DeleteModal";
 import { apiServiceGet } from "../../API/apiService";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
+import { EmptyState } from "../../components/EmptyState";
 
 export const Index = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,7 +17,7 @@ export const Index = () => {
 
   const fetchData = async () => {
     try {
-      const sups = await apiServiceGet("Proveedores");
+      const sups = await apiServiceGet("provider");
       setProveedores(sups);
     } catch (error) {
       console.error("Error al obtener proveedores:", error);
@@ -38,17 +39,19 @@ export const Index = () => {
   const closeModal = () => {
     setSupplier({
       id: 0,
-      nombre: "",
-      telefono: "",
+      name: "",
+      phoneNumber: "",
       email: "",
+      isActive: true,
     });
     setShowModal(false);
   };
   const [supplier, setSupplier] = useState({
     id: 0,
-    nombre: "",
-    telefono: "",
+    name: "",
+    phoneNumber: "",
     email: "",
+    isActive: true,
   });
   const [edit, setEdit] = useState(false);
   const onEdit = (supplierEdit) => {
@@ -105,40 +108,22 @@ export const Index = () => {
                   <thead>
                     <tr>
                       <th>No.</th>
-                      <th>nombre</th>
-                      <th>telefono</th>
-                      <th>email</th>
+                      <th>Nombre</th>
+                      <th>Teléfono</th>
+                      <th>Email</th>
+                      <th>Estado</th>
                       <th className="w-1"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {Proveedores.length === 0 ? (
+                    {visibleData.length === 0 ? (
                       <tr>
                         <td colSpan="100%" className="text-center py-4">
-                          <div className="d-flex flex-column align-items-center justify-content-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="48" // más grande
-                              height="48" // más grande
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              className="mb-2"
-                            >
-                              <path
-                                stroke="none"
-                                d="M0 0h24v24H0z"
-                                fill="none"
-                              />
-                              <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-2 10.66h-6l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h6l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-5.99 -5l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm6 0l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" />
-                            </svg>
-                            <span className="fw-semibold">
-                              No hay proveedores disponibles
-                            </span>
-                          </div>
+                          <EmptyState text="No hay proveedores disponibles." />
                         </td>
                       </tr>
                     ) : (
-                      Proveedores.map((supplier) => (
+                      visibleData.map((supplier) => (
                         <Show
                           key={supplier.id}
                           supplier={supplier}
@@ -170,7 +155,7 @@ export const Index = () => {
         show={showModalDelete}
         closeModal={closeModalDelete}
         id={supplier.id}
-        endpoint="Proveedores/proveedor/delete/"
+        endpoint="Provider/provider/delete/"
         fetchData={fetchData}
       />
     </div>

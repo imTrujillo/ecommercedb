@@ -3,50 +3,54 @@ import { IconPencil, IconTrash } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-const Show = ({ openProductsModal, order, onEdit, onDelete, customers }) => {
+const Show = ({ openProductsModal, order, onEdit, onDelete }) => {
   dayjs.extend(relativeTime);
   let bullet_color = "";
-  switch (order.estado) {
-    case "Realizado":
-      bullet_color = "bg-blue text-blue-fg";
+  let bullet_color_status = "";
+  let status = "";
+  switch (order.status) {
+    case 1:
+      bullet_color_status = "bg-green text-blue-fg";
+      status = "Entregado";
       break;
-    case "Pendiente":
-      bullet_color = "bg-orange text-orange-fg";
+    case 2:
+      bullet_color_status = "bg-blue text-orange-fg";
+      status = "Empaquetado";
+      break;
+    case 3:
+      bullet_color_status = "bg-orange text-orange-fg";
+      status = "En proceso";
+      break;
+    case 4:
+      bullet_color_status = "bg-red text-orange-fg";
+      status = "Cancelado";
       break;
     default:
-      bullet_color = "bg-muted";
+      bullet_color_status = "bg-muted text-orange-fg";
+      status = "Desconocido";
       break;
   }
-
-  const customer = customers.find((c) => c.id === order.clienteId);
 
   return (
     <tr>
       <td data-label="IDPedido">
         <div className="d-flex py-1 align-items-center">
-          <span>{order.id}</span>
+          <span>{order.orderId}</span>
         </div>
       </td>
       <td data-label="Fecha">
         <div className="font-weight-medium">
-          {dayjs(order.fecha).format(" MMMM D, YYYY. h:mm a")}
+          {dayjs(order.date).format(" MMMM D, YYYY. h:mm a")}
         </div>
       </td>
+
       <td className="text-secondary" data-label="Estado">
-        <span className={`badge ${bullet_color} w-max`}>{order.estado}</span>
+        <span className={`badge ${bullet_color_status} w-max`}>{status}</span>
       </td>
-      <td className="text-secondary" data-label="Método de pago">
-        {order.metodoPago}
-      </td>
-      <td className="text-secondary" data-label="Dirección de envío">
-        {order.direccionEnvio}
-      </td>
-      <td className="text-secondary" data-label="Cliente">
-        {customer ? customer.nombre : "Cliente no encontrado"}
-      </td>
+
       <td className="text-secondary markdown" data-label="Productos">
         <button
-          onClick={() => openProductsModal(order.orderDetails)}
+          onClick={() => openProductsModal(order.details)}
           className="btn btn-action"
         >
           Mostrar ↓
@@ -70,7 +74,7 @@ const Show = ({ openProductsModal, order, onEdit, onDelete, customers }) => {
               </button>
               <button
                 className="dropdown-item text-danger"
-                onClick={() => onDelete(order.id)}
+                onClick={() => onDelete(order.orderId)}
               >
                 <IconTrash /> Eliminar
               </button>

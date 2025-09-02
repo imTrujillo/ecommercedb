@@ -2,31 +2,17 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { toast } from "react-toastify";
-import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import style from "../../css/Auth.module.css";
-import {
-  IconLockFilled,
-  IconShieldCheck,
-  IconUserFilled,
-} from "@tabler/icons-react";
+import { IconShieldCheck } from "@tabler/icons-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Input } from "../../components/Input";
+import { loginSchema, loginValidations } from "../../validations/loginSchema";
 
 export const Login = () => {
   // se utiliza el localStorage para recordar username
   const rememberedUser = localStorage.getItem("rememberedUser");
   const [rememberUser, setRememberUser] = useState(!!rememberedUser); // convierte string a boolean
-
-  //VALIDACIONES PARA CADA CAMPO DEL FORM
-  const loginSchema = Yup.object().shape({
-    username: Yup.string()
-      .required("requerido")
-      .min(5, "min 5 caracteres")
-      .max(50, "max 50 caracteres")
-      .matches(/^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "solo letras y números"),
-    password: Yup.string().min(6, "min 8 caracteres.").required("requerido"),
-  });
 
   //Utilizar yup para validar formulario
   const methods = useForm({
@@ -55,25 +41,6 @@ export const Login = () => {
     }
   });
 
-  // Datos de cada input
-  const userValidation = {
-    icon: <IconUserFilled className={style.icon} />,
-    type: "text",
-    id: "username",
-    name: "username",
-    placeholder: "Nombre de usuario",
-    isAuthInput: true,
-  };
-
-  const passwordValidation = {
-    icon: <IconLockFilled className={style.icon} />,
-    type: "password",
-    id: "password",
-    name: "password",
-    placeholder: "Contraseña",
-    isAuthInput: true,
-  };
-
   return (
     <div className={style.loginContainer}>
       <div className={style.loginCard}>
@@ -84,8 +51,8 @@ export const Login = () => {
         </div>
         <FormProvider {...methods}>
           <form className={style.loginForm} onSubmit={onSubmit} noValidate>
-            <Input {...userValidation} />
-            <Input {...passwordValidation} />
+            <Input {...loginValidations.userValidation} />
+            <Input {...loginValidations.passwordValidation} />
 
             <div className={style.optionsGroup}>
               <div className={style.rememberMe}>

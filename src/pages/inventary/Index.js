@@ -6,6 +6,7 @@ import { DeleteModal } from "../../components/modals/DeleteModal";
 import { apiServiceGet } from "../../API/apiService";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
+import { EmptyState } from "../../components/EmptyState";
 
 export const Index = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,11 +17,11 @@ export const Index = () => {
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const fetchData = async () => {
-    const prods = await apiServiceGet("productos");
-    const cat = await apiServiceGet("categorias");
-    const sup = await apiServiceGet("proveedores");
+    const prods = await apiServiceGet("product");
+    const cat = await apiServiceGet("category");
+    const sup = await apiServiceGet("provider");
 
-    setProducts(prods);
+    setProducts(prods.products);
     setSuppliers(sup);
     setCategories(cat);
   };
@@ -39,24 +40,28 @@ export const Index = () => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setProduct({
-      id: 0,
-      nombre: "",
-      descripcion: "",
-      precio: 0,
+      productId: 0,
+      productName: "",
+      description: "",
+      price: 0,
       stock: 0,
-      categoriaId: "",
-      proveedorId: "",
+      providerName: "",
+      categoryName: "",
+      categoryId: 0,
+      providerId: 0,
     });
     setShowModal(false);
   };
   const [product, setProduct] = useState({
-    id: 0,
-    nombre: "",
-    descripcion: "",
-    precio: 0,
+    productId: 0,
+    productName: "",
+    description: "",
+    price: 0,
     stock: 0,
-    categoriaId: "",
-    proveedorId: "",
+    providerName: "",
+    categoryName: "",
+    categoryId: 0,
+    providerId: 0,
   });
   const [edit, setEdit] = useState(false);
   const onEdit = (productEdit) => {
@@ -74,13 +79,15 @@ export const Index = () => {
   const [productDelete, setProductDelete] = useState(0);
   const closeModalDelete = () => {
     setProduct({
-      id: 0,
-      nombre: "",
-      descripcion: "",
-      precio: 0,
+      productId: 0,
+      productName: "",
+      description: "",
+      price: 0,
       stock: 0,
-      categoriaId: "",
-      proveedorId: "",
+      providerName: "",
+      categoryName: "",
+      categoryId: 0,
+      providerId: 0,
     });
     setShowModalDelete(false);
   };
@@ -128,35 +135,14 @@ export const Index = () => {
                     {visibleData.length <= 0 ? (
                       <tr>
                         <td colSpan="100%" className="text-center py-4">
-                          <div className="d-flex flex-column align-items-center justify-content-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="48" // más grande
-                              height="48" // más grande
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              className="mb-2"
-                            >
-                              <path
-                                stroke="none"
-                                d="M0 0h24v24H0z"
-                                fill="none"
-                              />
-                              <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-2 10.66h-6l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h6l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-5.99 -5l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm6 0l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" />
-                            </svg>
-                            <span className="fw-semibold">
-                              No hay productos disponibles
-                            </span>
-                          </div>
+                          <EmptyState text="No hay productos disponibles." />
                         </td>
                       </tr>
                     ) : (
                       visibleData.map((product) => (
                         <Show
-                          key={product.id}
+                          key={product.productId}
                           product={product}
-                          categories={categories}
-                          suppliers={suppliers}
                           onEdit={onEdit}
                           onDelete={onDelete}
                         />
@@ -188,7 +174,7 @@ export const Index = () => {
         show={showModalDelete}
         closeModal={closeModalDelete}
         id={productDelete}
-        endpoint="productos/delete/"
+        endpoint="product/"
         fetchData={fetchData}
       />
     </div>

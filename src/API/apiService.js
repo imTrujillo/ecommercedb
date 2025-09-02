@@ -2,8 +2,7 @@ import axios from "axios";
 
 import { toast } from "react-toastify";
 
-const baseUrl = "https://localhost:7160/api/";
-const authUrl = "https://localhost:7084/api/";
+const baseUrl = "https://localhost:7084/api/";
 
 export const apiServiceGet = async (endpoint, id = null, token = null) => {
   try {
@@ -13,7 +12,7 @@ export const apiServiceGet = async (endpoint, id = null, token = null) => {
       url,
       token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
     );
-    if (response.status === 200) {
+    if (response.status >= 200 && response.status < 300) {
       return response.data;
     } else {
       // Si el status no es 200, devolver un array vacío o null
@@ -29,20 +28,12 @@ export const apiServiceGet = async (endpoint, id = null, token = null) => {
   }
 };
 
-export const apiServicePost = async (
-  endpoint,
-  object,
-  token = null,
-  apiAuth = false
-) => {
+export const apiServicePost = async (endpoint, object, token = null) => {
   const config = token
     ? { headers: { Authorization: `Bearer ${token}` } }
     : undefined;
 
-  let response = "";
-  apiAuth
-    ? (response = await axios.post(authUrl + endpoint, object, config))
-    : (response = await axios.post(baseUrl + endpoint, object, config));
+  const response = await axios.post(baseUrl + endpoint, object, config);
 
   return response;
 };
@@ -81,7 +72,7 @@ export const apiServiceDelete = async (endpoint, token = null) => {
       token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
     );
 
-    if (response.status == 200) {
+    if (response.status >= 200 && response.status < 300) {
       toast.success("¡Elemento borrado exitosamente!");
       return response.data;
     }

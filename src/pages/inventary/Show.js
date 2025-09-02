@@ -1,35 +1,32 @@
 import React from "react";
-import { IconPencil, IconTrash } from "@tabler/icons-react";
+import { IconImageInPicture, IconPencil, IconTrash } from "@tabler/icons-react";
+import { Link } from "react-router-dom";
 
-const Show = ({ product, onEdit, onDelete, suppliers, categories }) => {
-  const supplier = suppliers.find((s) => s.id === product.proveedorId);
-
-  const category = categories.find((c) => c.id === product.categoriaId);
-
+const Show = ({ product, onEdit, onDelete }) => {
   return (
     <tr>
       <td data-label="IDProducto">
         <div className="d-flex py-1 align-items-center">
-          <span>{product.id}</span>
+          <span>{product.productId}</span>
         </div>
       </td>
       <td data-label="NombreProducto">
-        <div className="font-weight-medium">{product.nombre}</div>
+        <div className="font-weight-medium">{product.productName}</div>
       </td>
       <td className="text-secondary" data-label="Role">
-        {product.descripcion}
+        {product.description}
       </td>
       <td className="text-secondary" data-label="Role">
-        $ {product.precio}
+        $ {product.price}
       </td>
       <td className="text-secondary" data-label="Role">
         {product.stock}
       </td>
       <td className="text-secondary" data-label="Role">
-        {category.nombre}
+        {product.categoryName}
       </td>
       <td className="text-secondary" data-label="Role">
-        {supplier.nombre}
+        {product.providerName}
       </td>
       <td>
         <div className="btn-list flex-nowrap">
@@ -41,6 +38,13 @@ const Show = ({ product, onEdit, onDelete, suppliers, categories }) => {
               Acciones
             </button>
             <div className="dropdown-menu dropdown-menu-end">
+              <Link
+                className="dropdown-item text-orange"
+                to={`/inventario/${product.productId}/imgs`}
+              >
+                <IconImageInPicture />
+                Imágenes
+              </Link>
               <button
                 className="dropdown-item text-yellow"
                 onClick={() => onEdit(product)}
@@ -50,7 +54,7 @@ const Show = ({ product, onEdit, onDelete, suppliers, categories }) => {
               </button>
               <button
                 className="dropdown-item text-danger"
-                onClick={() => onDelete(product.id)}
+                onClick={() => onDelete(product.productId)}
               >
                 <IconTrash />
                 Eliminar

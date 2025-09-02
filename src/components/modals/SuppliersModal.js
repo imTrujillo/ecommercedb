@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { apiServicePost, apiServiceUpdate } from "../../API/apiService";
-import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "../Input";
+import {
+  supplierSchema,
+  supplierValidations,
+} from "../../validations/supplierSchema"; // VALIDACIONES CON YUP
 
 export const SuppliersModal = ({
   show,
@@ -13,30 +16,15 @@ export const SuppliersModal = ({
   supplier,
   fetchData,
 }) => {
-  // VALIDACIONES CON YUP
-  const supplierSchema = Yup.object().shape({
-    nombre: Yup.string()
-      .min(3, "min 3 caracteres")
-      .required("requerido")
-      .matches(
-        /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
-        "sin caracteres especiales"
-      ),
-    telefono: Yup.string()
-      .required("requerido")
-      .matches(/^[0-9]+$/, "solo números")
-      .length(8, "len: 8 dígitos"),
-    email: Yup.string().email("no válido").required("requerido"),
-  });
-
   //Utilizar yup para validar formulario
   const methods = useForm({
     resolver: yupResolver(supplierSchema),
     defaultValues: {
       id: 0,
-      nombre: "",
-      telefono: "",
+      name: "",
+      phoneNumber: "",
       email: "",
+      isActive: true,
     },
   });
 
@@ -44,9 +32,10 @@ export const SuppliersModal = ({
     if (supplier) {
       methods.reset({
         id: supplier.id || 0,
-        nombre: supplier.nombre || "",
-        telefono: supplier.telefono || "",
+        name: supplier.name || "",
+        phoneNumber: supplier.phoneNumber || "",
         email: supplier.email || "",
+        isActive: supplier.isActive ? "true" : "false",
       });
     }
   }, [supplier]);
@@ -54,9 +43,9 @@ export const SuppliersModal = ({
   const onSubmit = methods.handleSubmit(async (data) => {
     try {
       if (isEdit) {
-        await apiServiceUpdate(`Proveedores/proveedor/update/${data.id}`, data);
+        await apiServiceUpdate(`provider/provider/update/${data.id}`, data);
       } else {
-        await apiServicePost("Proveedores", data);
+        await apiServicePost("provider", data);
       }
       closeModal();
       fetchData();
@@ -69,30 +58,6 @@ export const SuppliersModal = ({
       toast.error("Error al guardar el proveedor. Intenta de nuevo.");
     }
   });
-
-  const nombreValidation = {
-    id: "nombre",
-    label: "Nombre",
-    type: "text",
-    name: "nombre",
-    placeholder: "Proveedor 01",
-  };
-
-  const telefonoValidation = {
-    id: "telefono",
-    label: "Teléfono",
-    type: "text",
-    name: "telefono",
-    placeholder: "12345678",
-  };
-
-  const emailValidation = {
-    id: "email",
-    label: "Correo",
-    type: "email",
-    name: "email",
-    placeholder: "proveedor@proveedor.com",
-  };
 
   if (!show) return null;
 
@@ -119,13 +84,18 @@ export const SuppliersModal = ({
 
               <div className="modal-body">
                 <div className="row mb-3">
-                  <Input {...nombreValidation} />
+                  <div className="col-6">
+                    <Input {...supplierValidations.nameValidation} />
+                  </div>
+                  <div className="col-6">
+                    <Input {...supplierValidations.isActiveValidation} />
+                  </div>
                 </div>
                 <div className="row mb-3">
-                  <Input {...emailValidation} />
+                  <Input {...supplierValidations.emailValidation} />
                 </div>
                 <div className="row mb-3">
-                  <Input {...telefonoValidation} />
+                  <Input {...supplierValidations.phoneNumberValidation} />
                 </div>
               </div>
               <div className="modal-footer">

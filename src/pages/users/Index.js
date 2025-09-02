@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Show from "./Show";
-import { EmployeeModal } from "../../components/modals/EmployeeModal";
-import { IconCactus, IconPlus } from "@tabler/icons-react";
+import { UserModal } from "../../components/modals/UserModal";
+import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/modals/DeleteModal";
-import { apiServiceGet } from "../../API/apiService";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
+import { EmptyState } from "../../components/EmptyState";
 
-// NOTA: LA PAGINA DE EMPLEADOS POR AHORITA ES UNA COPIA DE employees,
+// NOTA: LA PAGINA DE EMPLEADOS POR AHORITA ES UNA COPIA DE CLIENTES,
 // CUANDO SE AGREGUE EL CRUD DE EMPLEADOS, SE MODIFICARÁ EL INDEX Y EL SHOW
 
 export const Index = () => {
@@ -15,10 +15,10 @@ export const Index = () => {
   const rowsPerPage = 5;
 
   //LLAMAR LA API
-  const [employees, setEmployees] = useState([]);
+  const [users, setUsers] = useState([]);
   const fetchData = async () => {
-    // const cust = await apiServiceGet("employees");
-    // setEmployees(cust);
+    // const cust = await apiServiceGet("users");
+    // setUsers(cust);
   };
   // useEffect(() => {
   //   fetchData();
@@ -27,7 +27,7 @@ export const Index = () => {
   //DATOS ESTATICOS
   useEffect(
     () =>
-      setEmployees([
+      setUsers([
         {
           id: 1,
           nombreCompleto: "Juan Pérez",
@@ -66,17 +66,18 @@ export const Index = () => {
     []
   );
 
-  const totalPages = Math.ceil(employees.length / rowsPerPage);
+  const totalPages = Math.ceil(users.length / rowsPerPage);
 
-  const visibleData = employees.slice(
+  const visibleData = users.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
 
   //CREAR/EDITAR UN CLIENTE
   const [showModal, setShowModal] = useState(false);
+  const [edit, setEdit] = useState(false);
   const closeModal = () => {
-    setEmployee({
+    setUser({
       id: 0,
       nombreCompleto: "",
       nombreUsuario: "",
@@ -87,9 +88,10 @@ export const Index = () => {
       direccion: "",
       salario: 0,
     });
+    setEdit(false);
     setShowModal(false);
   };
-  const [employee, setEmployee] = useState({
+  const [user, setUser] = useState({
     id: 0,
     nombreCompleto: "",
     nombreUsuario: "",
@@ -100,17 +102,17 @@ export const Index = () => {
     direccion: "",
     salario: 0,
   });
-  const [edit, setEdit] = useState(false);
-  const onEdit = (employeeEdit) => {
+
+  const onEdit = (userEdit) => {
     setShowModal(true);
     setEdit(true);
-    setEmployee(employeeEdit);
+    setUser(userEdit);
   };
 
   //ELIMINAR UN CLIENTE
   const [showModalDelete, setShowModalDelete] = useState(false);
   const closeModalDelete = () => {
-    setEmployee({
+    setUser({
       id: 0,
       nombreCompleto: "",
       nombreUsuario: "",
@@ -123,8 +125,8 @@ export const Index = () => {
     });
     setShowModalDelete(false);
   };
-  const onDelete = (employeeDelete) => {
-    setEmployee(employeeDelete);
+  const onDelete = (userDelete) => {
+    setUser(userDelete);
     setShowModalDelete(true);
   };
 
@@ -132,14 +134,14 @@ export const Index = () => {
     <div className="page-wrapper">
       <div className="container-xl">
         <div className="row row-cards">
-          {/* ENCABEZADO DE CLIENTES*/}
-          <Header title="Empleados" subtitle="Agrega y administra empleados">
+          {/* ENCABEZADO DE USUARIOS*/}
+          <Header title="Usuarios" subtitle="Agrega y administra usuarios">
             <button
               className="btn btn-primary d-inline-block"
               onClick={() => setShowModal(true)}
             >
               <IconPlus className="me-3" />
-              Agregar empleado
+              Agregar usuario
             </button>
           </Header>
 
@@ -149,7 +151,7 @@ export const Index = () => {
               <div className="table-responsive">
                 <table
                   className="table table-vcenter card-table table-striped"
-                  id="table-employees"
+                  id="table-users"
                 >
                   <thead>
                     <tr>
@@ -166,22 +168,17 @@ export const Index = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {employees.length <= 0 ? (
+                    {users.length <= 0 ? (
                       <tr>
                         <td colSpan="100%" className="text-center py-4">
-                          <div className="d-flex flex-column align-items-center justify-content-center">
-                            <IconCactus />
-                            <span className="fw-semibold">
-                              Aquí aparecerán los empleados (en proceso...)
-                            </span>
-                          </div>
+                          <EmptyState text="No hay usuarios disponibles." />
                         </td>
                       </tr>
                     ) : (
-                      visibleData.map((employee) => (
+                      visibleData.map((user) => (
                         <Show
-                          key={employee.id}
-                          employee={employee}
+                          key={user.id}
+                          user={user}
                           onEdit={onEdit}
                           onDelete={onDelete}
                         />
@@ -199,17 +196,17 @@ export const Index = () => {
           </div>
         </div>
       </div>
-      <EmployeeModal
+      <UserModal
         show={showModal}
         closeModal={closeModal}
         isEdit={edit}
-        employee={employee}
+        user={user}
         fetchData={fetchData}
       />
       <DeleteModal
         show={showModalDelete}
         closeModal={closeModalDelete}
-        id={employee.id}
+        id={user.id}
         endpoint="Clientes/cliente/delete/"
         fetchData={fetchData}
       />

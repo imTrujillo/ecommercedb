@@ -2,17 +2,19 @@ import App from "../layouts/App";
 import Guest from "../layouts/Guest";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Index as InventaryIndex } from "../pages/inventary/Index";
+import { Index as ProductIndex } from "../pages/shop/products/Index";
 import { Index as SuppliersIndex } from "../pages/suppliers/Index";
 import { Index as ShopIndex } from "../pages/shop/Index";
 import { Index as CategoriesIndex } from "../pages/categories/Index";
 import { Index as OrdersIndex } from "../pages/orders/Index";
-import { Index as CustomersIndex } from "../pages/customers/Index";
-import { Index as EmployeesIndex } from "../pages/employees/Index";
+import { Index as UsersIndex } from "../pages/users/Index";
+import { Index as ImageIndex } from "../pages/inventary/images/Index";
 import { Login } from "../pages/session/Login";
 import { SignUp } from "../pages/session/Signup";
 import { ForgotPassword } from "../pages/session/ForgotPassword";
 import AuthProvider from "../pages/session/AuthProvider";
 import PrivateRoute from "../pages/session/PrivateRoute";
+import { CartProvider } from "../components/shopping/CartProvider";
 
 export default function AppRoutes() {
   return (
@@ -25,10 +27,23 @@ export default function AppRoutes() {
               path="/"
               element={
                 <App>
-                  <ShopIndex />
+                  <CartProvider>
+                    <ShopIndex />
+                  </CartProvider>
                 </App>
               }
             ></Route>
+
+            <Route
+              path="/product/:id"
+              element={
+                <App>
+                  <CartProvider>
+                    <ProductIndex />
+                  </CartProvider>
+                </App>
+              }
+            />
 
             <Route
               path="/login"
@@ -60,21 +75,14 @@ export default function AppRoutes() {
             {/* RUTAS DEL ADMIN */}
             <Route element={<PrivateRoute allowedRoles={["Admin"]} />}>
               <Route
-                path="/empleados"
+                path="/usuarios"
                 element={
                   <App>
-                    <EmployeesIndex />
+                    <UsersIndex />
                   </App>
                 }
               ></Route>
-              <Route
-                path="/clientes"
-                element={
-                  <App>
-                    <CustomersIndex />
-                  </App>
-                }
-              ></Route>
+
               <Route
                 path="/categorias"
                 element={
@@ -94,9 +102,7 @@ export default function AppRoutes() {
             </Route>
 
             {/* RUTAS DEL EMPLEADO */}
-            <Route
-              element={<PrivateRoute allowedRoles={["Employee", "Admin"]} />}
-            >
+            <Route element={<PrivateRoute allowedRoles={["User", "Admin"]} />}>
               <Route
                 path="/inventario"
                 element={
@@ -105,14 +111,21 @@ export default function AppRoutes() {
                   </App>
                 }
               ></Route>
+
+              <Route
+                path="/inventario/:id/imgs"
+                element={
+                  <App>
+                    <ImageIndex />
+                  </App>
+                }
+              />
             </Route>
 
             {/* RUTAS DEL CLIENTE */}
             <Route
               element={
-                <PrivateRoute
-                  allowedRoles={["Customer", "Employee", "Admin"]}
-                />
+                <PrivateRoute allowedRoles={["Customer", "User", "Admin"]} />
               }
             >
               <Route

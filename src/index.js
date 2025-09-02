@@ -1,6 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
+import "@tabler/core/dist/css/tabler.min.css";
+import "dropzone/dist/dropzone.css";
+
 import AppRoutes from "./routes/AppRoutes";
 import reportWebVitals from "./reportWebVitals";
 
