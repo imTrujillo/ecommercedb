@@ -18,17 +18,17 @@ export const Index = () => {
   const [products, setProducts] = useState([]);
 
   //Obtener detalles del pedido
-  const { user } = useAuth();
+  const { token } = useAuth();
   const fetchData = async () => {
-    if (!user?.id) return;
-    const ords = await apiServiceGet(`orders/user/${user.id}`);
+    if (!token.user?.id) return;
+    const ords = await apiServiceGet(`orders/user/${token.user.id}`);
     const prods = await apiServiceGet("product");
     setOrders(ords);
     setProducts(prods.products);
   };
   useEffect(() => {
     fetchData();
-  }, [user]);
+  }, [token.user]);
 
   const totalPages = Math.ceil(orders.length / rowsPerPage);
   const visibleData = orders.slice(
@@ -52,7 +52,7 @@ export const Index = () => {
   const closeModal = () => {
     setOrder({
       orderId: 0,
-      userId: user?.id ?? 0,
+      userId: token.user?.id ?? 0,
       orderStatus: 3,
       address: "",
       details: [],
@@ -63,7 +63,7 @@ export const Index = () => {
 
   const [order, setOrder] = useState({
     orderId: 0,
-    userId: user?.id ?? 0,
+    userId: token.user?.id ?? 0,
     orderStatus: 3,
     address: "",
     details: [],
@@ -80,7 +80,7 @@ export const Index = () => {
   const closeModalDelete = () => {
     setOrder({
       orderId: 0,
-      userId: user?.id ?? 0,
+      userId: token.user?.id ?? 0,
       orderStatus: 3,
       address: "",
       details: [],
@@ -123,8 +123,8 @@ export const Index = () => {
                     <tr>
                       <th>No.</th>
                       <th>Fecha</th>
-                      <th>Productos</th>
                       <th>Estado</th>
+                      <th>Productos</th>
 
                       <th className="w-1"></th>
                     </tr>
@@ -137,9 +137,10 @@ export const Index = () => {
                         </td>
                       </tr>
                     ) : (
-                      visibleData.map((order) => (
+                      visibleData.map((order, index) => (
                         <Show
                           key={order.orderId}
+                          index={index + 1}
                           openProductsModal={openProductsModal}
                           order={order}
                           onEdit={onEdit}

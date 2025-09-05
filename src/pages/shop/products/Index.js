@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { EmptyState } from "../../../components/EmptyState";
 import { Header } from "../../../assets/Header";
 

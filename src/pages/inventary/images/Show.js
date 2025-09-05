@@ -1,5 +1,4 @@
 import { IconDeviceImacCheck, IconMenu2, IconTrash } from "@tabler/icons-react";
-import React from "react";
 
 export const Show = ({ img, savedTheme, handleMainPhoto, handleDelete }) => {
   return (

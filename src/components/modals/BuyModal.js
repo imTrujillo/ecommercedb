@@ -14,11 +14,11 @@ export const BuyModal = ({
   fetchData,
 }) => {
   //Utilizar yup para validar formulario
-  const { user } = useAuth();
+  const { token } = useAuth();
   const methods = useForm({
     resolver: yupResolver(orderSchema),
     defaultValues: {
-      userId: user?.id ?? 0,
+      userId: token?.user?.id ?? 0,
       orderStatus: 3,
       address: "",
       details: [],

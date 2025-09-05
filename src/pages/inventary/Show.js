@@ -2,12 +2,12 @@ import React from "react";
 import { IconImageInPicture, IconPencil, IconTrash } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 
-const Show = ({ product, onEdit, onDelete }) => {
+const Show = ({ product, index, onEdit, onDelete }) => {
   return (
     <tr>
       <td data-label="IDProducto">
         <div className="d-flex py-1 align-items-center">
-          <span>{product.productId}</span>
+          <span>{index}</span>
         </div>
       </td>
       <td data-label="NombreProducto">

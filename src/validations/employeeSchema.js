@@ -1,5 +1,6 @@
 import { subYears } from "date-fns";
 import * as Yup from "yup";
+import { Input } from "../components/Input";
 
 export const employeeSchema = Yup.object().shape({
   fullName: Yup.string()
@@ -147,4 +148,58 @@ export const employeeValidations = {
     name: "salary",
     placeholder: "999.99",
   },
+};
+
+export const EmployeeInputs = () => {
+  return (
+    <>
+      <div className="row mb-3">
+        <div className="col-6">
+          <Input {...employeeValidations.fullNameValidation} />
+        </div>
+        <div className="col-6">
+          <Input {...employeeValidations.salaryValidation} />
+        </div>
+      </div>
+
+      <div className="row mb-3">
+        <div className="col-5">
+          <Input {...employeeValidations.emailValidation} />
+        </div>
+        <div className="col-7">
+          <Input {...employeeValidations.phoneValidation} />
+        </div>
+      </div>
+      <div className="row mb-3">
+        <div className="col-6">
+          <Input {...employeeValidations.hireDateValidation} />
+        </div>
+        <div className="col-6">
+          <Input {...employeeValidations.DOBValidation} />
+        </div>
+      </div>
+
+      <div className="row mb-3">
+        <div className="col-5">
+          <Input {...employeeValidations.usernameValidation} />
+        </div>
+        <div className="col-7">
+          <Input {...employeeValidations.passwordValidation} />
+        </div>
+      </div>
+
+      <div className="row mb-3">
+        <div className="col-6">
+          <Input {...employeeValidations.duiValidation} />
+        </div>
+        <div className="col-6">
+          <Input {...employeeValidations.nitValidation} />
+        </div>
+      </div>
+
+      <div className="row mb-3">
+        <Input {...employeeValidations.addressValidation} />
+      </div>
+    </>
+  );
 };

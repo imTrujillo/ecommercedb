@@ -8,13 +8,13 @@ const ShopProducts = ({ product }) => {
   return (
     <Link
       className="card product-card bg-transparent my-4 border-4 border-bottom-0 w-100 cursor-pointer"
-      to={`/product/${product.productId}`}
+      to={`/producto/${product.productId}`}
     >
       <div className="ratio ratio-4x3 overflow-hidden">
         {mainPhoto ? (
           <img
             src={mainPhoto.imageUrl}
-            alt={product.name}
+            alt={product.productName}
             loading="lazy"
             className="w-100 object-fit-cover"
           />
@@ -30,7 +30,7 @@ const ShopProducts = ({ product }) => {
           className="card-title overflow-x-auto overflow-y-hidden"
           style={{ maxHeight: "30px" }}
         >
-          {product.name}
+          {product.productName}
         </h3>
         <p
           className="text-secondary overflow-y-auto overflow-x-hidden"

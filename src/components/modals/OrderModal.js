@@ -3,7 +3,6 @@ import { IconPlus } from "@tabler/icons-react";
 import { apiServicePost, apiServiceUpdate } from "../../API/apiService";
 import "@progress/kendo-theme-bootstrap/dist/all.css";
 import { toast } from "react-toastify";
-import * as Yup from "yup";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "../Input";
@@ -22,11 +21,11 @@ export const OrderModal = ({
   const [orderProducts, setOrderProducts] = useState([]);
 
   //Utilizar yup para validar formulario
-  const { user } = useAuth();
+  const { token } = useAuth();
   const methods = useForm({
     resolver: yupResolver(orderSchema),
     defaultValues: {
-      userId: user?.id ?? 0,
+      userId: token.user?.id ?? 0,
       orderStatus: 3,
       address: "",
       details: [],
@@ -52,7 +51,7 @@ export const OrderModal = ({
 
       methods.reset({
         orderId: order?.orderId ?? 0,
-        userId: user?.id ?? 0,
+        userId: token.user?.id ?? 0,
         orderStatus: order.status ?? 3,
         address: "",
         details: orderProducts ?? [],
@@ -115,11 +114,12 @@ export const OrderModal = ({
 
       const orderData = {
         orderId: data.orderId,
-        userId: data.id ?? 0,
+        userId: data.userId ?? 0,
         orderStatus: Number(data.orderStatus),
         address: data.address ?? "",
         details: orderProducts.map(({ stock, productName, ...rest }) => rest),
       };
+      console.log(orderData);
       let orderResponse;
       if (!isEdit) {
         orderResponse = await apiServicePost("orders", orderData);

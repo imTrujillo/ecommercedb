@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from "react";
 import Show from "./Show";
 import { ProductsModal } from "../../components/modals/ProductsModal";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/modals/DeleteModal";
 import { apiServiceGet } from "../../API/apiService";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
 import { EmptyState } from "../../components/EmptyState";
+import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { searchValidations } from "../../validations/searchSchema";
+import { Input } from "../../components/Input";
 
 export const Index = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
-
   //LLAMAR LA API
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const fetchData = async () => {
-    const prods = await apiServiceGet("product");
+    const query = new URLSearchParams(window.location.search).toString();
+    const prods = await apiServiceGet(`product?${query}`);
     const cat = await apiServiceGet("category");
     const sup = await apiServiceGet("provider");
 
@@ -29,8 +31,37 @@ export const Index = () => {
     fetchData();
   }, []);
 
-  const totalPages = Math.ceil(products.length / rowsPerPage);
+  //Preparar datos a enviar como parámetros de la url
+  const methods = useForm({
+    defaultValues: {
+      search: "",
+      categoryId: "",
+      providerId: "",
+    },
+  });
 
+  //Envío de los datos a la API
+  const onSubmit = methods.handleSubmit(async (data) => {
+    try {
+      const params = new URLSearchParams();
+
+      if (data.search) params.append("search", data.search);
+      if (data.categoryId) params.append("categoryId", data.categoryId);
+      if (data.providerId) params.append("providerId", data.providerId);
+
+      window.history.replaceState(null, "", `?${params.toString()}`);
+
+      const prods = await apiServiceGet(`product?${params.toString()}`);
+      setProducts(prods.products);
+    } catch (err) {
+      toast.error("Error de búsqueda. Intenta de nuevo.");
+    }
+  });
+
+  //Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+  const totalPages = Math.ceil(products.length / rowsPerPage);
   const visibleData = products.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
@@ -102,6 +133,38 @@ export const Index = () => {
         <div className="row row-cards">
           {/* ENCABEZADO DE INVENTARIO */}
           <Header title="Inventario" subtitle="Registra y elimina productos">
+            {/* Buscar un producto */}
+            <div className="dropdown">
+              <button
+                className="btn btn-icon px-3 d-flex gap-2"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <IconSearch /> Búsqueda avanzada
+              </button>
+
+              <div className="dropdown-menu dropdown-menu-end p-3">
+                <FormProvider {...methods}>
+                  <form noValidate onSubmit={onSubmit}>
+                    <Input {...searchValidations.searchValidation} />
+                    <Input
+                      {...searchValidations.categoryValidation(categories)}
+                    />
+                    <Input
+                      {...searchValidations.providerValidation(suppliers)}
+                    />
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-100 mt-2"
+                    >
+                      <IconSearch className="me-2" />
+                      Filtrar
+                    </button>
+                  </form>
+                </FormProvider>
+              </div>
+            </div>
             <button
               className="btn btn-primary d-inline-block"
               onClick={handleModal}
@@ -132,16 +195,17 @@ export const Index = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {visibleData.length <= 0 ? (
+                    {visibleData?.length <= 0 ? (
                       <tr>
                         <td colSpan="100%" className="text-center py-4">
                           <EmptyState text="No hay productos disponibles." />
                         </td>
                       </tr>
                     ) : (
-                      visibleData.map((product) => (
+                      visibleData?.map((product, index) => (
                         <Show
                           key={product.productId}
+                          index={index + 1}
                           product={product}
                           onEdit={onEdit}
                           onDelete={onDelete}

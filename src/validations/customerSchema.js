@@ -11,6 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { subYears } from "date-fns";
 import * as Yup from "yup";
+import { Input } from "../components/Input";
 
 export const customerSchema = Yup.object().shape({
   fullName: Yup.string()
@@ -22,7 +23,10 @@ export const customerSchema = Yup.object().shape({
     .required("requerido")
     .min(5, "min 5 caracteres")
     .max(50, "max 50 caracteres")
-    .matches(/^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "solo letras y números"),
+    .matches(
+      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s]+$/,
+      "solo letras y números"
+    ),
   email: Yup.string().email("no válido").required("requerido"),
   phoneNumber: Yup.string().required("requerido"),
   address: Yup.string()
@@ -123,4 +127,98 @@ export const customerValidations = {
     placeholder: "Confirmar contraseña",
     isAuthInput: true,
   },
+};
+
+export const CustomerInputs = () => {
+  return (
+    <>
+      <div className="row mb-3">
+        <div className="col-6">
+          <Input
+            {...customerValidations.fullNameValidation}
+            label="Nombre completo"
+            isAuthInput={false}
+            icon={null}
+          />
+        </div>
+        <div className="col-6">
+          <Input
+            {...customerValidations.duiValidation}
+            label="DUI"
+            isAuthInput={false}
+            icon={null}
+          />
+        </div>
+      </div>
+
+      <div className="row mb-3">
+        <div className="col-5">
+          <Input
+            {...customerValidations.emailValidation}
+            label="Correo"
+            isAuthInput={false}
+            placeholder="Juan Pérez"
+            icon={null}
+          />
+        </div>
+        <div className="col-7">
+          <Input
+            {...customerValidations.phoneValidation}
+            label="Teléfono"
+            isAuthInput={false}
+            placeholder="1234-5678"
+            icon={null}
+          />
+        </div>
+      </div>
+      <div className="row mb-3">
+        <div className="col-7">
+          <Input
+            {...customerValidations.usernameValidation}
+            label="Nombre de usuario"
+            isAuthInput={false}
+            icon={null}
+          />
+        </div>
+        <div className="col-5">
+          <Input
+            {...customerValidations.DOBValidation}
+            isAuthInput={false}
+            icon={null}
+          />
+        </div>
+      </div>
+
+      <div className="row mb-3">
+        <div className="col-6">
+          <Input
+            {...customerValidations.passwordValidation}
+            label="Contraseña"
+            isAuthInput={false}
+            placeholder="TuMascota123!"
+            icon={null}
+          />
+        </div>
+        <div className="col-6">
+          <Input
+            {...customerValidations.confirmPasswordValidation}
+            label="Confirmar contraseña"
+            isAuthInput={false}
+            placeholder="Anótala..."
+            icon={null}
+          />
+        </div>
+      </div>
+
+      <div className="row mb-3">
+        <Input
+          {...customerValidations.addressValidation}
+          label="Dirección"
+          isAuthInput={false}
+          placeholder="Av. Bernal"
+          icon={null}
+        />
+      </div>
+    </>
+  );
 };

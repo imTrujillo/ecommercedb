@@ -24,7 +24,6 @@ export const SuppliersModal = ({
       name: "",
       phoneNumber: "",
       email: "",
-      isActive: true,
     },
   });
 
@@ -35,7 +34,6 @@ export const SuppliersModal = ({
         name: supplier.name || "",
         phoneNumber: supplier.phoneNumber || "",
         email: supplier.email || "",
-        isActive: supplier.isActive ? "true" : "false",
       });
     }
   }, [supplier]);
@@ -84,12 +82,7 @@ export const SuppliersModal = ({
 
               <div className="modal-body">
                 <div className="row mb-3">
-                  <div className="col-6">
-                    <Input {...supplierValidations.nameValidation} />
-                  </div>
-                  <div className="col-6">
-                    <Input {...supplierValidations.isActiveValidation} />
-                  </div>
+                  <Input {...supplierValidations.nameValidation} />
                 </div>
                 <div className="row mb-3">
                   <Input {...supplierValidations.emailValidation} />

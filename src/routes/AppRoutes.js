@@ -5,6 +5,7 @@ import { Index as InventaryIndex } from "../pages/inventary/Index";
 import { Index as ProductIndex } from "../pages/shop/products/Index";
 import { Index as SuppliersIndex } from "../pages/suppliers/Index";
 import { Index as ShopIndex } from "../pages/shop/Index";
+import { Index as SearchIndex } from "../pages/search/Index";
 import { Index as CategoriesIndex } from "../pages/categories/Index";
 import { Index as OrdersIndex } from "../pages/orders/Index";
 import { Index as UsersIndex } from "../pages/users/Index";
@@ -32,10 +33,21 @@ export default function AppRoutes() {
                   </CartProvider>
                 </App>
               }
-            ></Route>
+            />
 
             <Route
-              path="/product/:id"
+              path="/producto/buscar"
+              element={
+                <App>
+                  <CartProvider>
+                    <SearchIndex />
+                  </CartProvider>
+                </App>
+              }
+            />
+
+            <Route
+              path="/producto/:id"
               element={
                 <App>
                   <CartProvider>

@@ -18,13 +18,13 @@ export const categorySchema = Yup.object().shape({
       /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
       "sin caracteres especiales"
     ),
-  isActive: Yup.boolean()
-    .transform((value, originalValue) => {
-      if (originalValue === "true") return true;
-      if (originalValue === "false") return false;
-      return null;
-    })
-    .required("requerido"),
+  // isActive: Yup.boolean()
+  //   .transform((value, originalValue) => {
+  //     if (originalValue === "true") return true;
+  //     if (originalValue === "false") return false;
+  //     return null;
+  //   })
+  //   .required("requerido"),
 });
 
 export const categoryValidations = {
@@ -36,16 +36,16 @@ export const categoryValidations = {
     placeholder: "Categoría 01",
   },
 
-  isActiveValidation: {
-    id: "isActive",
-    label: "Estado",
-    type: "select",
-    options: [
-      { id: true, name: "Activo" },
-      { id: false, name: "Inactivo" },
-    ],
-    name: "isActive",
-  },
+  // isActiveValidation: {
+  //   id: "isActive",
+  //   label: "Estado",
+  //   type: "select",
+  //   options: [
+  //     { id: true, name: "Activo" },
+  //     { id: false, name: "Inactivo" },
+  //   ],
+  //   name: "isActive",
+  // },
 
   descriptionValidation: {
     id: "description",

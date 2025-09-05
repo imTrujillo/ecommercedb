@@ -10,10 +10,10 @@ export const CartCanvas = ({ productsCart, setProductsCart, fetchData }) => {
   const [showModal, setShowModal] = useState(false);
 
   //COMPROBAR SI EL USUARIO ESTÁ LOGEADO
-  const { user } = useAuth();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const handleModal = () => {
-    if (!user) {
+    if (!token?.user) {
       return navigate("/sign-up");
     }
     return setShowModal(true);

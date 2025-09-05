@@ -4,7 +4,7 @@ export const Header = ({ title, subtitle, children }) => {
   return (
     <div className="page-header d-print-none">
       <div className="container-xl">
-        <div className="row g-2 align-items-center">
+        <div className="row g-2 align-items-center d-flex flex-column flex-md-row">
           <div className="col">
             <h2 className="page-title">{title}</h2>
             <div className="page-pretitle">{subtitle}</div>

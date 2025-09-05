@@ -70,6 +70,12 @@ code {
   width: 8px;
   height: 8px;
   opacity: 0.9;
+  background-color: gray !important;
+}
+
+.mySwiper .swiper-pagination-bullet-active {
+  background-color: lightseagreen !important;
+  opacity: 1;
 }
 
 .mySwiper .swiper-button-next,

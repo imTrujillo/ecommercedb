@@ -42,7 +42,6 @@ export const Index = () => {
       name: "",
       phoneNumber: "",
       email: "",
-      isActive: true,
     });
     setShowModal(false);
   };
@@ -51,7 +50,6 @@ export const Index = () => {
     name: "",
     phoneNumber: "",
     email: "",
-    isActive: true,
   });
   const [edit, setEdit] = useState(false);
   const onEdit = (supplierEdit) => {
@@ -65,8 +63,8 @@ export const Index = () => {
   const closeModalDelete = () => {
     setSupplier({
       id: 0,
-      nombre: "",
-      telefono: "",
+      name: "",
+      phoneNumber: "",
       email: "",
     });
     setShowModalDelete(false);
@@ -111,7 +109,6 @@ export const Index = () => {
                       <th>Nombre</th>
                       <th>Teléfono</th>
                       <th>Email</th>
-                      <th>Estado</th>
                       <th className="w-1"></th>
                     </tr>
                   </thead>
@@ -123,9 +120,10 @@ export const Index = () => {
                         </td>
                       </tr>
                     ) : (
-                      visibleData.map((supplier) => (
+                      visibleData.map((supplier, index) => (
                         <Show
                           key={supplier.id}
+                          index={index + 1}
                           supplier={supplier}
                           onEdit={onEdit}
                           onDelete={onDelete}

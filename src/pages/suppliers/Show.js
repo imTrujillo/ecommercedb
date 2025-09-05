@@ -1,25 +1,12 @@
 import React from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
 
-const Show = ({ supplier, onEdit, onDelete }) => {
-  let bullet_color = "";
-  switch (supplier.isActive) {
-    case true:
-      bullet_color = "bg-blue text-blue-fg";
-      break;
-    case false:
-      bullet_color = "bg-orange text-orange-fg";
-      break;
-    default:
-      bullet_color = "bg-muted text-orange-fg";
-      break;
-  }
-
+const Show = ({ supplier, index, onEdit, onDelete }) => {
   return (
     <tr>
       <td data-label="id">
         <div className="d-flex py-1 align-items-center">
-          <span>{supplier.id}</span>
+          <span>{index}</span>
         </div>
       </td>
       <td data-label="nombre">
@@ -31,11 +18,7 @@ const Show = ({ supplier, onEdit, onDelete }) => {
       <td className="text-secondary" data-label="email">
         {supplier.email}
       </td>
-      <td className="text-secondary" data-label="Role">
-        <span className={`badge ${bullet_color} w-max`}>
-          {supplier.isActive ? "Activo" : "Inactivo"}
-        </span>
-      </td>
+
       <td>
         <div className="btn-list flex-nowrap">
           <div className="dropdown">

@@ -52,7 +52,6 @@ export const ProductsModal = ({
   }, [product, suppliers, categories, methods]);
 
   const onSubmit = methods.handleSubmit(async (data) => {
-    console.log(data);
     try {
       if (isEdit) {
         await apiServiceUpdate(`product/${product.productId}`, data);
@@ -65,9 +64,11 @@ export const ProductsModal = ({
           }
         });
 
-        data.images.forEach((file) => {
-          formData.append("images", file);
-        });
+        if (data?.images && data.images.length > 0) {
+          data.images.forEach((file) => {
+            formData.append("images", file);
+          });
+        }
 
         await apiServicePost("product", formData);
       }

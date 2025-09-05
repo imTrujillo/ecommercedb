@@ -24,7 +24,6 @@ export const CategoryModal = ({
     defaultValues: {
       name: "",
       description: "",
-      isActive: true,
     },
   });
 
@@ -34,7 +33,6 @@ export const CategoryModal = ({
         id: category.id || 0,
         name: category.name || "",
         description: category.description || "",
-        isActive: category.isActive ? "true" : "false",
       });
     }
   }, [category]);
@@ -52,7 +50,6 @@ export const CategoryModal = ({
       toast.success(
         isEdit ? "¡Categoría actualizado!" : "¡Categoría agregada!"
       );
-      console.log(data);
     } catch (err) {
       console.error("Error al guardar la categoría:", err);
       toast.error("Error al guardar la categoría. Intenta de nuevo.");
@@ -84,12 +81,7 @@ export const CategoryModal = ({
 
               <div className="modal-body">
                 <div className="row mb-3">
-                  <div className="col-6">
-                    <Input {...categoryValidations.nameValidation} />
-                  </div>
-                  <div className="col-6">
-                    <Input {...categoryValidations.isActiveValidation} />
-                  </div>
+                  <Input {...categoryValidations.nameValidation} />
                 </div>
                 <div className="row mb-3">
                   <Input {...categoryValidations.descriptionValidation} />

@@ -1,11 +1,9 @@
-import React, { useState } from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-const Show = ({ openProductsModal, order, onEdit, onDelete }) => {
+const Show = ({ openProductsModal, order, index, onEdit, onDelete }) => {
   dayjs.extend(relativeTime);
-  let bullet_color = "";
   let bullet_color_status = "";
   let status = "";
   switch (order.status) {
@@ -35,7 +33,7 @@ const Show = ({ openProductsModal, order, onEdit, onDelete }) => {
     <tr>
       <td data-label="IDPedido">
         <div className="d-flex py-1 align-items-center">
-          <span>{order.orderId}</span>
+          <span>{index}</span>
         </div>
       </td>
       <td data-label="Fecha">

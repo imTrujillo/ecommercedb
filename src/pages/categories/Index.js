@@ -33,12 +33,12 @@ export const Index = () => {
   const [showModal, setShowModal] = useState(false);
   const [category, setCategory] = useState({
     id: 0,
-    nombre: "",
-    descripcion: "",
+    name: "",
+    description: "",
   });
   const [edit, setEdit] = useState(false);
   const closeModal = () => {
-    setCategory({ id: 0, nombre: "", descripcion: "" });
+    setCategory({ id: 0, name: "", description: "" });
     setShowModal(false);
   };
   const onEdit = (categoryEdit) => {
@@ -88,7 +88,6 @@ export const Index = () => {
                       <th>No.</th>
                       <th>Nombre</th>
                       <th>Descripción</th>
-                      <th>Estado</th>
                       <th className="w-1"></th>
                     </tr>
                   </thead>
@@ -103,6 +102,7 @@ export const Index = () => {
                       visibleData.map((category, index) => (
                         <Show
                           key={category.id}
+                          index={index + 1}
                           category={category}
                           onEdit={onEdit}
                           onDelete={onDelete}

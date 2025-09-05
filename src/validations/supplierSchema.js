@@ -13,13 +13,13 @@ export const supplierSchema = Yup.object().shape({
     .matches(/^[0-9]+$/, "solo números")
     .length(8, "len: 8 dígitos"),
   email: Yup.string().email("no válido").required("requerido"),
-  isActive: Yup.boolean()
-    .transform((value, originalValue) => {
-      if (originalValue === "true") return true;
-      if (originalValue === "false") return false;
-      return null;
-    })
-    .required("requerido"),
+  // isActive: Yup.boolean()
+  //   .transform((value, originalValue) => {
+  //     if (originalValue === "true") return true;
+  //     if (originalValue === "false") return false;
+  //     return null;
+  //   })
+  //   .required("requerido"),
 });
 
 export const supplierValidations = {
@@ -31,16 +31,16 @@ export const supplierValidations = {
     placeholder: "Proveedor 01",
   },
 
-  isActiveValidation: {
-    id: "isActive",
-    label: "Estado",
-    type: "select",
-    options: [
-      { id: true, name: "Activo" },
-      { id: false, name: "Inactivo" },
-    ],
-    name: "isActive",
-  },
+  // isActiveValidation: {
+  //   id: "isActive",
+  //   label: "Estado",
+  //   type: "select",
+  //   options: [
+  //     { id: true, name: "Activo" },
+  //     { id: false, name: "Inactivo" },
+  //   ],
+  //   name: "isActive",
+  // },
 
   phoneNumberValidation: {
     id: "phoneNumber",

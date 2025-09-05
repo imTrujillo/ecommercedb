@@ -2,14 +2,14 @@ import { useAuth } from "./AuthProvider";
 import { Navigate, Outlet } from "react-router-dom";
 
 const PrivateRoute = ({ allowedRoles }) => {
-  const { token, rol } = useAuth();
+  const { token } = useAuth();
 
   if (!token) {
     return <Navigate to="/" replace={true} />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(rol)) {
-    switch (rol) {
+  if (allowedRoles && !allowedRoles.includes(token.user.role)) {
+    switch (token.user.role) {
       case "Customer":
         return <Navigate to="/pedidos" replace={true} />;
       case "Employee":

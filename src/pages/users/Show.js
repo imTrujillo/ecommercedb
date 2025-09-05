@@ -1,12 +1,12 @@
 import React from "react";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
 
-const Show = ({ user, onEdit, onDelete }) => {
+const Show = ({ user, index, onEdit, onDelete }) => {
   return (
     <tr>
       <td data-label="IDProducto">
         <div className="d-flex py-1 align-items-center">
-          <span>{user.id}</span>
+          <span>{index}</span>
         </div>
       </td>
       <td data-label="nombreProducto">

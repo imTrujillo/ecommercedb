@@ -16,6 +16,7 @@ export const Input = ({
   icon = null,
   isAuthInput = false,
   options = [],
+  defaultSelect = null,
   required = true,
 }) => {
   const {
@@ -81,7 +82,9 @@ export const Input = ({
           {...register(name)}
           className="form-control"
         >
-          <option value="">Selecciona una opción</option>
+          <option value="">
+            {defaultSelect ? defaultSelect : "Selecciona una opción"}
+          </option>
           {options.map((option, index) =>
             typeof option === "object" ? (
               <option key={option.id || index} value={option.id}>

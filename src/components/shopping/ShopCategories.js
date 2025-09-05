@@ -5,15 +5,12 @@ import { Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
+import { IconCompassFilled } from "@tabler/icons-react";
+import { Link } from "react-router-dom";
+import { apiServiceGet } from "../../API/apiService";
 
-export const ShopCategories = ({
-  category,
-  setProductsCart,
-  productsCart,
-  products,
-}) => {
+export const ShopCategories = ({ category, setProductsCart, productsCart }) => {
   const [slidesPerView, setSlidesPerView] = useState(3);
-
   useEffect(() => {
     const updateSlides = () => {
       const width = window.innerWidth;
@@ -27,18 +24,35 @@ export const ShopCategories = ({
     return () => window.removeEventListener("resize", updateSlides);
   }, []);
 
-  const categoryProducts = products.filter(
-    (product) => product.categoryName === category.name
-  );
-  const enableNavigation = categoryProducts.length > slidesPerView;
+  const [products, setProducts] = useState([]);
+  const fetchData = async () => {
+    const prods = await apiServiceGet(`product?categoryId=${category.id}`);
+    setProducts(prods.products);
+  };
 
-  return categoryProducts.length === 0 ? (
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const enableNavigation = products.length > slidesPerView;
+
+  return products.length === 0 ? (
     ""
   ) : (
     <div className="page-header mb-3">
-      <h2 className="fs-1">
-        {category.name} | <em>{category.description}</em>
-      </h2>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-md-items-center px-2">
+        <h2 className="fs-1">
+          {category.name} | <em>{category.description}</em>
+        </h2>
+
+        <Link
+          className="btn btn-info text-white rounded-pill"
+          to="/producto/buscar"
+        >
+          <IconCompassFilled />
+          Explorar
+        </Link>
+      </div>
 
       <Swiper
         breakpoints={{
@@ -56,7 +70,7 @@ export const ShopCategories = ({
         modules={[Pagination, Navigation]}
         className="mySwiper w-100"
       >
-        {categoryProducts.map((product) => (
+        {products.slice(0, 10).map((product) => (
           <SwiperSlide key={product.id}>
             <ShopProducts product={product} />
           </SwiperSlide>

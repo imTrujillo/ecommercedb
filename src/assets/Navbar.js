@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Search } from "../components/Search";
 
@@ -9,26 +8,23 @@ import {
   IconTruckDelivery,
   IconMoon,
   IconSun,
-  IconSearch,
   IconPackages,
   IconUsersPlus,
   IconShoppingCart,
   IconLogin2,
   IconLogout2,
-  IconBriefcase2Filled,
-  IconBriefcase2,
 } from "@tabler/icons-react";
 import { useAuth } from "../pages/session/AuthProvider";
 
 export default function Navbar({ theme, handleTheme }) {
   var location = useLocation();
-  const { rol, logout, token } = useAuth();
+  const { logout, token } = useAuth();
 
   return (
     <nav className="w-100">
       <header className="navbar d-md-none d-print-none">
         <div className="container-xl">
-          {rol && token ? (
+          {token && (
             <button
               className="navbar-toggler"
               type="button"
@@ -40,8 +36,6 @@ export default function Navbar({ theme, handleTheme }) {
             >
               <span className="navbar-toggler-icon"></span>
             </button>
-          ) : (
-            ""
           )}
 
           <div className=" d-flex align-items-center flex-row gap-2">
@@ -58,7 +52,7 @@ export default function Navbar({ theme, handleTheme }) {
             </button>
             <a
               className={`nav-item ${
-                location.pathname.startsWith("/product") ||
+                location.pathname.startsWith("/producto") ||
                 location.pathname === "/"
                   ? "btn"
                   : "d-none"
@@ -70,20 +64,27 @@ export default function Navbar({ theme, handleTheme }) {
             >
               <IconShoppingCart />
             </a>
-            <form action="./" method="get" autoComplete="off" noValidate>
-              <div className="input-icon">
-                <span className="input-icon-addon">
-                  <IconSearch size={24} stroke={2} />
-                </span>
-                <input
-                  type="text"
-                  value=""
-                  className="form-control"
-                  placeholder="Buscar…"
-                  aria-label="Search in website"
+            {
+              <div
+                className={
+                  location.pathname.startsWith("/producto") ||
+                  location.pathname.startsWith("/inventario") ||
+                  location.pathname === "/"
+                    ? "d-none"
+                    : "input-icon"
+                }
+              >
+                <Search
+                  tableIds={[
+                    "table-categories",
+                    "table-orders",
+                    "table-inventary",
+                    "table-customers",
+                    "table-suppliers",
+                  ]}
                 />
               </div>
-            </form>
+            }
             <div className="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
               {/* <a href=".">
                 <img
@@ -132,12 +133,12 @@ export default function Navbar({ theme, handleTheme }) {
                   </Link>
                 </h1>
 
-                {rol && token && (
+                {token && (
                   <>
                     {/* TIENDA: visible para todos */}
                     <li
                       className={`nav-item ${
-                        location.pathname.startsWith("/product") ||
+                        location.pathname.startsWith("/producto") ||
                         location.pathname === "/"
                           ? "active"
                           : ""
@@ -152,7 +153,8 @@ export default function Navbar({ theme, handleTheme }) {
                     </li>
 
                     {/* EMPLOYEE o ADMIN */}
-                    {(rol === "Employee" || rol === "Admin") && (
+                    {(token.user.role === "Employee" ||
+                      token.user.role === "Admin") && (
                       <>
                         <li
                           className={`nav-item ${
@@ -172,7 +174,7 @@ export default function Navbar({ theme, handleTheme }) {
                     )}
 
                     {/* ADMIN únicamente */}
-                    {rol === "Admin" && (
+                    {token.user.role === "Admin" && (
                       <>
                         <li
                           className={`nav-item ${
@@ -215,9 +217,9 @@ export default function Navbar({ theme, handleTheme }) {
                     )}
 
                     {/* TODOS LOS LOGUEADOS */}
-                    {(rol === "Customer" ||
-                      rol === "Employee" ||
-                      rol === "Admin") && (
+                    {(token.user.role === "Customer" ||
+                      token.user.role === "Employee" ||
+                      token.user.role === "Admin") && (
                       <li
                         className={`nav-item ${
                           location.pathname === "/pedidos" ? "active" : ""
@@ -251,7 +253,7 @@ export default function Navbar({ theme, handleTheme }) {
                 {/* CARRITO DE COMPRAS */}
                 <a
                   className={`nav-item ${
-                    location.pathname.startsWith("/product") ||
+                    location.pathname.startsWith("/producto") ||
                     location.pathname === "/"
                       ? "btn"
                       : "d-none"
@@ -265,15 +267,29 @@ export default function Navbar({ theme, handleTheme }) {
                 </a>
 
                 {/* BUSCAR ITEM DE UNA TABLA */}
-                <Search
-                  tableIds={[
-                    "table-categories",
-                    "table-orders",
-                    "table-inventary",
-                    "table-customers",
-                    "table-suppliers",
-                  ]}
-                />
+                {
+                  <div
+                    className={
+                      location.pathname.startsWith("/producto") ||
+                      location.pathname.startsWith("/inventario") ||
+                      location.pathname === "/"
+                        ? "d-none"
+                        : "input-icon"
+                    }
+                  >
+                    <Search
+                      tableIds={[
+                        "table-categories",
+                        "table-orders",
+                        "table-inventary",
+                        "table-customers",
+                        "table-suppliers",
+                      ]}
+                    />
+                  </div>
+                }
+
+                {/* INICIO DE SESIÓN */}
                 <div className="p-0 align-self-center">
                   {!token ? (
                     <Link

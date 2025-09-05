@@ -54,7 +54,6 @@ export const Index = () => {
 
   //AGREGAR IMAGENES EN LA BASE DE DATOS
   const onSubmit = methods.handleSubmit(async (data) => {
-    console.log(data);
     try {
       const formData = new FormData();
 
@@ -104,10 +103,7 @@ export const Index = () => {
       <div className="container-xl">
         <div className="row row-cards">
           {/* ENCABEZADO DE INVENTARIO */}
-          <Header
-            title={`Galería del prod ${id}`}
-            subtitle="Organiza fotos por producto"
-          />
+          <Header title={`Galería`} subtitle="Organiza fotos por producto" />
 
           {/* GALERÍA DE IMÁGENES */}
           <div className=" page-wrapper d-flex flex-column-reverse flex-md-row align-items-start">

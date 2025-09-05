@@ -12,14 +12,11 @@ export const Index = () => {
 
   //LLAMAR APIS PARA TIENDA
   const [categorias, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
 
-  const { user } = useAuth();
+  const { token } = useAuth();
   const fetchData = async () => {
     const cats = await apiServiceGet("category");
-    const prods = await apiServiceGet("product");
     setCategories(cats);
-    setProducts(prods.products);
   };
 
   useEffect(() => {
@@ -28,10 +25,10 @@ export const Index = () => {
 
   return (
     <div className="page-wrapper">
-      <div className="container-xl px-4">
-        {user && (
+      <div className="container-xl">
+        {token?.user && (
           <h1 className="badge bg-body-secondary fs-3 my-3">
-            ¡Bienvenido usuario "{user.username}"!
+            ¡Bienvenido usuario "{token?.user?.username}"!
           </h1>
         )}
         <div className="row row-cards">
@@ -42,7 +39,6 @@ export const Index = () => {
               <ShopCategories
                 key={category.id}
                 category={category}
-                products={products}
                 setProductsCart={setProductsCart}
                 productsCart={productsCart}
               />

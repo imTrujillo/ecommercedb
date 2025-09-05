@@ -32,8 +32,13 @@ export const SignUp = () => {
   const auth = useAuth();
   const onSubmit = methods.handleSubmit(async (data) => {
     try {
-      console.log(data);
-      await auth.signup(data, "customer");
+      const response = await auth.signup(data, "customer");
+      if (response.status >= 200 && response.status < 300) {
+        auth.login({
+          username: response.data.username,
+          password: response.data.password,
+        });
+      }
     } catch (err) {
       console.error("Error en register:", err);
       toast.error("Error al registrarse. Intenta de nuevo.");

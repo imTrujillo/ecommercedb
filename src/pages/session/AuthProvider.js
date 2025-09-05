@@ -2,53 +2,60 @@ import { createContext, useContext, useState, useEffect } from "react"; // Añad
 import { useNavigate } from "react-router-dom";
 import { apiServicePost } from "../../API/apiService";
 import { toast } from "react-toastify";
+import { RefreshTokenModal } from "../../components/modals/RefreshTokenModal";
 
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
+  //Buscar el token guardado en el sessionStorage
   const [token, setToken] = useState(() => {
     const stored = sessionStorage.getItem("token");
     return stored ? JSON.parse(stored) : null;
   });
 
-  const [refreshToken, setRefreshToken] = useState(() => {
-    const stored = sessionStorage.getItem("refreshToken");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [refreshTokenModal, setRefreshTokenModal] = useState(false);
+  useEffect(() => {
+    if (!token) return;
 
-  const [rol, setRol] = useState(() => {
-    const stored = sessionStorage.getItem("rol");
-    return stored ? JSON.parse(stored) : null;
-  });
+    // Función que revisa si el token expiró
+    const checkTokenExpiry = () => {
+      const now = new Date();
+      const expiryDate = new Date(token.expiresAt);
+      if (expiryDate <= now) {
+        setRefreshTokenModal(true);
+      }
+    };
+    checkTokenExpiry();
 
-  const [user, setUser] = useState(() => {
-    const stored = sessionStorage.getItem("user");
-    return stored ? JSON.parse(stored) : null;
-  });
+    // Revisar cada 1 minuto
+    const intervalId = setInterval(checkTokenExpiry, 60000);
+    return () => clearInterval(intervalId);
+  }, [token]);
 
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(false);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
   }, []);
 
   const navigate = useNavigate();
 
   const signup = async (data, rol) => {
     try {
-      console.log(data);
       const response = await apiServicePost(
         `auth/register/${rol}`,
         data,
-        token
+        token.accessToken
       );
 
       if (response.status >= 200 && response.status < 300) {
-        if (rol === "customer") {
-          login({ username: data.username, password: data.password });
-        }
+        toast.success(
+          `¡${rol === "employee" ? "Empleado" : "Cliente"} agregado!`
+        );
       }
-      toast.success("¡Usuario agregado!");
     } catch (error) {
       if (error.response && Array.isArray(error.response.data)) {
         error.response.data.forEach((err) => {
@@ -67,19 +74,11 @@ const AuthProvider = ({ children }) => {
       const response = await apiServicePost("auth/login", data);
 
       if (response.status >= 200 && response.status < 300) {
-        const { refreshToken, accessToken, user } = response.data;
+        const tokenData = response.data;
+        setToken(tokenData);
+        sessionStorage.setItem("token", JSON.stringify(tokenData));
 
-        setUser(user);
-        setRol(user.role);
-        setToken(accessToken);
-        setRefreshToken(refreshToken);
-
-        sessionStorage.setItem("user", JSON.stringify(user));
-        sessionStorage.setItem("rol", JSON.stringify(user.role));
-        sessionStorage.setItem("token", JSON.stringify(accessToken));
-        sessionStorage.setItem("refreshToken", JSON.stringify(refreshToken));
-
-        switch (user.role) {
+        switch (tokenData.user.role) {
           case "Employee":
             navigate("/inventario");
             break;
@@ -104,6 +103,7 @@ const AuthProvider = ({ children }) => {
         toast.error(error.response.data.error);
       } else {
         toast.error("Ocurrió un error al iniciar sesión.");
+        console.error(error);
       }
     }
   };
@@ -132,33 +132,40 @@ const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       const body = {
-        accessToken: token,
-        refreshToken: refreshToken,
+        accessToken: token.token,
+        refreshToken: token.refreshToken,
       };
       await apiServicePost("auth/logout", body, token, true);
     } catch (error) {
       console.error("Error durante el logout en la API:", error);
     } finally {
-      setUser(null);
-      setRol(null);
       setToken(null);
       sessionStorage.removeItem("token");
-      sessionStorage.removeItem("refreshToken");
-      sessionStorage.removeItem("user");
-      sessionStorage.removeItem("rol");
+
       navigate("/");
       toast.success("Sesión cerrada.");
     }
   };
 
-  if (isLoading) return <div>Cargando...</div>;
+  if (isLoading)
+    return (
+      <div className="progress progress-sm">
+        <div className="progress-bar progress-bar-indeterminate"></div>
+      </div>
+    );
 
   return (
     //Pasa los valores como un objeto
     <AuthContext.Provider
-      value={{ user, token, rol, signup, setNewPassword, login, logout }}
+      value={{ token, signup, setNewPassword, login, logout, setIsLoading }}
     >
       {children}
+      <RefreshTokenModal
+        show={refreshTokenModal}
+        token={token}
+        setToken={setToken}
+        closeModal={() => setRefreshTokenModal(false)}
+      />
     </AuthContext.Provider>
   );
 };
