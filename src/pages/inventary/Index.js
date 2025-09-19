@@ -3,7 +3,6 @@ import Show from "./Show";
 import { ProductsModal } from "../../components/modals/ProductsModal";
 import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/modals/DeleteModal";
-import { apiServiceGet } from "../../API/apiService";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
 import { EmptyState } from "../../components/EmptyState";
@@ -11,12 +10,14 @@ import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { searchValidations } from "../../validations/searchSchema";
 import { Input } from "../../components/Input";
+import { useApi } from "../../API/apiService";
 
 export const Index = () => {
   //LLAMAR LA API
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const { apiServiceGet } = useApi();
   const fetchData = async () => {
     const query = new URLSearchParams(window.location.search).toString();
     const prods = await apiServiceGet(`product?${query}`);
@@ -71,7 +72,6 @@ export const Index = () => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => {
     setProduct({
-      productId: 0,
       productName: "",
       description: "",
       price: 0,
@@ -84,7 +84,6 @@ export const Index = () => {
     setShowModal(false);
   };
   const [product, setProduct] = useState({
-    productId: 0,
     productName: "",
     description: "",
     price: 0,

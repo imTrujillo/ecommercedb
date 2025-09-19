@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { apiServiceGet } from "../../API/apiService";
 import ShopProducts from "../../components/shopping/ShopProducts";
 import { EmptyState } from "../../components/EmptyState";
 import { Header } from "../../assets/Header";
@@ -11,6 +10,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { CartCanvas } from "../../components/shopping/CartCanvas";
 import { useCart } from "../../components/shopping/CartProvider";
+import { useApi } from "../../API/apiService";
 
 export const Index = () => {
   //OBTENER DEL CARRITO DE COMPRA
@@ -20,6 +20,7 @@ export const Index = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [providers, setProviders] = useState([]);
+  const { apiServiceGet } = useApi();
   const fetchData = async () => {
     const query = new URLSearchParams(window.location.search).toString();
     const prods = await apiServiceGet(`product?${query}`);

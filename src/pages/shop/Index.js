@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { ShopCategories } from "../../components/shopping/ShopCategories";
-import { apiServiceGet } from "../../API/apiService";
+
 import { EmptyState } from "../../components/EmptyState";
 import { useCart } from "../../components/shopping/CartProvider";
 import { CartCanvas } from "../../components/shopping/CartCanvas";
 import { useAuth } from "../session/AuthProvider";
+import { useApi } from "../../API/apiService";
 
 export const Index = () => {
   //OBTENER DEL CARRITO DE COMPRA
@@ -14,6 +15,7 @@ export const Index = () => {
   const [categorias, setCategories] = useState([]);
 
   const { token } = useAuth();
+  const { apiServiceGet } = useApi();
   const fetchData = async () => {
     const cats = await apiServiceGet("category");
     setCategories(cats);

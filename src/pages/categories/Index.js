@@ -3,16 +3,17 @@ import Show from "./Show";
 import { CategoryModal } from "../../components/modals/CategoryModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/modals/DeleteModal";
-import { apiServiceGet } from "../../API/apiService";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
 import { EmptyState } from "../../components/EmptyState";
+import { useApi } from "../../API/apiService";
 
 export const Index = () => {
   const [categories, setCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
 
+  const { apiServiceGet } = useApi();
   const fetchData = async () => {
     const cat = await apiServiceGet("category");
     setCategories(cat);

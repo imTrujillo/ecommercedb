@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { apiServicePost, apiServiceUpdate } from "../../API/apiService";
 import { toast } from "react-toastify";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -8,6 +7,7 @@ import {
   supplierSchema,
   supplierValidations,
 } from "../../validations/supplierSchema"; // VALIDACIONES CON YUP
+import { useApi } from "../../API/apiService";
 
 export const SuppliersModal = ({
   show,
@@ -38,12 +38,17 @@ export const SuppliersModal = ({
     }
   }, [supplier]);
 
+  const { apiServicePost, apiServiceUpdate } = useApi();
   const onSubmit = methods.handleSubmit(async (data) => {
     try {
       if (isEdit) {
-        await apiServiceUpdate(`provider/provider/update/${data.id}`, data);
+        await apiServiceUpdate(
+          `provider/provider/update/${data.id}`,
+          data,
+          true
+        );
       } else {
-        await apiServicePost("provider", data);
+        await apiServicePost("provider", data, true);
       }
       closeModal();
       fetchData();
@@ -61,7 +66,7 @@ export const SuppliersModal = ({
 
   return (
     <div
-      className="modal d-block show fade modal-blur"
+      className="modal d-block position-fixed overflow-y-scroll pb-5 show fade modal-blur"
       tabIndex="-1"
       role="dialog"
     >

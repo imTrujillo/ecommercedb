@@ -3,12 +3,12 @@ import Show from "./Show";
 import { OrderModal } from "../../components/modals/OrderModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/modals/DeleteModal";
-import { apiServiceGet } from "../../API/apiService";
 import { ProductsOrderModal } from "../../components/modals/ProductsOrderModal";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
 import { useAuth } from "../session/AuthProvider";
 import { EmptyState } from "../../components/EmptyState";
+import { useApi } from "../../API/apiService";
 
 export const Index = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,9 +19,10 @@ export const Index = () => {
 
   //Obtener detalles del pedido
   const { token } = useAuth();
+  const { apiServiceGet } = useApi();
   const fetchData = async () => {
     if (!token.user?.id) return;
-    const ords = await apiServiceGet(`orders/user/${token.user.id}`);
+    const ords = await apiServiceGet("orders/user", token.user.id, true);
     const prods = await apiServiceGet("product");
     setOrders(ords);
     setProducts(prods.products);
@@ -125,7 +126,6 @@ export const Index = () => {
                       <th>Fecha</th>
                       <th>Estado</th>
                       <th>Productos</th>
-
                       <th className="w-1"></th>
                     </tr>
                   </thead>

@@ -3,10 +3,10 @@ import Show from "./Show";
 import { SuppliersModal } from "../../components/modals/SuppliersModal";
 import { IconPlus } from "@tabler/icons-react";
 import { DeleteModal } from "../../components/modals/DeleteModal";
-import { apiServiceGet } from "../../API/apiService";
 import { Header } from "../../assets/Header";
 import PaginationControl from "../../assets/PaginationControl";
 import { EmptyState } from "../../components/EmptyState";
+import { useApi } from "../../API/apiService";
 
 export const Index = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,7 +14,7 @@ export const Index = () => {
 
   //LLAMAR LA API
   const [Proveedores, setProveedores] = useState([]);
-
+  const { apiServiceGet } = useApi();
   const fetchData = async () => {
     try {
       const sups = await apiServiceGet("provider");

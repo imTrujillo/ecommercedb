@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react"; // Añadido useEffect
 import { useNavigate } from "react-router-dom";
-import { apiServicePost } from "../../API/apiService";
 import { toast } from "react-toastify";
 import { RefreshTokenModal } from "../../components/modals/RefreshTokenModal";
+import axios from "axios";
 
 const AuthContext = createContext();
 
@@ -43,13 +43,11 @@ const AuthProvider = ({ children }) => {
 
   const navigate = useNavigate();
 
+  const baseUrl = "https://localhost:7084/api/";
+
   const signup = async (data, rol) => {
     try {
-      const response = await apiServicePost(
-        `auth/register/${rol}`,
-        data,
-        token.accessToken
-      );
+      const response = await axios.post(`${baseUrl}auth/register/${rol}`, data);
 
       if (response.status >= 200 && response.status < 300) {
         toast.success(
@@ -71,7 +69,7 @@ const AuthProvider = ({ children }) => {
 
   const login = async (data) => {
     try {
-      const response = await apiServicePost("auth/login", data);
+      const response = await axios.post(`${baseUrl}auth/login`, data);
 
       if (response.status >= 200 && response.status < 300) {
         const tokenData = response.data;
@@ -110,7 +108,7 @@ const AuthProvider = ({ children }) => {
 
   const setNewPassword = async (data) => {
     try {
-      const response = await apiServicePost("auth/reset-password", data);
+      const response = await axios.post(`${baseUrl}auth/reset-password`, data);
 
       if (response && response.status >= 200 && response.status < 300) {
         navigate("/login");
@@ -132,10 +130,13 @@ const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       const body = {
-        accessToken: token.token,
-        refreshToken: token.refreshToken,
+        accessToken: token?.token,
+        refreshToken: token?.refreshToken,
       };
-      await apiServicePost("auth/logout", body, token, true);
+
+      await axios.post(`${baseUrl}auth/logout`, body, {
+        headers: { Authorization: `Bearer ${token?.accessToken}` },
+      });
     } catch (error) {
       console.error("Error durante el logout en la API:", error);
     } finally {

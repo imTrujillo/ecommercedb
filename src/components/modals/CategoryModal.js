@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { apiServicePost, apiServiceUpdate } from "../../API/apiService";
 import { toast } from "react-toastify";
 
 import { FormProvider, useForm } from "react-hook-form";
@@ -9,7 +8,7 @@ import {
   categorySchema,
   categoryValidations,
 } from "../../validations/categorySchema"; // VALIDACIONES CON YUP
-import { boolean } from "yup";
+import { useApi } from "../../API/apiService";
 
 export const CategoryModal = ({
   show,
@@ -38,12 +37,18 @@ export const CategoryModal = ({
   }, [category]);
 
   //Envío de los datos a la API
+
+  const { apiServicePost, apiServiceUpdate } = useApi();
   const onSubmit = methods.handleSubmit(async (data) => {
     try {
       if (isEdit) {
-        await apiServiceUpdate(`category/category/update/${category.id}`, data);
+        await apiServiceUpdate(
+          `category/category/update/${category.id}`,
+          data,
+          true
+        );
       } else {
-        await apiServicePost("category", data);
+        await apiServicePost("category", data, true);
       }
       closeModal();
       fetchData();
@@ -60,7 +65,7 @@ export const CategoryModal = ({
 
   return (
     <div
-      className="modal d-block show fade modal-blur"
+      className="modal d-block position-fixed overflow-y-scroll pb-5 show fade modal-blur"
       tabIndex="-1"
       role="dialog"
     >

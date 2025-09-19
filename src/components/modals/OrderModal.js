@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { IconPlus } from "@tabler/icons-react";
-import { apiServicePost, apiServiceUpdate } from "../../API/apiService";
 import "@progress/kendo-theme-bootstrap/dist/all.css";
 import { toast } from "react-toastify";
 import { FormProvider, useForm } from "react-hook-form";
@@ -8,6 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "../Input";
 import { useAuth } from "../../pages/session/AuthProvider";
 import { orderSchema, orderValidations } from "../../validations/orderSchema"; // VALIDACIONES CON YUP
+import { useApi } from "../../API/apiService";
 
 export const OrderModal = ({
   show,
@@ -105,6 +105,7 @@ export const OrderModal = ({
   };
 
   //Envío de los datos a la API
+  const { apiServicePost, apiServiceUpdate } = useApi();
   const onSubmit = methods.handleSubmit(async (data) => {
     try {
       if (orderProducts.length <= 0) {
@@ -122,11 +123,12 @@ export const OrderModal = ({
       console.log(orderData);
       let orderResponse;
       if (!isEdit) {
-        orderResponse = await apiServicePost("orders", orderData);
+        orderResponse = await apiServicePost("orders", orderData, true);
       } else {
         orderResponse = await apiServiceUpdate(
           `orders/update/${data.orderId}`,
-          orderData
+          orderData,
+          true
         );
       }
       if (orderResponse) {
@@ -148,7 +150,7 @@ export const OrderModal = ({
 
   return (
     <div
-      className="modal d-block show fade modal-blur"
+      className="modal d-block position-fixed overflow-y-scroll pb-5 show fade modal-blur"
       tabIndex="-1"
       role="dialog"
     >

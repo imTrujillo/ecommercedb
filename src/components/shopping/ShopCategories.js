@@ -7,7 +7,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { IconCompassFilled } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-import { apiServiceGet } from "../../API/apiService";
+import { useApi } from "../../API/apiService";
 
 export const ShopCategories = ({ category, setProductsCart, productsCart }) => {
   const [slidesPerView, setSlidesPerView] = useState(3);
@@ -25,6 +25,7 @@ export const ShopCategories = ({ category, setProductsCart, productsCart }) => {
   }, []);
 
   const [products, setProducts] = useState([]);
+  const { apiServiceGet } = useApi();
   const fetchData = async () => {
     const prods = await apiServiceGet(`product?categoryId=${category.id}`);
     setProducts(prods.products);

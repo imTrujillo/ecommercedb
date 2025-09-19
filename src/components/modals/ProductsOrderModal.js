@@ -20,7 +20,7 @@ export const ProductsOrderModal = ({
 
   return (
     <div
-      className="modal d-block show fade modal-blur"
+      className="modal d-block position-fixed overflow-y-scroll pb-5 show fade modal-blur"
       tabIndex="-1"
       role="dialog"
     >

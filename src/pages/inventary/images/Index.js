@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  apiServiceDelete,
-  apiServiceGet,
-  apiServicePost,
-  apiServiceUpdate,
-} from "../../../API/apiService";
+
 import { Header } from "../../../assets/Header";
 import PaginationControl from "../../../assets/PaginationControl";
 import { useParams } from "react-router-dom";
@@ -16,10 +11,13 @@ import { toast } from "react-toastify";
 import { EmptyState } from "../../../components/EmptyState";
 import { Show } from "./Show";
 import { imgSchema, imgValidations } from "../../../validations/imageSchema";
+import { useApi } from "../../../API/apiService";
 
 export const Index = () => {
   //Obtener id del product según la url
   const { id } = useParams();
+  const { apiServiceGet, apiServicePost, apiServiceUpdate, apiServiceDelete } =
+    useApi();
   //Eliminar el filtro de la imagen en el modo claro
   const savedTheme = localStorage.getItem("theme");
 
@@ -27,6 +25,7 @@ export const Index = () => {
   const rowsPerPage = 5;
 
   //LLAMAR LA API
+
   const [imgs, setImgs] = useState([]);
   const fetchData = async () => {
     const images = await apiServiceGet(`product/${id}/images`);
@@ -61,7 +60,7 @@ export const Index = () => {
         formData.append("images", file);
       });
 
-      await apiServicePost(`product/${id}/images/multiple`, formData);
+      await apiServicePost(`product/${id}/images/multiple`, formData, true);
 
       setImgs([]);
       fetchData();
@@ -75,7 +74,11 @@ export const Index = () => {
   //ESTABLECER COMO FOTO PRINCIPAL
   const handleMainPhoto = async (imageId) => {
     try {
-      await apiServiceUpdate(`product/${id}/images/${imageId}/principal`);
+      await apiServiceUpdate(
+        `product/${id}/images/${imageId}/principal`,
+        null,
+        true
+      );
 
       fetchData();
       toast.success("¡Portada actualizada!");
@@ -88,7 +91,7 @@ export const Index = () => {
   //ELIMINAR UN PRODUCTO
   const handleDelete = async (imageId) => {
     try {
-      await apiServiceDelete(`product/${id}/images/${imageId}`);
+      await apiServiceDelete(`product/${id}/images/${imageId}`, true);
 
       fetchData();
       toast.success("¡Imagen eliminada!");

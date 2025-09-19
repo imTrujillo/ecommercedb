@@ -9,7 +9,6 @@ import {
   IconReportMoney,
 } from "@tabler/icons-react";
 import { toast } from "react-toastify";
-import { apiServiceGet } from "../../../API/apiService";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Navigation, Zoom } from "swiper/modules";
@@ -22,13 +21,15 @@ import "swiper/css/zoom";
 
 import { useCart } from "../../../components/shopping/CartProvider";
 import { CartCanvas } from "../../../components/shopping/CartCanvas";
+import { useApi } from "../../../API/apiService";
 
 export const Index = () => {
   //Obtener el product de acuerdo al id
   const { id } = useParams();
   const [product, setProduct] = useState([]);
+  const { apiServiceGet } = useApi();
   const fetchData = async () => {
-    const prod = await apiServiceGet(`product/${id}`);
+    const prod = await apiServiceGet("product", id);
     setProduct(prod);
   };
   useEffect(() => {

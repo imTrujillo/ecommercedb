@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { apiServicePost, apiServiceUpdate } from "../../API/apiService";
 import { toast } from "react-toastify";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -8,6 +7,7 @@ import {
   productSchema,
   productValidations,
 } from "../../validations/productSchema"; // VALIDACIONES CON YUP
+import { useApi } from "../../API/apiService";
 
 export const ProductsModal = ({
   show,
@@ -24,7 +24,6 @@ export const ProductsModal = ({
   const methods = useForm({
     resolver: yupResolver(productSchema),
     defaultValues: {
-      productId: 0,
       productName: "",
       description: "",
       price: 0.0,
@@ -40,7 +39,7 @@ export const ProductsModal = ({
       const supplier = suppliers.find((s) => s.name === product.providerName);
       const category = categories.find((c) => c.name === product.categoryName);
       methods.reset({
-        productId: product.productId || 0,
+        // productId: product.productId || 0,
         productName: product.productName || "",
         description: product.description || "",
         price: product.price || 0,
@@ -51,10 +50,11 @@ export const ProductsModal = ({
     }
   }, [product, suppliers, categories, methods]);
 
+  const { apiServicePost, apiServiceUpdate } = useApi();
   const onSubmit = methods.handleSubmit(async (data) => {
     try {
       if (isEdit) {
-        await apiServiceUpdate(`product/${product.productId}`, data);
+        await apiServiceUpdate(`product/${product.productId}`, data, true);
       } else {
         const formData = new FormData();
 
@@ -70,7 +70,7 @@ export const ProductsModal = ({
           });
         }
 
-        await apiServicePost("product", formData);
+        await apiServicePost("product", formData, true);
       }
       closeModal();
       fetchData();
@@ -85,7 +85,7 @@ export const ProductsModal = ({
 
   return (
     <div
-      className="modal d-block show fade modal-blur"
+      className="modal d-block position-fixed overflow-y-scroll pb-5 show fade modal-blur"
       tabIndex="-1"
       role="dialog"
     >

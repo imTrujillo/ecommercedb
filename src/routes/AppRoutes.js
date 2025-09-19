@@ -10,6 +10,8 @@ import { Index as CategoriesIndex } from "../pages/categories/Index";
 import { Index as OrdersIndex } from "../pages/orders/Index";
 import { Index as UsersIndex } from "../pages/users/Index";
 import { Index as ImageIndex } from "../pages/inventary/images/Index";
+import { Index as SuccessPaymentIndex } from "../pages/orders/payment/success/Index";
+import { Index as CancelPaymentIndex } from "../pages/orders/payment/cancel/Index";
 import { Login } from "../pages/session/Login";
 import { SignUp } from "../pages/session/Signup";
 import { ForgotPassword } from "../pages/session/ForgotPassword";
@@ -144,7 +146,29 @@ export default function AppRoutes() {
                 path="/pedidos"
                 element={
                   <App>
-                    <OrdersIndex />
+                    <CartProvider>
+                      <OrdersIndex />
+                    </CartProvider>
+                  </App>
+                }
+              ></Route>
+              <Route
+                path="/success"
+                element={
+                  <App>
+                    <CartProvider>
+                      <SuccessPaymentIndex />
+                    </CartProvider>
+                  </App>
+                }
+              ></Route>
+              <Route
+                path="/cancel"
+                element={
+                  <App>
+                    <CartProvider>
+                      <CancelPaymentIndex />
+                    </CartProvider>
                   </App>
                 }
               ></Route>

@@ -1,16 +1,21 @@
 import React from "react";
-import { apiServicePost } from "../../API/apiService";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useApi } from "../../API/apiService";
 
 export const RefreshTokenModal = ({ show, closeModal, token, setToken }) => {
+  const { apiServicePost } = useApi();
   const handleRefresh = async (e) => {
     e.preventDefault();
     try {
-      const response = await apiServicePost("auth/refresh-token", {
-        refreshToken: token.refreshToken,
-        accessToken: token.accessToken,
-      });
+      const response = await apiServicePost(
+        "auth/refresh-token",
+        {
+          refreshToken: token.refreshToken,
+          accessToken: token.accessToken,
+        },
+        true
+      );
 
       const newToken = {
         ...token,
@@ -41,7 +46,7 @@ export const RefreshTokenModal = ({ show, closeModal, token, setToken }) => {
 
   return (
     <div
-      className="modal d-block show fade modal-blur"
+      className="modal d-block position-fixed overflow-y-scroll pb-5 show fade modal-blur"
       tabIndex="-1"
       role="dialog"
     >

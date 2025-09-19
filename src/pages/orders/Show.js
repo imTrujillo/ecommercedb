@@ -1,9 +1,14 @@
-import { IconPencil, IconTrash } from "@tabler/icons-react";
+import { IconCreditCard, IconPencil, IconTrash } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { toast } from "react-toastify";
+import { useCart } from "../../components/shopping/CartProvider";
+import { useAuth } from "../session/AuthProvider";
+import { useApi } from "../../API/apiService";
 
 const Show = ({ openProductsModal, order, index, onEdit, onDelete }) => {
   dayjs.extend(relativeTime);
+  const { token } = useAuth();
   let bullet_color_status = "";
   let status = "";
   switch (order.status) {
@@ -12,7 +17,7 @@ const Show = ({ openProductsModal, order, index, onEdit, onDelete }) => {
       status = "Entregado";
       break;
     case 2:
-      bullet_color_status = "bg-blue text-orange-fg";
+      bullet_color_status = "bg-yellow text-orange-fg";
       status = "Empaquetado";
       break;
     case 3:
@@ -20,7 +25,7 @@ const Show = ({ openProductsModal, order, index, onEdit, onDelete }) => {
       status = "En proceso";
       break;
     case 4:
-      bullet_color_status = "bg-red text-orange-fg";
+      bullet_color_status = "bg-blue text-orange-fg";
       status = "Cancelado";
       break;
     default:
@@ -28,6 +33,35 @@ const Show = ({ openProductsModal, order, index, onEdit, onDelete }) => {
       status = "Desconocido";
       break;
   }
+
+  const { setOrderDetails, payments, setPayments } = useCart();
+  const { apiServicePost } = useApi();
+  const generatePaymentLink = async (order) => {
+    const currentStatus = payments[order.orderId];
+
+    if (currentStatus === "confirmed") {
+      return toast.success("¡Este pedido ya fue pagado!");
+    }
+
+    try {
+      const response = await apiServicePost(
+        `payment/checkout?orderId=${order.orderId}`
+      );
+
+      setOrderDetails(order);
+      sessionStorage.setItem("orderDetails", JSON.stringify(order));
+
+      const updated = { ...payments, [order.orderId]: "pending" };
+      setPayments(updated);
+      sessionStorage.setItem("payments", JSON.stringify(updated));
+
+      window.open(response.data, "_blank");
+      toast.success("¡Redireccionando a página de pago!");
+    } catch (err) {
+      console.error("Error al guardar el pago:", err);
+      toast.error("Error al procesar el pago. Intenta de nuevo.");
+    }
+  };
 
   return (
     <tr>
@@ -64,12 +98,22 @@ const Show = ({ openProductsModal, order, index, onEdit, onDelete }) => {
               Acciones
             </button>
             <div className="dropdown-menu dropdown-menu-end">
-              <button
-                className="dropdown-item text-yellow"
-                onClick={() => onEdit(order)}
-              >
-                <IconPencil /> Editar
-              </button>
+              {order.status !== 4 && (
+                <button
+                  className="dropdown-item text-green"
+                  onClick={() => generatePaymentLink(order)}
+                >
+                  <IconCreditCard /> Confirmar Pago
+                </button>
+              )}
+              {token.user.role !== "Customer" && (
+                <button
+                  className="dropdown-item text-yellow"
+                  onClick={() => onEdit(order)}
+                >
+                  <IconPencil /> Editar
+                </button>
+              )}
               <button
                 className="dropdown-item text-danger"
                 onClick={() => onDelete(order.orderId)}

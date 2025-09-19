@@ -1,10 +1,10 @@
-import { apiServicePost } from "../../API/apiService";
 import { toast } from "react-toastify";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "../Input";
 import { useAuth } from "../../pages/session/AuthProvider";
 import { orderSchema, orderValidations } from "../../validations/orderSchema"; // VALIDACIONES CON YUP
+import { useApi } from "../../API/apiService";
 
 export const BuyModal = ({
   show,
@@ -25,6 +25,7 @@ export const BuyModal = ({
     },
   });
 
+  const { apiServicePost } = useApi();
   const onSubmit = methods.handleSubmit(async (data) => {
     //Guardar los detalles del pedido
     const details = productsCart.map((product) => ({
@@ -46,7 +47,7 @@ export const BuyModal = ({
     };
 
     try {
-      await apiServicePost("orders", payload);
+      await apiServicePost("orders", payload, true);
       toast.success("¡Pedido registrado con éxito!");
       sessionStorage.removeItem("productsCart");
       setProductsCart([]);
@@ -62,7 +63,7 @@ export const BuyModal = ({
 
   return (
     <div
-      className="modal d-block show fade modal-blur"
+      className="modal d-block position-fixed overflow-y-scroll pb-5 show fade modal-blur"
       tabIndex="-1"
       role="dialog"
     >
