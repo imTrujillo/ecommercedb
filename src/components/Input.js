@@ -18,6 +18,8 @@ export const Input = ({
   options = [],
   defaultSelect = null,
   required = true,
+  step = 1,
+  min = "",
 }) => {
   const {
     register,
@@ -135,6 +137,8 @@ export const Input = ({
         className="form-control"
         name={name}
         placeholder={placeholder}
+        step={step}
+        min={min}
         {...register(name)}
       />
     );

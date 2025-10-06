@@ -2,10 +2,10 @@ import * as Yup from "yup";
 
 export const supplierSchema = Yup.object().shape({
   name: Yup.string()
-    .min(3, "min 3 caracteres")
+    .min(6, "min 50 caracteres")
     .required("requerido")
     .matches(
-      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.¡!¿?:;]+$/,
       "sin caracteres especiales"
     ),
   phoneNumber: Yup.string()

@@ -1,4 +1,4 @@
-import { subYears } from "date-fns";
+import { differenceInYears, subYears } from "date-fns";
 import * as Yup from "yup";
 import { Input } from "../components/Input";
 
@@ -10,8 +10,8 @@ export const employeeSchema = Yup.object().shape({
     .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "solo letras y espacios"),
   username: Yup.string()
     .required("requerido")
-    .min(5, "min 5 caracteres")
-    .max(50, "max 50 caracteres")
+    .min(2, "min 2 caracteres")
+    .max(100, "max 100 caracteres")
     .matches(
       /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s]+$/,
       "solo letras y números"
@@ -26,25 +26,30 @@ export const employeeSchema = Yup.object().shape({
     .matches(/^\d{8}-\d{1}$/, "formato: 12345678-9")
     .required("requerido"),
   dateOfBirth: Yup.date()
-    .transform((value, originalValue) => {
-      return originalValue === "" ? undefined : value;
-    })
+    .nullable()
+    .transform((curr, orig) => (orig === "" ? null : curr))
+    .required("requerido")
     .min(subYears(new Date(), 65), "max 65 años")
-    .max(subYears(new Date(), 19), "min 18 años")
-    .required("requerido"),
+    .max(subYears(new Date(), 19), "min 18 años"),
   hireDate: Yup.date()
-    .transform((value, originalValue) =>
-      originalValue === "" ? undefined : value
-    )
-    .max(new Date(), "Debe ser una fecha actual o pasada")
-    .required("Fecha de contratación requerida")
-    .when("dateOfBirth", (dob, schema) => {
-      if (!dob) return schema;
-      const minHireDate = subYears(dob, -18);
-      return schema.min(minHireDate, "min 18 años para contratarse");
+    .nullable()
+    .transform((curr, orig) => {
+      if (orig === "" || orig === null || orig === undefined) {
+        return null;
+      }
+      const date = new Date(orig);
+      return isNaN(date.getTime()) ? null : date;
+    })
+    .required("requerido")
+    .max(new Date(), "no puede ser una fecha futura")
+    .test("at-least-18", "min 18 años", function (value) {
+      const { dateOfBirth } = this.parent;
+      if (!value || !dateOfBirth) return true;
+      const yearsDiff = differenceInYears(value, dateOfBirth);
+      return yearsDiff >= 18;
     }),
   password: Yup.string()
-    .min(6, "min 8 caracteres.")
+    .min(8, "min 8 caracteres.")
     .matches(/[a-z]/, "falta letra minúscula")
     .matches(/[A-Z]/, "falta letra mayúscula")
     .matches(/\d/, "falta un número")
@@ -54,7 +59,7 @@ export const employeeSchema = Yup.object().shape({
     .transform((value, originalValue) => {
       return originalValue === "" ? undefined : value;
     })
-    .min(0.01, "min $0")
+    .min(0.01, "min $0.01")
     .max(50000, "max $50,000")
     .required("requerido"),
   nit: Yup.string()
@@ -147,6 +152,8 @@ export const employeeValidations = {
     type: "number",
     name: "salary",
     placeholder: "999.99",
+    step: 0.01,
+    min: 0.01,
   },
 };
 

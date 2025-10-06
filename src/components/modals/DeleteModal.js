@@ -1,16 +1,21 @@
 import { useApi } from "../../API/apiService";
+import { useCart } from "../shopping/CartProvider";
 
 export const DeleteModal = ({ show, closeModal, id, endpoint, fetchData }) => {
   const { apiServiceDelete } = useApi();
+  const { setProductsCart } = useCart();
   const handleDelete = async (e) => {
     e.preventDefault();
     try {
       await apiServiceDelete(endpoint + id, true);
+      if (endpoint === "product/") {
+        setProductsCart((prev) => prev.filter((p) => p.id !== id));
+      }
       closeModal();
       fetchData();
     } catch (error) {
       console.error("Error deleting record:", error);
-      closeModal(); // Cerrar el modal incluso si hay un error
+      closeModal();
     }
   };
 

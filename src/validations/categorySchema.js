@@ -4,18 +4,18 @@ import * as Yup from "yup";
 export const categorySchema = Yup.object().shape({
   name: Yup.string()
     .required("requerido")
-    .min(2, "min 2 caracteres")
-    .max(100, "max 100 caracteres")
+    .min(6, "min 6 caracteres")
+    .max(50, "max 50 caracteres")
     .matches(
-      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.¡!¿?:;]+$/,
       "sin caracteres especiales"
     ),
   description: Yup.string()
     .required("requerido")
-    .min(10, "min 10 caracteres")
+    .min(20, "min 20 caracteres")
     .max(200, "max 200 caracteres")
     .matches(
-      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.¡!¿?:;]+$/,
       "sin caracteres especiales"
     ),
   // isActive: Yup.boolean()

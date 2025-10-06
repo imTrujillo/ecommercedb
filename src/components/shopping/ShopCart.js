@@ -25,37 +25,46 @@ export const ShopCart = ({ productBuy, setProductsCart }) => {
   // Valor de cantidad (si no está definido, usa 1 por defecto)
   const quantity = productBuy.quantity ?? 1;
 
+  const mainPhoto =
+    productBuy.images.find((i) => i.isMain === true) ?? productBuy.images[0];
+
   return (
-    <div className="card">
+    <div className="card position-relative">
       <div className="row row-0">
         <div className="col-3 my-auto">
-          <img src={photo} alt={productBuy.name} />
+          <img src={mainPhoto.imageUrl} alt={productBuy.name} />
         </div>
         <div className="col">
           <div className="card-body">
-            <h5>{productBuy.providerName}</h5>
-            <h3 className="card-title">{productBuy.name}</h3>
-            <p className="text-secondary">{productBuy.description}</p>
+            <div>
+              <h5>{productBuy.providerName}</h5>
+              <h3 className="card-title">{productBuy.name}</h3>
+            </div>
+            <div className="d-flex align-items-center gap-2 my-2">
+              <p className="my-auto">Cantidad: </p>
+              <input
+                type="number"
+                placeholder="1"
+                min="1"
+                step="1"
+                value={quantity}
+                onChange={(e) =>
+                  updateQuantity(productBuy.id, Number(e.target.value))
+                }
+                className="w-25"
+              />
+            </div>
+
             <strong>$ {(productBuy.price * quantity).toFixed(2)}</strong>
           </div>
         </div>
-        <div className="col-2 py-3 pe-3 d-flex flex-column justify-content-between">
+        <div className="col-2 py-2 d-flex justify-content-end">
           <button
-            className="btn btn-danger"
+            className="btn btn-danger btn-sm rounded-circle h-25 w-50 mx-2"
             onClick={() => deleteProduct(productBuy)}
           >
             X
           </button>
-          <input
-            type="number"
-            placeholder="1"
-            min="1"
-            step="1"
-            value={quantity}
-            onChange={(e) =>
-              updateQuantity(productBuy.id, Number(e.target.value))
-            }
-          />
         </div>
       </div>
     </div>

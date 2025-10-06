@@ -47,7 +47,13 @@ const AuthProvider = ({ children }) => {
 
   const signup = async (data, rol) => {
     try {
-      const response = await axios.post(`${baseUrl}auth/register/${rol}`, data);
+      const response = await axios.post(
+        `${baseUrl}auth/register/${rol}`,
+        data,
+        {
+          headers: { Authorization: `Bearer ${token?.accessToken}` },
+        }
+      );
 
       if (response.status >= 200 && response.status < 300) {
         toast.success(

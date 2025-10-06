@@ -37,12 +37,17 @@ export const customerSchema = Yup.object().shape({
     .matches(/^\d{8}-\d{1}$/, "formato: 12345678-9")
     .required("requerido"),
   dateOfBirth: Yup.date()
-    .transform((value, originalValue) => {
-      return originalValue === "" ? undefined : value;
+    .nullable()
+    .transform((curr, orig) => {
+      if (orig === "" || orig === null || orig === undefined) {
+        return null;
+      }
+      const date = new Date(orig);
+      return isNaN(date.getTime()) ? null : date;
     })
+    .required("requerido")
     .min(new Date(1930, 0, 1), "min 1930")
-    .max(subYears(new Date(), 19), "min 18 años")
-    .required("requerido"),
+    .max(subYears(new Date(), 18), "min 18 años"),
   password: Yup.string()
     .min(6, "min 8 caracteres.")
     .matches(/[a-z]/, "falta letra minúscula")

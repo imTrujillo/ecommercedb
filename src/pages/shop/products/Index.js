@@ -124,7 +124,7 @@ export const Index = () => {
                 </p>
               </Header>
 
-              <div className="card my-2 p-2 d-flex flex-row flex-sm-column flex-md-row justify-content-between">
+              <div className="card my-2 p-2 d-flex flex-row flex-sm-column flex-md-row justify-content-between gap-3">
                 <div>
                   <h5 className="mb-4">{product.description}</h5>
                 </div>

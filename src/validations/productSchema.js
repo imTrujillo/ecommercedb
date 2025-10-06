@@ -6,7 +6,7 @@ export const productSchema = Yup.object().shape({
     .max(50, "max 50 caracteres")
     .required("requerido")
     .matches(
-      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.¡!¿?:;]+$/,
       "sin caracteres especiales"
     ),
   description: Yup.string()
@@ -14,7 +14,7 @@ export const productSchema = Yup.object().shape({
     .max(200, "max 200 caracteres")
     .required("requerido")
     .matches(
-      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.!?:;]+$/,
+      /^(?![\W_]+$)[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s,\.¡!¿?:;]+$/,
       "sin caracteres especiales"
     ),
   price: Yup.number()
