@@ -1,5 +1,6 @@
 import React from "react";
 import photo from "../../assets/images/producto.jpg";
+import { EmptyState } from "../EmptyState";
 
 export const ShopCart = ({ productBuy, setProductsCart }) => {
   // BORRAR UN PRODUCTO DEL CARRITO
@@ -26,13 +27,19 @@ export const ShopCart = ({ productBuy, setProductsCart }) => {
   const quantity = productBuy.quantity ?? 1;
 
   const mainPhoto =
-    productBuy.images.find((i) => i.isMain === true) ?? productBuy.images[0];
+    productBuy.images.find((i) => i.isMain === true) ??
+    productBuy.images[0] ??
+    "";
 
   return (
     <div className="card position-relative">
       <div className="row row-0">
         <div className="col-3 my-auto">
-          <img src={mainPhoto.imageUrl} alt={productBuy.name} />
+          {mainPhoto ? (
+            <img src={mainPhoto.imageUrl} alt={productBuy.name} />
+          ) : (
+            <EmptyState text="Sin imagen" />
+          )}
         </div>
         <div className="col">
           <div className="card-body">

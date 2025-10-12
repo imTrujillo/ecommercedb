@@ -1,22 +1,51 @@
-import { IconBrandShopee, IconCaretLeft } from "@tabler/icons-react";
+import {
+  IconBrandShopee,
+  IconCaretLeft,
+  IconReceiptFilled,
+} from "@tabler/icons-react";
 import { useAuth } from "../../../session/AuthProvider";
 import { useCart } from "../../../../components/shopping/CartProvider";
 import dayjs from "dayjs";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 export const Index = () => {
   const { token } = useAuth();
   const { payments, setPayments, orderDetails } = useCart();
   const navigate = useNavigate();
 
+  const downloadInvoice = async (fileName) => {
+    try {
+      const response = await axios.get(
+        `https://localhost:7084/api/invoice?orderId=${orderDetails?.orderId}`,
+        { responseType: "blob" }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error("Error al generar la facturación:", error);
+      toast.error("Ocurrió un error en la factura.");
+    }
+  };
+
   useEffect(() => {
     if (!orderDetails?.orderId) {
       return navigate("/");
     }
-    const currentStatus = payments[orderDetails.orderId];
 
+    const currentStatus = payments[orderDetails.orderId];
     switch (currentStatus) {
       case "pending":
         const updated = { ...payments, [orderDetails.orderId]: "confirmed" };
@@ -83,6 +112,14 @@ export const Index = () => {
               <h5 className="fs-2 mt-4">
                 Total: $ {orderDetails?.total ?? "Precio no disponible"}
               </h5>
+            </div>
+            <div className="card-footer">
+              <button
+                onClick={() => downloadInvoice("Factura.pdf")}
+                className="btn btn-outline mx-auto d-flex gap-3"
+              >
+                Descargar comprobante <IconReceiptFilled />
+              </button>
             </div>
           </div>
         </div>
