@@ -24,156 +24,148 @@ export default function AppRoutes() {
     <div>
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            {/* RUTAS DEL CLIENTE */}
-            <Route
-              path="/"
-              element={
-                <App>
-                  <CartProvider>
+          <CartProvider>
+            <Routes>
+              {/* RUTAS DEL CLIENTE */}
+              <Route
+                path="/"
+                element={
+                  <App>
                     <ShopIndex />
-                  </CartProvider>
-                </App>
-              }
-            />
-
-            <Route
-              path="/producto/buscar"
-              element={
-                <App>
-                  <CartProvider>
-                    <SearchIndex />
-                  </CartProvider>
-                </App>
-              }
-            />
-
-            <Route
-              path="/producto/:id"
-              element={
-                <App>
-                  <CartProvider>
-                    <ProductIndex />
-                  </CartProvider>
-                </App>
-              }
-            />
-
-            <Route
-              path="/login"
-              element={
-                <Guest>
-                  <Login />
-                </Guest>
-              }
-            ></Route>
-
-            <Route
-              path="/sign-up"
-              element={
-                <Guest>
-                  <SignUp />
-                </Guest>
-              }
-            ></Route>
-
-            <Route
-              path="/forgotpassword"
-              element={
-                <Guest>
-                  <ForgotPassword />
-                </Guest>
-              }
-            ></Route>
-
-            {/* RUTAS DEL ADMIN */}
-            <Route element={<PrivateRoute allowedRoles={["Admin"]} />}>
-              <Route
-                path="/usuarios"
-                element={
-                  <App>
-                    <UsersIndex />
-                  </App>
-                }
-              ></Route>
-
-              <Route
-                path="/categorias"
-                element={
-                  <App>
-                    <CategoriesIndex />
-                  </App>
-                }
-              ></Route>
-              <Route
-                path="/proveedores"
-                element={
-                  <App>
-                    <SuppliersIndex />
-                  </App>
-                }
-              ></Route>
-            </Route>
-
-            {/* RUTAS DEL EMPLEADO */}
-            <Route element={<PrivateRoute allowedRoles={["User", "Admin"]} />}>
-              <Route
-                path="/inventario"
-                element={
-                  <App>
-                    <InventaryIndex />
-                  </App>
-                }
-              ></Route>
-
-              <Route
-                path="/inventario/:id/imgs"
-                element={
-                  <App>
-                    <ImageIndex />
                   </App>
                 }
               />
-            </Route>
 
-            {/* RUTAS DEL CLIENTE */}
-            <Route
-              element={
-                <PrivateRoute allowedRoles={["Customer", "User", "Admin"]} />
-              }
-            >
               <Route
-                path="/pedidos"
+                path="/producto/buscar"
                 element={
                   <App>
-                    <CartProvider>
+                    <SearchIndex />
+                  </App>
+                }
+              />
+
+              <Route
+                path="/producto/:id"
+                element={
+                  <App>
+                    <ProductIndex />
+                  </App>
+                }
+              />
+
+              <Route
+                path="/login"
+                element={
+                  <Guest>
+                    <Login />
+                  </Guest>
+                }
+              ></Route>
+
+              <Route
+                path="/sign-up"
+                element={
+                  <Guest>
+                    <SignUp />
+                  </Guest>
+                }
+              ></Route>
+
+              <Route
+                path="/forgotpassword"
+                element={
+                  <Guest>
+                    <ForgotPassword />
+                  </Guest>
+                }
+              ></Route>
+
+              {/* RUTAS DEL ADMIN */}
+              <Route element={<PrivateRoute allowedRoles={["Admin"]} />}>
+                <Route
+                  path="/usuarios"
+                  element={
+                    <App>
+                      <UsersIndex />
+                    </App>
+                  }
+                ></Route>
+
+                <Route
+                  path="/categorias"
+                  element={
+                    <App>
+                      <CategoriesIndex />
+                    </App>
+                  }
+                ></Route>
+                <Route
+                  path="/proveedores"
+                  element={
+                    <App>
+                      <SuppliersIndex />
+                    </App>
+                  }
+                ></Route>
+              </Route>
+
+              {/* RUTAS DEL EMPLEADO */}
+              <Route
+                element={<PrivateRoute allowedRoles={["User", "Admin"]} />}
+              >
+                <Route
+                  path="/inventario"
+                  element={
+                    <App>
+                      <InventaryIndex />
+                    </App>
+                  }
+                ></Route>
+
+                <Route
+                  path="/inventario/:id/imgs"
+                  element={
+                    <App>
+                      <ImageIndex />
+                    </App>
+                  }
+                />
+              </Route>
+
+              {/* RUTAS DEL CLIENTE */}
+              <Route
+                element={
+                  <PrivateRoute allowedRoles={["Customer", "User", "Admin"]} />
+                }
+              >
+                <Route
+                  path="/pedidos"
+                  element={
+                    <App>
                       <OrdersIndex />
-                    </CartProvider>
-                  </App>
-                }
-              ></Route>
-              <Route
-                path="/success"
-                element={
-                  <App>
-                    <CartProvider>
+                    </App>
+                  }
+                ></Route>
+                <Route
+                  path="/success"
+                  element={
+                    <App>
                       <SuccessPaymentIndex />
-                    </CartProvider>
-                  </App>
-                }
-              ></Route>
-              <Route
-                path="/cancel"
-                element={
-                  <App>
-                    <CartProvider>
+                    </App>
+                  }
+                ></Route>
+                <Route
+                  path="/cancel"
+                  element={
+                    <App>
                       <CancelPaymentIndex />
-                    </CartProvider>
-                  </App>
-                }
-              ></Route>
-            </Route>
-          </Routes>
+                    </App>
+                  }
+                ></Route>
+              </Route>
+            </Routes>
+          </CartProvider>
         </AuthProvider>
       </BrowserRouter>
     </div>

@@ -3,12 +3,12 @@ import { useCart } from "../shopping/CartProvider";
 
 export const DeleteModal = ({ show, closeModal, id, endpoint, fetchData }) => {
   const { apiServiceDelete } = useApi();
-  const { setProductsCart } = useCart();
+  const { productsCart, setProductsCart } = useCart();
   const handleDelete = async (e) => {
     e.preventDefault();
     try {
       await apiServiceDelete(endpoint + id, true);
-      if (endpoint === "product/") {
+      if (productsCart && endpoint === "product/") {
         setProductsCart((prev) => prev.filter((p) => p.id !== id));
       }
       closeModal();

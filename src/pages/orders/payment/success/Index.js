@@ -61,7 +61,7 @@ export const Index = () => {
               </h3>
               <div
                 className="text-secondary overflow-y-auto overflow-x-hidden"
-                style={{ maxHeight: "120px" }}
+                style={{ maxHeight: "420px" }}
               >
                 <p className="text-secondary fs-3 fw-bold mb-2">
                   Lista de productos
@@ -72,7 +72,7 @@ export const Index = () => {
                 </div>
                 {orderDetails?.details?.map((p) => (
                   <div className="d-flex justify-content-between">
-                    <h5 className="fw-normal">
+                    <h5 className="fw-normal" style={{ maxWidth: "140px" }}>
                       {p.productName} | {p.quantity}{" "}
                       {p.quantity === 1 ? "unidad" : "unidades"}
                     </h5>
